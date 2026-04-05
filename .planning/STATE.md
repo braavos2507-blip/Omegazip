@@ -6,17 +6,17 @@ See: `.planning/PROJECT.md` (updated 2026-03-30)
 
 **Core value:** Надёжное сжатие/распаковка с нативным ядром и опциональным 7-Zip на десктопе; честные ограничения на Android.  
 **Майлстоун v1.0:** **закрыт и заархивирован** — `.planning/MILESTONES.md`, `.planning/milestones/v1.0-*.md`, `.planning/MILESTONE-V1.0.md`.  
-**Current focus:** Майлстоун **v1.1** — фазы **4–7** выполнены; далее **фаза 8** (TBD-01 / п.8 ТЗ) после заказчика.
+**Current focus:** Майлстоун **v1.2** — строгие пробелы ТЗ (**GAP-01**…); параллельно gate **TBD-01** (фаза 8) при ответе заказчика.
 
 ## Current Position
 
-**Milestone:** v1.1 — Интеграция в ОС и умолчания  
-Phase: **7** — *Умные пресеты*  
-Plan: **07-01** — smart_preset, UI/CLI auto, SMART-PRESETS.md  
-Status: **Completed** (`07-01-SUMMARY.md`)  
-Last activity: **2026-03-29** — `/gsd:execute-phase 7`
+**Milestone:** v1.2 — ТЗ: строгая доводка (GAP)  
+Phase: **не начата** (определение требований завершено → планирование)  
+Plan: —  
+Status: **Ожидает** `/gsd:plan-phase 9` (GAP-01)  
+Last activity: **2026-03-29** — `/gsd:new-milestone` (v1.2)
 
-Progress: фазы 4–7 по планам 01 закрыты в коде/доках; фаза 8 — gate по TBD-01
+Progress: v1.1 фазы 4–7 сданы; честные partial-статусы в `REQUIREMENTS.md`; очередь — фазы **9–13** и опционально **8** (TBD-01)
 
 ## Performance Metrics
 
@@ -30,6 +30,7 @@ Progress: фазы 4–7 по планам 01 закрыты в коде/док�
 
 ### Pending Todos
 
+- Запланировать **фазу 9** (GAP-01) и далее по ROADMAP v1.2.
 - Уточнить **п.8 ТЗ** (TBD-01) у заказчика.
 
 ### Blockers
@@ -41,4 +42,4 @@ Progress: фазы 4–7 по планам 01 закрыты в коде/док�
 *(пусто)*
 
 ---
-*STATE.md — 2026-03-29 — close-milestone v1.0*
+*STATE.md — 2026-03-29 — new-milestone v1.2*

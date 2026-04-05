@@ -5,7 +5,8 @@
 ## Майлстоуны
 
 - **v1.0** (ядро, GUI, Android, CI, документация) — закрыт; журнал: [.planning/MILESTONES.md](.planning/MILESTONES.md), индекс: [.planning/MILESTONE-V1.0.md](.planning/MILESTONE-V1.0.md).
-- **v1.1** (интеграция в ОС по ТЗ) — фазы 4–7 выполнены; остаётся **п.8 ТЗ** (TBD). Карта: [.planning/ROADMAP.md](.planning/ROADMAP.md).
+- **v1.1** (интеграция в ОС по ТЗ) — планы 4–7 сданы; gate **п.8 ТЗ** (TBD-01).  
+- **v1.2** (строгое ТЗ, только пробелы: тихая распаковка, ПКМ из коробки, vs топ-5, установка, опц. трей) — [.planning/MILESTONE-V1.2.md](.planning/MILESTONE-V1.2.md), [.planning/ROADMAP.md](.planning/ROADMAP.md).
 
 ## Сборка и запуск
 
