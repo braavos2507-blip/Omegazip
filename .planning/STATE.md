@@ -11,12 +11,12 @@ See: `.planning/PROJECT.md` (updated 2026-03-30)
 ## Current Position
 
 **Milestone:** v1.2 — ТЗ: строгая доводка (GAP)  
-Phase: **не начата** (определение требований завершено → планирование)  
-Plan: —  
-Status: **Ожидает** `/gsd:plan-phase 9` (GAP-01)  
-Last activity: **2026-03-29** — `/gsd:new-milestone` (v1.2)
+Phase: **9** — *Тихое открытие архива*  
+Plan: **09-01** — silent extract, GAP-01  
+Status: **Planned** (`09-01-PLAN.md`, `09-01-RESEARCH.md`, `VALIDATION.md`)  
+Last activity: **2026-03-29** — `/gsd:plan-phase 9`
 
-Progress: v1.1 фазы 4–7 сданы; честные partial-статусы в `REQUIREMENTS.md`; очередь — фазы **9–13** и опционально **8** (TBD-01)
+Progress: план фазы 9 готов → **`/gsd:execute-phase 9`** (или ручное выполнение задач из PLAN)
 
 ## Performance Metrics
 
@@ -30,7 +30,7 @@ Progress: v1.1 фазы 4–7 сданы; честные partial-статусы 
 
 ### Pending Todos
 
-- Запланировать **фазу 9** (GAP-01) и далее по ROADMAP v1.2.
+- Выполнить **фазу 9** (`/gsd:execute-phase 9` / задачи `09-01-PLAN.md`).
 - Уточнить **п.8 ТЗ** (TBD-01) у заказчика.
 
 ### Blockers
@@ -42,4 +42,4 @@ Progress: v1.1 фазы 4–7 сданы; честные partial-статусы 
 *(пусто)*
 
 ---
-*STATE.md — 2026-03-29 — new-milestone v1.2*
+*STATE.md — 2026-03-29 — plan-phase 9*

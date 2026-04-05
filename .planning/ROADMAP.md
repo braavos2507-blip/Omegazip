@@ -100,7 +100,7 @@
 
 ### Phases
 
-- [ ] **Phase 9: Тихое открытие архива** — GAP-01 (`open-files` → распаковка без главного окна / headless)
+- [ ] **Phase 9: Тихое открытие архива** — GAP-01 — `phases/09-silent-open-extract/` ([09-01-PLAN.md](phases/09-silent-open-extract/09-01-PLAN.md))
 - [ ] **Phase 10: ПКМ Win/Linux «из коробки»** — GAP-02 (установляемый путь вместо только ручного `.reg` / фрагментов)
 - [ ] **Phase 11: Честный паритет форматов** — GAP-03 (таблица vs топ-5 + решение по одному нативному пробелу или явный non-goals)
 - [ ] **Phase 12: Установка end-to-end** — GAP-04 (README/INSTALL, 7-Zip, первый «внешний» формат)

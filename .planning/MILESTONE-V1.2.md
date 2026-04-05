@@ -17,7 +17,7 @@
 | **12** | Установка end-to-end | GAP-04 |
 | **13** | Трей (опционально) | GAP-05 |
 
-Дорожная карта: [ROADMAP.md](ROADMAP.md). Следующий шаг: **`/gsd:plan-phase 9`**.
+Дорожная карта: [ROADMAP.md](ROADMAP.md). Фаза **9** запланирована: [phases/09-silent-open-extract/09-01-PLAN.md](phases/09-silent-open-extract/09-01-PLAN.md). Следующий шаг: **`/gsd:execute-phase 9`**.
 
 ## Параллельно
 
