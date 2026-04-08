@@ -1,0 +1,9 @@
+# Скопируйте в ~/.config/omegazip/context_preset (одна строка, без # в начале).
+# Управляет только сжатием в .oz из Finder Services (install-context-menu.sh).
+#
+# auto     — по умолчанию: omegazip compress --preset auto (fast/balanced + чанки)
+# max      — сильнее: solid, без recovery (быстрее чем ultra)
+# ultra    — максимум: solid + recovery (дольше CPU)
+# aggressive — то же что max
+#
+auto

@@ -148,6 +148,60 @@ make_sfx_for_oz() {
   chmod +x "$sfx"
 }
 
+# Пресет для .oz без вопросов в UI: auto | max | ultra (или aggressive=max).
+# Источник: переменная OMEGAZIP_CONTEXT_PRESET или файл ~/.config/omegazip/context_preset (одна строка).
+# Опционально: OMEGAZIP_AUTO_UPGRADE_FOLDER_MB=300 — для папок >= 300MB при preset=auto поднять до max.
+load_oz_context_preset() {
+  if [[ -z "${OMEGAZIP_CONTEXT_PRESET:-}" ]]; then
+    local cf="${XDG_CONFIG_HOME:-$HOME/.config}/omegazip/context_preset"
+    if [[ -f "$cf" ]]; then
+      OMEGAZIP_CONTEXT_PRESET="$(grep -v '^[[:space:]]*#' "$cf" | grep -v '^[[:space:]]*$' | head -1 | tr -d '\r\n' | awk '{print $1}')"
+    fi
+  fi
+  if [[ -z "${OMEGAZIP_CONTEXT_PRESET:-}" ]]; then
+    OMEGAZIP_CONTEXT_PRESET="auto"
+  fi
+}
+
+bump_preset_for_large_folder() {
+  local path="$1"
+  local base="$2"
+  local mb="${OMEGAZIP_AUTO_UPGRADE_FOLDER_MB:-}"
+  if [[ "$base" != "auto" || -z "$mb" || ! -d "$path" ]]; then
+    printf '%s' "$base"
+    return
+  fi
+  local kb
+  kb="$(du -sk "$path" 2>/dev/null | awk '{print $1}')"
+  if [[ -z "$kb" || ! "$kb" =~ ^[0-9]+$ ]]; then
+    printf '%s' "$base"
+    return
+  fi
+  if [[ "$kb" -ge $((mb * 1024)) ]]; then
+    echo "[$(date '+%F %T')] [compress-auto] папка >= ${mb}MB (du) -> effective preset max" >> "/tmp/OmegaZip-workflow.log"
+    printf '%s' "max"
+    return
+  fi
+  printf '%s' "$base"
+}
+
+run_compress_oz() {
+  local f="$1" out="$2"
+  local eff
+  eff="$(bump_preset_for_large_folder "$f" "${OMEGAZIP_CONTEXT_PRESET}")"
+  echo "[$(date '+%F %T')] [compress-auto] oz_preset_eff=$eff (OMEGAZIP_CONTEXT_PRESET=${OMEGAZIP_CONTEXT_PRESET})" >> "/tmp/OmegaZip-workflow.log"
+  if [[ "$eff" == "max" || "$eff" == "aggressive" ]]; then
+    "$OZ" compress --preset max "$f" "$out"
+  elif [[ "$eff" == "ultra" ]]; then
+    "$OZ" compress --preset ultra "$f" "$out"
+  else
+    "$OZ" compress --preset auto "$f" "$out"
+  fi
+}
+
+load_oz_context_preset
+echo "[$(date '+%F %T')] [compress-auto] preset_config CONTEXT_PRESET=${OMEGAZIP_CONTEXT_PRESET} AUTO_UPGRADE_FOLDER_MB=${OMEGAZIP_AUTO_UPGRADE_FOLDER_MB:-}" >> "/tmp/OmegaZip-workflow.log"
+
 while IFS= read -r item; do
   f="$(decode_input_path "$item")"
   echo "[$(date '+%F %T')] [compress-auto] input=$item decoded=$f" >> "/tmp/OmegaZip-workflow.log"
@@ -159,8 +213,7 @@ while IFS= read -r item; do
   out="$d/$stem.$ext"
   echo "[$(date '+%F %T')] [compress-auto] chosen_ext=$ext out=$out" >> "/tmp/OmegaZip-workflow.log"
   if [[ "$ext" == "oz" ]]; then
-    echo "[$(date '+%F %T')] [compress-auto] using --preset auto (чанки/пресет по типу данных)" >> "/tmp/OmegaZip-workflow.log"
-    if "$OZ" compress --preset auto "$f" "$out" >> "/tmp/OmegaZip-workflow.log" 2>&1; then
+    if run_compress_oz "$f" "$out" >> "/tmp/OmegaZip-workflow.log" 2>&1; then
       make_sfx_for_oz "$out" >> "/tmp/OmegaZip-workflow.log" 2>&1 || true
       echo "Сжато: $out"
     fi

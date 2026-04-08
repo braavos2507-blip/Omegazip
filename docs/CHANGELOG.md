@@ -2,6 +2,11 @@
 
 ## 2026-04-08
 
+### feat(macos): configurable aggressive `.oz` preset (Finder Services)
+- `~/.config/omegazip/context_preset` or `OMEGAZIP_CONTEXT_PRESET`: `auto` | `max` | `ultra` (`aggressive` = `max`).
+- Optional `OMEGAZIP_AUTO_UPGRADE_FOLDER_MB`: when preset is `auto`, folders over threshold use `--preset max`.
+- Example: [config/omegazip/context_preset.example](config/omegazip/context_preset.example).
+
 ### feat(cli+macos): `--preset auto` for `.oz` from Services + smarter PDF/EPUB presets
 - Finder workflow: `omegazip compress --preset auto` when output is `.oz` (balanced → chunked dedup; fast для медиа/архивов).
 - `smart_preset`: PDF/EPUB → **balanced** (раньше PDF/EPUB давали fast без чанков); добавлены `fb2`, `mobi`, `azw`, `azw3` как текстовые.
