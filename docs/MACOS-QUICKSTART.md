@@ -45,3 +45,11 @@
 ```bash
 ./scripts/benchmark-workflow.sh --real-only --out-report docs/BENCH_RESULTS.md "$HOME/Documents/Для тестов"
 ```
+
+## 7. Локальная обкатка (одна машина, без публикации)
+
+1. Собрать и положить приложение: `./build-app.sh` → при необходимости скопировать `dist/OmegaZip.app` в `/Applications/`.
+2. Поставить сервисы: `./scripts/install-context-menu.sh`.
+3. Проверить окружение: `./scripts/verify-local-macos.sh` (или передать путь к своему `.app`).
+4. В Finder прогнать: текстовый файл → сжать; картинку → сжать; архив → распаковать; смотреть `/tmp/OmegaZip-workflow.log` при сбоях.
+5. Замечания фиксировать у себя (например в `Правки.md`), **в удалённый репозиторий не выкладывать**, пока не решишь сам.
