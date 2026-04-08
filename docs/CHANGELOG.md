@@ -4,8 +4,9 @@
 
 ### feat(macos): configurable aggressive `.oz` preset (Finder Services)
 - `~/.config/omegazip/context_preset` or `OMEGAZIP_CONTEXT_PRESET`: `auto` | `max` | `ultra` (`aggressive` = `max`).
-- Optional `OMEGAZIP_AUTO_UPGRADE_FOLDER_MB`: when preset is `auto`, folders over threshold use `--preset max`.
-- Example: [config/omegazip/context_preset.example](config/omegazip/context_preset.example).
+- Default **`OMEGAZIP_AUTO_UPGRADE_FOLDER_MB=200`** when unset; optional file `~/.config/omegazip/auto_upgrade_folder_mb`; `0` disables.
+- `install-context-menu.sh` creates `context_preset` with `auto` if missing.
+- Examples: [config/omegazip/context_preset.example](config/omegazip/context_preset.example), [config/omegazip/auto_upgrade_folder_mb.example](config/omegazip/auto_upgrade_folder_mb.example).
 
 ### feat(cli+macos): `--preset auto` for `.oz` from Services + smarter PDF/EPUB presets
 - Finder workflow: `omegazip compress --preset auto` when output is `.oz` (balanced → chunked dedup; fast для медиа/архивов).

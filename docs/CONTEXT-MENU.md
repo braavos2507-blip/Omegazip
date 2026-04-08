@@ -16,9 +16,9 @@
    - **Распаковать в OmegaZip** → папка `stem_распаковано` рядом с архивом (форматы, которые поддерживает `omegazip decompress`).
    - **Правило `pick_ext_auto`:** по умолчанию **`.oz`** (текст, разметка, PDF, EPUB, типичные документы, исходники, неизвестные суффиксы — сильная сторона OmegaZip). **`.zip`** только для явно «не-текстового» набора: готовые архивы (`zip`, `7z`, `rar`, `gz` …), изображения, видео, аудио, шрифты, бинарники/образы дисков и т.д. (см. `pick_ext_auto` в `scripts/install-context-menu.sh`).
    - **Пресет для `.oz` без диалогов:** по умолчанию `compress --preset auto` ([SMART-PRESETS.md](SMART-PRESETS.md)). Усиление без GUI:
-     - Файл **`~/.config/omegazip/context_preset`** — одна строка: `auto` | `max` | `ultra` (или `aggressive` = `max`). Пример: [config/omegazip/context_preset.example](../config/omegazip/context_preset.example).
+     - Файл **`~/.config/omegazip/context_preset`** — одна строка: `auto` | `max` | `ultra` (или `aggressive` = `max`). Пример: [config/omegazip/context_preset.example](../config/omegazip/context_preset.example). Скрипт установки **создаёт** этот файл с `auto`, если его ещё нет.
      - Или переменная **`OMEGAZIP_CONTEXT_PRESET`** (имеет приоритет над файлом; в Automator/Finder обычно не наследуется — удобнее файл).
-     - Опционально **`OMEGAZIP_AUTO_UPGRADE_FOLDER_MB=300`** — если в конфиге `auto` и сжимается **папка** размером ≥ 300 MB (`du`), для этого случая берётся **`--preset max`** (большие деревья — solid).
+     - **Большие папки → `max`:** по умолчанию порог **200 MB** (`du -sk`): при `auto` и каталоге не меньше этого размера вызывается **`--preset max`**. Переопределить: переменная **`OMEGAZIP_AUTO_UPGRADE_FOLDER_MB`** или файл **`~/.config/omegazip/auto_upgrade_folder_mb`** (одна строка, число МБ). **`0`** — отключить автоповышение.
      - Для **`.zip`** по-прежнему обычный `compress` (Deflate).
 4. После установки в Finder: **ПКМ → Сервисы** (или **Быстрые действия**) — выберите нужный пункт. При необходимости включите пункты в **Системные настройки → Клавиатура → Сочетания клавиш → Сервисы**.
 5. Если пункты дублируются (`…workflow` и `(OmegaZip)`), переустановите приложение без инжекта `NSServices` и снова запустите `./scripts/install-context-menu.sh`.

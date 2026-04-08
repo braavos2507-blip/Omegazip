@@ -150,7 +150,7 @@ make_sfx_for_oz() {
 
 # Пресет для .oz без вопросов в UI: auto | max | ultra (или aggressive=max).
 # Источник: переменная OMEGAZIP_CONTEXT_PRESET или файл ~/.config/omegazip/context_preset (одна строка).
-# Опционально: OMEGAZIP_AUTO_UPGRADE_FOLDER_MB=300 — для папок >= 300MB при preset=auto поднять до max.
+# OMEGAZIP_AUTO_UPGRADE_FOLDER_MB: при preset=auto папки >= N MB -> max. По умолчанию 200. Отключить: =0
 load_oz_context_preset() {
   if [[ -z "${OMEGAZIP_CONTEXT_PRESET:-}" ]]; then
     local cf="${XDG_CONFIG_HOME:-$HOME/.config}/omegazip/context_preset"
@@ -166,8 +166,12 @@ load_oz_context_preset() {
 bump_preset_for_large_folder() {
   local path="$1"
   local base="$2"
-  local mb="${OMEGAZIP_AUTO_UPGRADE_FOLDER_MB:-}"
-  if [[ "$base" != "auto" || -z "$mb" || ! -d "$path" ]]; then
+  local mb="${OMEGAZIP_AUTO_UPGRADE_FOLDER_MB:-200}"
+  if [[ "$mb" == "0" ]]; then
+    printf '%s' "$base"
+    return
+  fi
+  if [[ "$base" != "auto" || ! -d "$path" ]]; then
     printf '%s' "$base"
     return
   fi
@@ -200,7 +204,12 @@ run_compress_oz() {
 }
 
 load_oz_context_preset
-echo "[$(date '+%F %T')] [compress-auto] preset_config CONTEXT_PRESET=${OMEGAZIP_CONTEXT_PRESET} AUTO_UPGRADE_FOLDER_MB=${OMEGAZIP_AUTO_UPGRADE_FOLDER_MB:-}" >> "/tmp/OmegaZip-workflow.log"
+CFG_OME="${XDG_CONFIG_HOME:-$HOME/.config}/omegazip"
+if [[ -z "${OMEGAZIP_AUTO_UPGRADE_FOLDER_MB:-}" && -f "$CFG_OME/auto_upgrade_folder_mb" ]]; then
+  OMEGAZIP_AUTO_UPGRADE_FOLDER_MB="$(grep -v '^[[:space:]]*#' "$CFG_OME/auto_upgrade_folder_mb" | head -1 | tr -d '\r\n' | awk '{print $1}')"
+fi
+: "${OMEGAZIP_AUTO_UPGRADE_FOLDER_MB:=200}"
+echo "[$(date '+%F %T')] [compress-auto] preset_config CONTEXT_PRESET=${OMEGAZIP_CONTEXT_PRESET} AUTO_UPGRADE_FOLDER_MB=${OMEGAZIP_AUTO_UPGRADE_FOLDER_MB} (0=off)" >> "/tmp/OmegaZip-workflow.log"
 
 while IFS= read -r item; do
   f="$(decode_input_path "$item")"
@@ -352,6 +361,17 @@ cat > "$SERVICES/Распаковать в OmegaZip.workflow/Contents/Info.plist
 </plist>
 INFO
 write_wflow "$SERVICES/Распаковать в OmegaZip.workflow/Contents/document.wflow" "$EXTRACT_SCRIPT"
+
+# 5) Конфиг пресета по умолчанию (не перезаписываем существующий)
+CFG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/omegazip"
+if [[ ! -f "$CFG_DIR/context_preset" ]]; then
+  mkdir -p "$CFG_DIR"
+  {
+    echo "# OmegaZip — пресет для .oz из Finder: auto | max | ultra (см. docs/CONTEXT-MENU.md)"
+    echo "auto"
+  } > "$CFG_DIR/context_preset"
+  echo "Создан конфиг по умолчанию: $CFG_DIR/context_preset"
+fi
 
 echo ""
 echo "Готово. Установлено:"
