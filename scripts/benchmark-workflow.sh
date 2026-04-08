@@ -177,10 +177,18 @@ run_compress_case() {
   out_file="$OUT_DIR/${case_name}.compress.out"
 
   status="ok"
-  if ! /usr/bin/time -p "$BIN" compress "$input_path" "$out_path" >"$out_file" 2>"$time_file"; then
-    status="compress_failed"
-    echo "${case_name},${input_path},${in_bytes},${out_path},0,0,0,0,0,0,${status}" >> "$RESULTS"
-    return
+  if [[ "$out_ext" == "oz" ]]; then
+    if ! /usr/bin/time -p "$BIN" compress --preset auto "$input_path" "$out_path" >"$out_file" 2>"$time_file"; then
+      status="compress_failed"
+      echo "${case_name},${input_path},${in_bytes},${out_path},0,0,0,0,0,0,${status}" >> "$RESULTS"
+      return
+    fi
+  else
+    if ! /usr/bin/time -p "$BIN" compress "$input_path" "$out_path" >"$out_file" 2>"$time_file"; then
+      status="compress_failed"
+      echo "${case_name},${input_path},${in_bytes},${out_path},0,0,0,0,0,0,${status}" >> "$RESULTS"
+      return
+    fi
   fi
 
   local out_bytes real_s user_s sys_s ratio

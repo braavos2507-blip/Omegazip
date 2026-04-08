@@ -158,11 +158,16 @@ while IFS= read -r item; do
   ext="$(pick_ext_auto "$f")"
   out="$d/$stem.$ext"
   echo "[$(date '+%F %T')] [compress-auto] chosen_ext=$ext out=$out" >> "/tmp/OmegaZip-workflow.log"
-  if "$OZ" compress "$f" "$out" >> "/tmp/OmegaZip-workflow.log" 2>&1; then
-    if [[ "$ext" == "oz" ]]; then
+  if [[ "$ext" == "oz" ]]; then
+    echo "[$(date '+%F %T')] [compress-auto] using --preset auto (чанки/пресет по типу данных)" >> "/tmp/OmegaZip-workflow.log"
+    if "$OZ" compress --preset auto "$f" "$out" >> "/tmp/OmegaZip-workflow.log" 2>&1; then
       make_sfx_for_oz "$out" >> "/tmp/OmegaZip-workflow.log" 2>&1 || true
+      echo "Сжато: $out"
     fi
-    echo "Сжато: $out"
+  else
+    if "$OZ" compress "$f" "$out" >> "/tmp/OmegaZip-workflow.log" 2>&1; then
+      echo "Сжато: $out"
+    fi
   fi
 done < <(collect_inputs "$@")
 ENDAUTO

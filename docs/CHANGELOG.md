@@ -2,6 +2,11 @@
 
 ## 2026-04-08
 
+### feat(cli+macos): `--preset auto` for `.oz` from Services + smarter PDF/EPUB presets
+- Finder workflow: `omegazip compress --preset auto` when output is `.oz` (balanced → chunked dedup; fast для медиа/архивов).
+- `smart_preset`: PDF/EPUB → **balanced** (раньше PDF/EPUB давали fast без чанков); добавлены `fb2`, `mobi`, `azw`, `azw3` как текстовые.
+- `benchmark-workflow.sh`: для `.oz` тот же `--preset auto`.
+
 ### fix(macos): default `.oz` in `pick_ext_auto` (blacklist → `.zip`)
 - Replaced extension whitelist with **default `.oz`** and a **blacklist** for media, existing archives, fonts, executables, disk images, sqlite DB files.
 - PDF, EPUB, DOCX and other text-heavy types now use **`.oz`** from Finder Services.
