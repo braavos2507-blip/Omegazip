@@ -110,7 +110,7 @@ pick_ext_auto() {
   base="${f##*/}"
   ext="${base##*.}"
   ext="$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')"
-  if [[ "$ext" == "txt" || "$ext" == "md" || "$ext" == "markdown" || "$ext" == "csv" || "$ext" == "json" || "$ext" == "xml" || "$ext" == "yaml" || "$ext" == "yml" || "$ext" == "toml" || "$ext" == "ini" || "$ext" == "log" || "$ext" == "sql" || "$ext" == "rs" || "$ext" == "js" || "$ext" == "ts" || "$ext" == "tsx" || "$ext" == "jsx" || "$ext" == "html" || "$ext" == "css" || "$ext" == "java" || "$ext" == "kt" || "$ext" == "go" || "$ext" == "py" || "$ext" == "c" || "$ext" == "cpp" || "$ext" == "h" || "$ext" == "hpp" ]]; then
+  if [[ "$ext" == "txt" || "$ext" == "md" || "$ext" == "markdown" || "$ext" == "epub" || "$ext" == "csv" || "$ext" == "json" || "$ext" == "xml" || "$ext" == "yaml" || "$ext" == "yml" || "$ext" == "toml" || "$ext" == "ini" || "$ext" == "log" || "$ext" == "sql" || "$ext" == "rs" || "$ext" == "js" || "$ext" == "ts" || "$ext" == "tsx" || "$ext" == "jsx" || "$ext" == "html" || "$ext" == "css" || "$ext" == "java" || "$ext" == "kt" || "$ext" == "go" || "$ext" == "py" || "$ext" == "c" || "$ext" == "cpp" || "$ext" == "h" || "$ext" == "hpp" ]]; then
     printf '%s' "oz"
   else
     printf '%s' "zip"

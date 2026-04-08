@@ -11,7 +11,7 @@
 | Input | Archive |
 |---|---|
 | Folder | `.oz` |
-| `txt`, `md`, `csv`, `json`, code sources (`rs`, `js`, `ts`, …), markup/config (`xml`, `yaml`, …) | `.oz` |
+| `txt`, `md`, `epub`, `csv`, `json`, code sources (`rs`, `js`, `ts`, …), markup/config (`xml`, `yaml`, …) | `.oz` |
 | Other extensions (images, video, `pdf`, `zip`, `docx`, …) | `.zip` |
 
 ## Results

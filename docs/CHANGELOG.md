@@ -2,6 +2,9 @@
 
 ## 2026-04-08
 
+### fix(macos): `epub` → `.oz` in `pick_ext_auto`
+- EPUB (электронная книга, XHTML/CSS внутри) отнесён к ветке **`.oz`**, как и прочие текстовые/разметочные типы; см. `scripts/install-context-menu.sh` и `scripts/benchmark-workflow.sh`.
+
 ### docs(macos): release checklist and benchmark CSV
 - Restored root `README.md`; added `.gitignore` for `node_modules`, `target`, `dist`, `out`.
 - `scripts/benchmark-workflow.sh`: column `extracted_bytes` for decompress rows (sum of extracted file sizes); report table distinguishes compress vs decompress.
