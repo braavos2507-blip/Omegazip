@@ -100,6 +100,10 @@ ENDINPUT
 COMPRESS_AUTO_SCRIPT="OZ=$(printf '%q' "$CLI")"$'\n'"$STEM_FN"$'\n'"$INPUT_FN"$'\n'$(cat <<'ENDAUTO'
 echo "[$(date '+%F %T')] [compress-auto] start args=$#" >> "/tmp/OmegaZip-workflow.log"
 
+# По умолчанию .oz (сильная сторона OmegaZip на тексте/разметке/документах).
+# .zip только для явного «бинарного» набора: медиа, уже сжатые контейнеры, прошивки и т.п.
+# Дублируется в scripts/benchmark-workflow.sh — менять синхронно.
+# (без case/;; — иначе bash путает разбор при вложенном heredoc в install-context-menu.sh)
 pick_ext_auto() {
   local f="$1"
   local base ext
@@ -110,11 +114,11 @@ pick_ext_auto() {
   base="${f##*/}"
   ext="${base##*.}"
   ext="$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')"
-  if [[ "$ext" == "txt" || "$ext" == "md" || "$ext" == "markdown" || "$ext" == "epub" || "$ext" == "csv" || "$ext" == "json" || "$ext" == "xml" || "$ext" == "yaml" || "$ext" == "yml" || "$ext" == "toml" || "$ext" == "ini" || "$ext" == "log" || "$ext" == "sql" || "$ext" == "rs" || "$ext" == "js" || "$ext" == "ts" || "$ext" == "tsx" || "$ext" == "jsx" || "$ext" == "html" || "$ext" == "css" || "$ext" == "java" || "$ext" == "kt" || "$ext" == "go" || "$ext" == "py" || "$ext" == "c" || "$ext" == "cpp" || "$ext" == "h" || "$ext" == "hpp" ]]; then
-    printf '%s' "oz"
-  else
+  if [[ "$ext" =~ ^(zip|7z|rar|tar|gz|tgz|bz2|xz|zst|lz4|lzma|cab|ar|cpio|xpi|crx|jar|war|ear|apk|ipa|msix|jpg|jpeg|pjpeg|png|gif|bmp|webp|tif|tiff|heic|heif|avif|ico|jxl|psd|dds|exr|dng|cr2|nef|orf|srw|svgz|mp4|m4v|mkv|avi|mov|webm|mpeg|mpg|m2v|wmv|flv|3gp|ogv|ts|mts|m2ts|vob|asf|f4v|mp3|flac|wav|aac|m4a|m4b|ogg|opus|wma|aiff|aif|mpc|wv|ape|caf|woff|woff2|otf|ttf|eot|exe|dll|dylib|so|bin|com|msi|pyc|pyo|o|a|lib|class|dex|pak|nib|wasm|pdb|dmg|iso|img|vmdk|vdi|qcow2|hdd|vhd|sparseimage|sqlite|db-shm|db-wal)$ ]]; then
     printf '%s' "zip"
+    return 0
   fi
+  printf '%s' "oz"
 }
 
 make_sfx_for_oz() {

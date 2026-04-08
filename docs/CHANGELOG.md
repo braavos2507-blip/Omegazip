@@ -2,8 +2,9 @@
 
 ## 2026-04-08
 
-### fix(macos): `epub` → `.oz` in `pick_ext_auto`
-- EPUB (электронная книга, XHTML/CSS внутри) отнесён к ветке **`.oz`**, как и прочие текстовые/разметочные типы; см. `scripts/install-context-menu.sh` и `scripts/benchmark-workflow.sh`.
+### fix(macos): default `.oz` in `pick_ext_auto` (blacklist → `.zip`)
+- Replaced extension whitelist with **default `.oz`** and a **blacklist** for media, existing archives, fonts, executables, disk images, sqlite DB files.
+- PDF, EPUB, DOCX and other text-heavy types now use **`.oz`** from Finder Services.
 
 ### docs(macos): release checklist and benchmark CSV
 - Restored root `README.md`; added `.gitignore` for `node_modules`, `target`, `dist`, `out`.
