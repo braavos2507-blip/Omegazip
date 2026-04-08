@@ -100,7 +100,7 @@
 
 ### Phases
 
-- [ ] **Phase 9: Тихое открытие архива** — GAP-01 — `phases/09-silent-open-extract/` ([09-01-PLAN.md](phases/09-silent-open-extract/09-01-PLAN.md))
+- [x] **Phase 9: Тихое открытие архива** — GAP-01 — `phases/09-silent-open-extract/` ([09-01-SUMMARY.md](phases/09-silent-open-extract/09-01-SUMMARY.md))
 - [ ] **Phase 10: ПКМ Win/Linux «из коробки»** — GAP-02 (установляемый путь вместо только ручного `.reg` / фрагментов)
 - [ ] **Phase 11: Честный паритет форматов** — GAP-03 (таблица vs топ-5 + решение по одному нативному пробелу или явный non-goals)
 - [ ] **Phase 12: Установка end-to-end** — GAP-04 (README/INSTALL, 7-Zip, первый «внешний» формат)
@@ -147,4 +147,4 @@
 
 ---
 
-*Roadmap updated: 2026-03-29 — `/gsd:new-milestone`: добавлен v1.2 (фазы 9–13); v1.1 — фаза 8 gate.*
+*Roadmap updated: 2026-03-29 — фаза 9 (GAP-01) выполнена; далее фаза 10.*

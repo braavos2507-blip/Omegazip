@@ -131,10 +131,10 @@ make_sfx_for_oz() {
     echo 'ARC="$WORK/payload.oz"'
     echo 'OUT="${1:-$SCRIPT_DIR/$(basename "$0" .extract.command)_распаковано}"'
     echo '/usr/bin/base64 -D > "$BIN" <<'"'"'__OMEGAZIP_BIN__'"'"''
-    /usr/bin/base64 "$OZ"
+    /usr/bin/base64 -i "$OZ"
     echo '__OMEGAZIP_BIN__'
     echo '/usr/bin/base64 -D > "$ARC" <<'"'"'__OMEGAZIP_ARCHIVE__'"'"''
-    /usr/bin/base64 "$archive"
+    /usr/bin/base64 -i "$archive"
     echo '__OMEGAZIP_ARCHIVE__'
     echo 'chmod +x "$BIN"'
     echo 'xattr -d com.apple.quarantine "$BIN" 2>/dev/null || true'

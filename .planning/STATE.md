@@ -12,11 +12,11 @@ See: `.planning/PROJECT.md` (updated 2026-03-30)
 
 **Milestone:** v1.2 — ТЗ: строгая доводка (GAP)  
 Phase: **9** — *Тихое открытие архива*  
-Plan: **09-01** — silent extract, GAP-01  
-Status: **Planned** (`09-01-PLAN.md`, `09-01-RESEARCH.md`, `VALIDATION.md`)  
-Last activity: **2026-03-29** — `/gsd:plan-phase 9`
+Plan: **09-01**  
+Status: **Completed** (`09-01-SUMMARY.md`)  
+Last activity: **2026-03-29** — реализация GAP-01 (silent extract)
 
-Progress: план фазы 9 готов → **`/gsd:execute-phase 9`** (или ручное выполнение задач из PLAN)
+Progress: **GAP-01** закрыт → далее **фаза 10** (GAP-02) или **`/gsd:plan-phase 10`**
 
 ## Performance Metrics
 
@@ -30,7 +30,7 @@ Progress: план фазы 9 готов → **`/gsd:execute-phase 9`** (или 
 
 ### Pending Todos
 
-- Выполнить **фазу 9** (`/gsd:execute-phase 9` / задачи `09-01-PLAN.md`).
+- Запланировать / выполнить **фазу 10** (GAP-02).
 - Уточнить **п.8 ТЗ** (TBD-01) у заказчика.
 
 ### Blockers

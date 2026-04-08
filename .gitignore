@@ -1,0 +1,15 @@
+# Dependencies & build
+node_modules/
+**/target/
+dist/
+out/
+
+# OS / IDE
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Env & local
+.env
+.env.*

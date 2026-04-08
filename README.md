@@ -44,7 +44,7 @@ cargo build --release
 
 **Ассоциации файлов и двойной щелчок:** [docs/FILE-ASSOCIATIONS.md](docs/FILE-ASSOCIATIONS.md).
 
-**Контекстное меню** (сжатие в `.oz` / `.zip` без окна): [docs/CONTEXT-MENU.md](docs/CONTEXT-MENU.md).
+**Контекстное меню** (сжатие в `.oz` / `.zip` без окна): [docs/CONTEXT-MENU.md](docs/CONTEXT-MENU.md). Кратко: установка, логи, переустановка — [docs/MACOS-QUICKSTART.md](docs/MACOS-QUICKSTART.md).
 
 **Умные пресеты .oz** (авто по типу файлов, CLI `--preset auto`): [docs/SMART-PRESETS.md](docs/SMART-PRESETS.md).
 

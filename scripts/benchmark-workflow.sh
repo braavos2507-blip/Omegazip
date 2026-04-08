@@ -76,6 +76,17 @@ bytes_of() {
   stat -f "%z" "$1"
 }
 
+# Sum of file sizes under a directory (for decompress output).
+dir_bytes_sum() {
+  local d="$1"
+  local sum=0 b
+  while IFS= read -r -d '' f; do
+    b="$(stat -f '%z' "$f" 2>/dev/null || echo 0)"
+    sum=$((sum + b))
+  done < <(find "$d" -type f -print0 2>/dev/null)
+  echo "$sum"
+}
+
 copy_first_by_ext() {
   local ext="$1"
   local dst="$2"
@@ -151,7 +162,7 @@ if [[ ${#_inputs[@]} -eq 0 ]]; then
 fi
 
 RESULTS="$WORK/results.csv"
-echo "case,input_path,input_bytes,chosen_archive,output_bytes,ratio,time_real_s,time_user_s,time_sys_s,status" > "$RESULTS"
+echo "case,input_path,input_bytes,chosen_archive,output_bytes,ratio,time_real_s,time_user_s,time_sys_s,extracted_bytes,status" > "$RESULTS"
 
 run_compress_case() {
   local case_name="$1"
@@ -167,7 +178,7 @@ run_compress_case() {
   status="ok"
   if ! /usr/bin/time -p "$BIN" compress "$input_path" "$out_path" >"$out_file" 2>"$time_file"; then
     status="compress_failed"
-    echo "${case_name},${input_path},${in_bytes},${out_path},0,0,0,0,0,${status}" >> "$RESULTS"
+    echo "${case_name},${input_path},${in_bytes},${out_path},0,0,0,0,0,0,${status}" >> "$RESULTS"
     return
   fi
 
@@ -178,10 +189,10 @@ run_compress_case() {
   sys_s="$(awk '/^sys/{print $2}' "$time_file")"
   ratio="$(awk -v i="$in_bytes" -v o="$out_bytes" 'BEGIN{ if(i==0){print "0"} else {printf "%.4f", o/i} }')"
 
-  echo "${case_name},${input_path},${in_bytes},${out_path},${out_bytes},${ratio},${real_s},${user_s},${sys_s},${status}" >> "$RESULTS"
+  echo "${case_name},${input_path},${in_bytes},${out_path},${out_bytes},${ratio},${real_s},${user_s},${sys_s},0,${status}" >> "$RESULTS"
 
   # Decompress benchmark for produced archive
-  local dcase ddir dtime dout dstatus
+  local dcase ddir dtime dout dstatus ext_bytes
   dcase="${case_name}_decompress"
   ddir="$OUT_DIR/${dcase}"
   dtime="$OUT_DIR/${dcase}.time"
@@ -190,14 +201,15 @@ run_compress_case() {
   mkdir -p "$ddir"
   if ! /usr/bin/time -p "$BIN" decompress "$out_path" "$ddir" >"$dout" 2>"$dtime"; then
     dstatus="decompress_failed"
-    echo "${dcase},${out_path},${out_bytes},${ddir},0,0,0,0,0,${dstatus}" >> "$RESULTS"
+    echo "${dcase},${out_path},${out_bytes},${ddir},0,0,0,0,0,0,${dstatus}" >> "$RESULTS"
     return
   fi
   local dreal duser dsys
   dreal="$(awk '/^real/{print $2}' "$dtime")"
   duser="$(awk '/^user/{print $2}' "$dtime")"
   dsys="$(awk '/^sys/{print $2}' "$dtime")"
-  echo "${dcase},${out_path},${out_bytes},${ddir},0,0,${dreal},${duser},${dsys},${dstatus}" >> "$RESULTS"
+  ext_bytes="$(dir_bytes_sum "$ddir")"
+  echo "${dcase},${out_path},${out_bytes},${ddir},0,0,${dreal},${duser},${dsys},${ext_bytes},${dstatus}" >> "$RESULTS"
 }
 
 echo "Running benchmark cases..."
@@ -238,12 +250,24 @@ fi
   echo
   echo "## Results"
   echo
-  echo "| Case | Input MB | Output MB | Ratio | Real(s) | User(s) | Sys(s) | Status |"
-  echo "|---|---:|---:|---:|---:|---:|---:|---|"
+  echo "Compress: **Input** = исходный файл/папка; **Archive** = размер архива; **Ratio** = архив / вход."
+  echo
+  echo "Decompress: **Archive** = размер файла архива; **Extracted** = сумма размеров извлечённых файлов; **Ratio** = extracted / archive."
+  echo
+  echo "| Case | Input MB | Archive MB | Extracted MB | Ratio | Real(s) | User(s) | Sys(s) | Status |"
+  echo "|---|---:|---:|---:|---:|---:|---:|---:|---|"
   awk -F, 'NR>1 {
+    is_dec = ($1 ~ /_decompress$/);
     in_mb = $3 / 1048576.0;
-    out_mb = $5 / 1048576.0;
-    printf("| %s | %.2f | %.2f | %s | %s | %s | %s | %s |\n", $1, in_mb, out_mb, $6, $7, $8, $9, $10);
+    arch_mb = $5 / 1048576.0;
+    ext_mb = $10 / 1048576.0;
+    status = $11;
+    if (is_dec) {
+      ratio = ($3 > 0 ? sprintf("%.4f", $10 / $3) : "—");
+      printf("| %s | %.4f | — | %.4f | %s | %s | %s | %s | %s |\n", $1, in_mb, ext_mb, ratio, $7, $8, $9, status);
+    } else {
+      printf("| %s | %.4f | %.4f | — | %s | %s | %s | %s | %s |\n", $1, in_mb, arch_mb, $6, $7, $8, $9, status);
+    }
   }' "$RESULTS"
   echo
   echo "CSV: \`$RESULTS\`"

@@ -16,19 +16,23 @@
 
 ## Results
 
-| Case | Input MB | Output MB | Ratio | Real(s) | User(s) | Sys(s) | Status |
-|---|---:|---:|---:|---:|---:|---:|---|
-| real_sample_docx_docx | 0.14 | 0.13 | 0.9535 | 0.00 | 0.00 | 0.00 | ok |
-| real_sample_docx_docx_decompress | 0.13 | 0.00 | 0 | 0.00 | 0.00 | 0.00 | ok |
-| real_sample_jpg_jpg | 0.69 | 0.68 | 0.9965 | 0.01 | 0.01 | 0.00 | ok |
-| real_sample_jpg_jpg_decompress | 0.68 | 0.00 | 0 | 0.00 | 0.00 | 0.00 | ok |
-| real_sample_mp4_mp4 | 2.72 | 2.70 | 0.9947 | 0.04 | 0.04 | 0.00 | ok |
-| real_sample_mp4_mp4_decompress | 2.70 | 0.00 | 0 | 0.00 | 0.00 | 0.00 | ok |
-| real_sample_pdf_pdf | 4.89 | 2.84 | 0.5806 | 0.07 | 0.07 | 0.00 | ok |
-| real_sample_pdf_pdf_decompress | 2.84 | 0.00 | 0 | 0.01 | 0.00 | 0.00 | ok |
-| real_sample_png_png | 0.21 | 0.21 | 0.9933 | 0.00 | 0.00 | 0.00 | ok |
-| real_sample_png_png_decompress | 0.21 | 0.00 | 0 | 0.00 | 0.00 | 0.00 | ok |
-| real_sample_zip_zip | 2.84 | 2.83 | 0.9952 | 0.04 | 0.04 | 0.00 | ok |
-| real_sample_zip_zip_decompress | 2.83 | 0.00 | 0 | 0.00 | 0.00 | 0.00 | ok |
+Compress: **Input** = исходный файл/папка; **Archive** = размер архива; **Ratio** = архив / вход.
+
+Decompress: **Archive** = размер файла архива; **Extracted** = сумма размеров извлечённых файлов; **Ratio** = extracted / archive.
+
+| Case | Input MB | Archive MB | Extracted MB | Ratio | Real(s) | User(s) | Sys(s) | Status |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| real_sample_docx_docx | 0.1363 | 0.1299 | — | 0.9535 | 0.00 | 0.00 | 0.00 | ok |
+| real_sample_docx_docx_decompress | 0.1299 | — | 0.1363 | 1.0488 | 0.00 | 0.00 | 0.00 | ok |
+| real_sample_jpg_jpg | 0.6856 | 0.6832 | — | 0.9965 | 0.01 | 0.01 | 0.00 | ok |
+| real_sample_jpg_jpg_decompress | 0.6832 | — | 0.6856 | 1.0035 | 0.00 | 0.00 | 0.00 | ok |
+| real_sample_mp4_mp4 | 2.7163 | 2.7018 | — | 0.9947 | 0.05 | 0.05 | 0.00 | ok |
+| real_sample_mp4_mp4_decompress | 2.7018 | — | 2.7163 | 1.0054 | 0.00 | 0.00 | 0.00 | ok |
+| real_sample_pdf_pdf | 4.8939 | 2.8413 | — | 0.5806 | 0.09 | 0.09 | 0.00 | ok |
+| real_sample_pdf_pdf_decompress | 2.8413 | — | 4.8939 | 1.7224 | 0.01 | 0.01 | 0.00 | ok |
+| real_sample_png_png | 0.2142 | 0.2127 | — | 0.9933 | 0.00 | 0.00 | 0.00 | ok |
+| real_sample_png_png_decompress | 0.2127 | — | 0.2142 | 1.0067 | 0.00 | 0.00 | 0.00 | ok |
+| real_sample_zip_zip | 2.8412 | 2.8275 | — | 0.9952 | 0.05 | 0.05 | 0.00 | ok |
+| real_sample_zip_zip_decompress | 2.8275 | — | 2.8412 | 1.0048 | 0.00 | 0.00 | 0.00 | ok |
 
 CSV: `/tmp/omegazip-full-bench/results.csv`
