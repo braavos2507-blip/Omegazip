@@ -336,7 +336,12 @@ fn try_start_silent_compress_background_impl(app: &AppHandle, paths: &[String], 
     let source = pb;
 
     if force {
-        let preset = omegazip::suggested_preset_for_path(&source);
+        let fmt = normalized_silent_compress_format(&prefs.silent_compress_format);
+        let preset = if fmt == "oz" {
+            omegazip::effective_oz_preset_from_service_context(&source)
+        } else {
+            omegazip::suggested_preset_for_path(&source)
+        };
         let opts = omegazip::CompressOptions {
             chunk_size: None,
             solid: false,
@@ -369,8 +374,13 @@ fn try_start_silent_compress_background_impl(app: &AppHandle, paths: &[String], 
         let _ = w.hide();
     }
     let h = app.clone();
+    let fmt = normalized_silent_compress_format(&prefs.silent_compress_format);
     std::thread::spawn(move || {
-        let preset = omegazip::suggested_preset_for_path(&source);
+        let preset = if fmt == "oz" {
+            omegazip::effective_oz_preset_from_service_context(&source)
+        } else {
+            omegazip::suggested_preset_for_path(&source)
+        };
         let opts = omegazip::CompressOptions {
             chunk_size: None,
             solid: false,

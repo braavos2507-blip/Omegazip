@@ -12,12 +12,13 @@
 | Фаза | Фокус | REQ |
 |------|--------|-----|
 | **9** | Тихое открытие / распаковка без главного окна | GAP-01 ✅ |
-| **10** | ПКМ Win/Linux «из коробки» | GAP-02 |
+| **10** | ПКМ Win/Linux «из коробки» | GAP-02 (impl complete, QA pending) |
 | **11** | Честный vs топ-5 | GAP-03 |
 | **12** | Установка end-to-end | GAP-04 |
 | **13** | Трей (опционально) | GAP-05 |
 
-Дорожная карта: [ROADMAP.md](ROADMAP.md). Фаза **9** выполнена: [09-01-SUMMARY.md](phases/09-silent-open-extract/09-01-SUMMARY.md). Следующий шаг: **фаза 10** (GAP-02).
+Дорожная карта: [ROADMAP.md](ROADMAP.md). Фаза **9** выполнена: [09-01-SUMMARY.md](phases/09-silent-open-extract/09-01-SUMMARY.md).  
+По фазе **10** добавлен итог: [10-01-SUMMARY.md](phases/10-pkm-win-linux/10-01-SUMMARY.md) (ожидается ручная приёмка).
 
 ## Параллельно
 

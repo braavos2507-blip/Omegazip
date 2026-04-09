@@ -480,6 +480,24 @@ fn suggest_compress_preset(path: String) -> omegazip::CompressPresetHint {
     omegazip::suggest_compress_preset_hint(&p)
 }
 
+/// Пресет .oz с учётом `context_preset` и порога больших папок (как Finder Services).
+#[tauri::command]
+fn effective_compress_preset(path: String) -> String {
+    let p = PathBuf::from(path);
+    match omegazip::effective_oz_preset_from_service_context(&p) {
+        omegazip::Preset::Fast => "fast".to_string(),
+        omegazip::Preset::Balanced => "balanced".to_string(),
+        omegazip::Preset::Max => "max".to_string(),
+        omegazip::Preset::Ultra => "ultra".to_string(),
+    }
+}
+
+#[tauri::command]
+fn effective_compress_preset_hint(path: String) -> omegazip::CompressPresetHint {
+    let p = PathBuf::from(path);
+    omegazip::effective_compress_preset_hint(&p)
+}
+
 #[tauri::command]
 fn get_silent_extract_on_open(app: AppHandle) -> bool {
     silent_open::silent_extract_enabled(&app)
@@ -534,6 +552,8 @@ pub fn run() {
             rclone_available,
             seven_zip_status,
             suggest_compress_preset,
+            effective_compress_preset,
+            effective_compress_preset_hint,
             get_silent_extract_on_open,
             set_silent_extract_on_open,
             get_silent_compress_on_open,

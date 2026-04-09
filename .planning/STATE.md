@@ -11,12 +11,12 @@ See: `.planning/PROJECT.md` (updated 2026-03-30)
 ## Current Position
 
 **Milestone:** v1.2 — ТЗ: строгая доводка (GAP)  
-Phase: **9** — *Тихое открытие архива*  
-Plan: **09-01**  
-Status: **Completed** (`09-01-SUMMARY.md`)  
-Last activity: **2026-03-29** — реализация GAP-01 (silent extract)
+Phase: **10** — *ПКМ Win/Linux «из коробки»*  
+Plan: **10-01**  
+Status: **Implementation complete, manual QA pending** (`10-01-SUMMARY.md`)  
+Last activity: **2026-04-09** — подтверждён macOS workflow smoke-test через Automator (`compress-auto` + `extract` без ошибок в логе).
 
-Progress: **GAP-01** закрыт → далее **фаза 10** (GAP-02) или **`/gsd:plan-phase 10`**
+Progress: **GAP-01** закрыт; по **GAP-02** реализованы артефакты установки (`scripts/install-context-menu-windows.ps1`, `scripts/install-context-menu-linux.sh`) и обновлён `docs/CONTEXT-MENU.md`; macOS smoke подтверждён, ждём только ручную приёмку Win/Linux.
 
 ## Performance Metrics
 
@@ -30,7 +30,7 @@ Progress: **GAP-01** закрыт → далее **фаза 10** (GAP-02) или
 
 ### Pending Todos
 
-- Запланировать / выполнить **фазу 10** (GAP-02).
+- Завершить ручную приёмку **фазы 10** (GAP-02) и проставить финальный статус `done`.
 - Уточнить **п.8 ТЗ** (TBD-01) у заказчика.
 
 ### Blockers

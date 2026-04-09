@@ -31,14 +31,27 @@
 
 ## Windows
 
-Полноценное каскадное меню обычно делают установщиком (MSI) или расширением оболочки. Для ручной настройки:
+Для типового пользователя есть готовый скрипт в профиль **текущего пользователя** (`HKCU`, без admin):
 
-1. Убедитесь, что **`omegazip.exe`** доступен по стабильному пути (или добавьте каталог с бинарником в `PATH`).
-2. Отредактируйте шаблон **`scripts/context-menu-windows.reg.example`**: подставьте реальный путь к `omegazip.exe` вместо `C:\\Path\\To\\omegazip.exe`.
-3. Импортируйте `.reg` через реестр (нужны права администратора на запись в `HKEY_CLASSES_ROOT`). Если подписи на кириллице отображаются неверно, сохраните файл в **UTF-16 LE** («Юникод») в Блокноте перед импортом.
-4. В значении `command` используется **`cmd /c`** и подстановки вида `"%~dpn1"` — так выходной файл получает то же имя (без расширения) и расширение `.oz` / `.zip` в **той же папке**, что и `%1`.
+1. Подготовьте путь к `omegazip.exe`.
+2. Выполните:
 
-**Риски:** пути с пробелами и кавычками требуют аккуратного экранирования; политики UAC и антивирус могут блокировать правки реестра; обновление приложения меняет путь к `.exe` — reg нужно обновить.
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\scripts\install-context-menu-windows.ps1 -OmegaZipExe "C:\Path\To\omegazip.exe"
+   ```
+
+3. Скрипт добавит пункты:
+   - `Сжать в .oz (OmegaZip)`
+   - `Сжать в .zip (OmegaZip)`
+   - `Распаковать (OmegaZip)` -> `%~dpn1_распаковано`
+
+4. Удаление:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\scripts\install-context-menu-windows.ps1 -Uninstall
+   ```
+
+Если нужен полностью ручной режим/шаблон `.reg`, остаётся `scripts/context-menu-windows.reg.example`.
 
 Пример вызова вручную из `cmd` (аналог одного из пунктов меню):
 
@@ -48,9 +61,26 @@
 
 ## Linux
 
-Добавьте в `.desktop`-файл приложения секцию **`Actions=`** и блоки `[Desktop Action …]`, вызывающие `omegazip` с полными путями. Параметр `%f` (один файл) или `%F` (несколько) задаётся в строке `Exec=`.
+Для типового пользователя есть установщик в профиль:
 
-Иллюстративный фрагмент (подставьте путь к бинарнику; для `%f` с пробелами и для stem как в GUI лучше **`Exec=sh -c '...'`** с обёрткой, см. логику `omegazip_stem` в `scripts/install-context-menu.sh`):
+```bash
+./scripts/install-context-menu-linux.sh --binary /absolute/path/to/omegazip
+```
+
+Что ставится:
+
+- **Nautilus Scripts** (`~/.local/share/nautilus/scripts/`):
+  - `OmegaZip Compress (Auto)` -> авто `.oz/.zip` (для `.oz` использует `--preset auto`);
+  - `OmegaZip Extract Here` -> `${stem}_распаковано`.
+- **KDE Service Menu** (`~/.local/share/kio/servicemenus/omegazip.desktop`) с теми же действиями.
+
+Удаление:
+
+```bash
+./scripts/install-context-menu-linux.sh --uninstall
+```
+
+Если в вашей среде используется другой механизм пунктов меню, можно использовать иллюстративный `.desktop`-подход:
 
 ```ini
 Actions=CompressOz;CompressZip;Extract;
@@ -68,9 +98,7 @@ Name=Распаковать (OmegaZip)
 Exec=sh -c '/usr/local/bin/omegazip decompress "$1" "$(dirname "$1")/$(basename "$1" | sed "s/\\.[^.]*$//")_распаковано"' sh %f
 ```
 
-Для папок и имён вида `archive.tar.gz` **sed с одним отрезанием суффикса** даёт иной stem, чем OmegaZip GUI; для полного совпадения используйте ту же оболочечную функцию, что в macOS-скрипте.
-
-Установка пункта в контекстное меню файлового менеджера зависит от среды (Nautilus, Dolphin, Thunar и т.д.) — часто достаточно скопировать `.desktop` в `~/.local/share/file-manager/actions/` или использовать настройки «Открыть с помощью».
+Для папок и имён вида `archive.tar.gz` **sed с одним отрезанием суффикса** даёт иной stem, чем OmegaZip GUI; штатный `install-context-menu-linux.sh` уже включает корректировку stem для популярных двойных суффиксов.
 
 ## GUI: диалог «Куда сохранить»
 

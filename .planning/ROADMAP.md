@@ -101,7 +101,7 @@
 ### Phases
 
 - [x] **Phase 9: Тихое открытие архива** — GAP-01 — `phases/09-silent-open-extract/` ([09-01-SUMMARY.md](phases/09-silent-open-extract/09-01-SUMMARY.md))
-- [ ] **Phase 10: ПКМ Win/Linux «из коробки»** — GAP-02 (установляемый путь вместо только ручного `.reg` / фрагментов)
+- [ ] **Phase 10: ПКМ Win/Linux «из коробки»** — GAP-02 (implementation complete, manual QA pending; см. `phases/10-pkm-win-linux/10-01-SUMMARY.md`)
 - [ ] **Phase 11: Честный паритет форматов** — GAP-03 (таблица vs топ-5 + решение по одному нативному пробелу или явный non-goals)
 - [ ] **Phase 12: Установка end-to-end** — GAP-04 (README/INSTALL, 7-Zip, первый «внешний» формат)
 - [ ] **Phase 13 (опционально): Трей / фон** — GAP-05
