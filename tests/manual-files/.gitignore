@@ -1,0 +1,6 @@
+workflow-run/
+results/
+results-auto/extract/
+results-auto/oz/
+results-auto/zip/
+large-folder/
