@@ -21,3 +21,6 @@ out/
 backups/
 OmegaZip-for-review.tar.gz
 archive.oz
+test.oz
+test.txt
+test.extract.command

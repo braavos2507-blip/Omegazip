@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmegaZip Android</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 222.2 84% 4.9%;
+      --card: 0 0% 100%;
+      --card-foreground: 222.2 84% 4.9%;
+      --popover: 0 0% 100%;
+      --primary: 222.2 47.4% 11.2%;
+      --primary-foreground: 210 40% 98%;
+      --secondary: 210 40% 96.1%;
+      --secondary-foreground: 222.2 47.4% 11.2%;
+      --muted: 210 40% 96.1%;
+      --muted-foreground: 215.4 16.3% 46.9%;
+      --accent: 210 40% 96.1%;
+      --accent-foreground: 222.2 47.4% 11.2%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 214.3 31.8% 91.4%;
+      --input: 214.3 31.8% 91.4%;
+      --ring: 222.2 84% 4.9%;
+      --radius: 0.5rem;
+      --radius-lg: 0.75rem;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 2rem 1.5rem;
+      background: hsl(var(--background));
+      color: hsl(var(--foreground));
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid hsl(var(--border));
+    }
+    .app-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin: 0;
+      color: hsl(var(--foreground));
+    }
+    .app-subtitle {
+      font-size: 0.875rem;
+      color: hsl(var(--muted-foreground));
+      margin: 0.25rem 0 0;
+      font-weight: 400;
+    }
+
+    .card {
+      background: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin: 0 0 0.75rem;
+      color: hsl(var(--card-foreground));
+    }
+    .card-desc {
+      font-size: 0.8125rem;
+      color: hsl(var(--muted-foreground));
+      margin: 0 0 1rem;
+    }
+
+    .drop-zone {
+      border: 2px dashed hsl(var(--border));
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+      color: hsl(var(--muted-foreground));
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      background: hsl(var(--muted));
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+    .drop-zone:hover {
+      border-color: hsl(var(--ring));
+      background: hsl(var(--accent));
+    }
+    .drop-zone.dragover {
+      border-color: hsl(var(--primary));
+      background: hsl(var(--accent));
+      color: hsl(var(--foreground));
+    }
+    .drop-hint { font-size: 0.75rem; opacity: 0.8; }
+
+    .path-row {
+      margin-top: 0.5rem;
+    }
+    .path {
+      font-size: 0.75rem;
+      color: hsl(var(--muted-foreground));
+      word-break: break-all;
+      padding: 0.5rem 0.75rem;
+      background: hsl(var(--muted));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      margin-top: 0.375rem;
+    }
+    .path:empty { display: none; }
+
+    .btn-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-top: 0.75rem; }
+    button {
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      height: 2.25rem;
+      padding: 0  1rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border: none;
+      outline: none;
+    }
+    button:focus-visible { box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+
+    .btn-primary {
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+    }
+    .btn-primary:hover:not(:disabled) { background: hsl(222.2 47.4% 8%); }
+    .btn-primary:active:not(:disabled) { transform: translateY(0.5px); }
+
+    .btn-secondary {
+      background: hsl(var(--secondary));
+      color: hsl(var(--secondary-foreground));
+      border: 1px solid hsl(var(--border));
+    }
+    .btn-secondary:hover:not(:disabled) { background: hsl(var(--accent)); }
+
+    .status {
+      font-size: 0.8125rem;
+      margin-top: 0.75rem;
+      padding: 0.5rem 0;
+    }
+    .status.ok { color: hsl(142.1 76.2% 36.3%); }
+    .status.err { color: hsl(var(--destructive)); }
+
+    .footer-hint {
+      font-size: 0.75rem;
+      color: hsl(var(--muted-foreground));
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid hsl(var(--border));
+      line-height: 1.5;
+    }
+    .progress-wrap { margin-top: 0.5rem; display: none; }
+    .progress-wrap.visible { display: block; }
+    .progress-bar {
+      height: 6px;
+      background: hsl(var(--muted));
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: hsl(var(--primary));
+      border-radius: 3px;
+      transition: width 0.2s;
+    }
+    .compress-hint {
+      font-size: 0.75rem;
+      color: hsl(var(--muted-foreground));
+      margin: 0.35rem 0 0;
+      line-height: 1.4;
+    }
+    .opts-advanced {
+      margin-top: 0.75rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      padding: 0.5rem 0.75rem;
+      background: hsl(var(--muted) / 0.45);
+    }
+    .opts-advanced summary {
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: hsl(var(--foreground));
+      user-select: none;
+    }
+    .opts-advanced .opts-inner {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
+      align-items: center;
+    }
+    .opts-advanced label.is-disabled { opacity: 0.45; pointer-events: none; }
+    .opts-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-top: 0.5rem; }
+    .opts-row label { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8125rem; cursor: pointer; }
+    .opts-row input[type="checkbox"] { width: 1rem; height: 1rem; }
+    .opts-row input[type="password"], .opts-row input[type="text"] {
+      font-size: 0.8125rem; padding: 0.35rem 0.5rem; border-radius: var(--radius);
+      border: 1px solid hsl(var(--border)); width: 140px;
+    }
+
+    .deps-banner {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      border: 1px solid hsl(var(--border));
+    }
+    .deps-banner-pending { color: hsl(var(--muted-foreground)); background: hsl(var(--muted)); }
+    .deps-banner.deps-ok {
+      background: hsl(142.1 76.2% 96%);
+      border-color: hsl(142.1 40% 80%);
+      color: hsl(222.2 47.4% 18%);
+    }
+    .deps-banner.deps-warn {
+      background: hsl(48 100% 96%);
+      border-color: hsl(48 80% 75%);
+      color: hsl(222.2 47.4% 18%);
+    }
+    .deps-banner code { font-size: 0.75rem; word-break: break-all; }
+    .deps-howto {
+      margin: 0.5rem 0 0;
+      padding: 0.5rem 0.75rem;
+      background: hsl(0 0% 100% / 0.6);
+      border-radius: var(--radius);
+      font-size: 0.75rem;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .deps-more {
+      margin: 0.5rem 0 0;
+      font-size: 0.75rem;
+      color: hsl(var(--muted-foreground));
+    }
+    .deps-more a {
+      color: hsl(var(--primary));
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-title">OmegaZip Android</h1>
+    <p class="app-subtitle">Мобильная версия: .oz, ZIP, tar, zstd, CAB встроенно. Без 7-Zip на устройстве — нет RAR / .7z / ISO (используйте ПК или другой архиватор).</p>
+    <div id="sevenzip-banner" class="deps-banner deps-banner-pending" role="status">Проверка 7-Zip…</div>
+  </header>
+
+  <div class="card">
+    <h2 class="card-title">Создать архив (.oz или .zip)</h2>
+    <p class="card-desc">Файл или папка → <strong>.oz</strong>, <strong>.zip</strong> или <strong>.tar.gz</strong>. <strong>.7z</strong> на Android не создаётся. Профиль ниже — для <strong>.oz</strong>; пароль и ручные опции — в «Дополнительно». <strong>Видео</strong> в .oz почти не сжимается.</p>
+    <div class="drop-zone" id="drop-compress" data-mode="compress">Перетащите файл или папку в окно приложения<br><span class="drop-hint">подсветка зоны при перетаскивании (macOS / Tauri)</span></div>
+    <div class="opts-row">
+      <label>Профиль для <strong>.oz</strong>: <select id="compress-preset" aria-describedby="compress-preset-hint">
+        <option value="fast">Быстрее, без чанков</option>
+        <option value="balanced" selected>Сбалансировано (рекомендуется)</option>
+        <option value="auto">Авто (по типу файлов)</option>
+        <option value="max">Сильнее сжатие (solid)</option>
+        <option value="ultra">Максимум (solid + восстановление)</option>
+        <option value="custom">Вручную: чанки, solid, recovery</option>
+      </select></label>
+    </div>
+    <p class="compress-hint" id="compress-preset-hint">Профиль для <strong>.oz</strong>. Для <strong>.zip</strong> / <strong>.tar.gz</strong> — расширение в диалоге сохранения.</p>
+    <details class="opts-advanced" id="compress-advanced-details">
+      <summary>Дополнительно — пароль и ручные опции</summary>
+      <div class="opts-inner">
+        <label id="compress-label-chunked"><input type="checkbox" id="compress-chunked"> Чанки (дедупликация)</label>
+        <label id="compress-label-solid"><input type="checkbox" id="compress-solid"> Один поток (solid)</label>
+        <label id="compress-label-recovery"><input type="checkbox" id="compress-recovery"> Блоки восстановления</label>
+        <label>Пароль: <input type="password" id="compress-password" placeholder="если нужен — для .oz" autocomplete="off"></label>
+      </div>
+    </details>
+    <div class="btn-row">
+      <button class="btn-secondary" id="btn-compress-src">Файл или папка</button>
+      <button class="btn-secondary" id="btn-compress-dest">Куда сохранить</button>
+      <button class="btn-primary" id="btn-compress-run">Сжать</button>
+    </div>
+    <div class="path-row"><div id="compress-src-path" class="path"></div></div>
+    <div class="path-row"><div id="compress-dest-path" class="path"></div></div>
+    <div class="progress-wrap" id="compress-progress-wrap">
+      <div class="progress-bar"><div class="progress-bar-fill" id="compress-progress-fill" style="width:0%"></div></div>
+      <div class="status" id="compress-progress-text"></div>
+    </div>
+    <div id="compress-status" class="status"></div>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">Распаковать архив</h2>
+    <p class="card-desc">На Android: <strong>.oz</strong>, ZIP, tar (в т.ч. gz/xz/bz2/zst), <strong>.zst</strong>, <strong>.cab</strong>. <strong>RAR, 7z, ISO, MSI</strong> здесь не открываются. Пароль: для .oz и зашифрованных ZIP (ограничения); поле ниже для совместимости.</p>
+    <div class="drop-zone" id="drop-extract" data-mode="extract">Перетащите архив в окно<br><span class="drop-hint">ZIP, tar, gzip, OmegaZip…</span></div>
+    <div class="opts-row">
+      <label>Пароль: <input type="password" id="extract-password" placeholder=".oz или 7z/RAR…"></label>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" id="btn-extract-src">Выбрать архив</button>
+      <button class="btn-secondary" id="btn-extract-dest">Папка назначения</button>
+      <button class="btn-secondary" id="btn-extract-list">Список файлов</button>
+      <button class="btn-primary" id="btn-extract-run">Распаковать</button>
+    </div>
+    <div class="path-row"><div id="extract-src-path" class="path"></div></div>
+    <div class="path-row"><div id="extract-dest-path" class="path"></div></div>
+    <div class="progress-wrap" id="extract-progress-wrap">
+      <div class="progress-bar"><div class="progress-bar-fill" id="extract-progress-fill" style="width:0%"></div></div>
+      <div class="status" id="extract-progress-text"></div>
+    </div>
+    <div id="extract-status" class="status"></div>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">Экспорт в ZIP</h2>
+    <p class="card-desc">Конвертировать .oz в обычный ZIP — откроется в любом архиваторе.</p>
+    <div class="btn-row">
+      <button class="btn-secondary" id="btn-export-oz">Архив .oz</button>
+      <button class="btn-secondary" id="btn-export-zip">Сохранить как .zip</button>
+      <button class="btn-primary" id="btn-export-run">Экспортировать</button>
+    </div>
+    <div class="opts-row">
+      <label>Пароль: <input type="password" id="export-password" placeholder="если .oz зашифрован"></label>
+    </div>
+    <div class="path-row"><div id="export-oz-path" class="path"></div></div>
+    <div class="path-row"><div id="export-zip-path" class="path"></div></div>
+    <div id="export-status" class="status"></div>
+  </div>
+
+  <div class="card" id="card-rclone" style="display: none;" aria-hidden="true">
+    <h2 class="card-title">Облако (rclone)</h2>
+    <p class="card-desc">Синхронизация с Google Drive, S3, Dropbox и др. через rclone. Установите rclone и настройте remote: <code>rclone config</code>.</p>
+    <div id="rclone-status" class="status"></div>
+    <div class="opts-row">
+      <label>Remote (например <code>mydrive:Backup/file.oz</code>):</label>
+    </div>
+    <div class="path-row">
+      <input type="text" id="rclone-remote-path" class="path" placeholder="mydrive:OmegaZip/archive.oz" style="margin-top:4px" />
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" id="btn-rclone-upload">Загрузить в облако</button>
+      <button class="btn-secondary" id="btn-rclone-download">Скачать из облака</button>
+    </div>
+    <div id="rclone-result" class="status"></div>
+  </div>
+
+  <div class="footer-hint card" style="margin-top:1rem; padding:1rem;">
+    <strong>Совет:</strong> выбирайте файлы через кнопки «Файл или папка» / «Выбрать архив». Интеграция с «Поделиться» в системе настраивается отдельно в манифесте Android.
+  </div>
+  <p class="footer-hint" id="rar-format-note"></p>
+  <p class="footer-hint">OmegaZip Android — та же логика сжатия, что и на ПК, без внешнего 7-Zip и без rclone. Десктоп: OmegaZip + <code>omegazip deps</code>.</p>
+
+  <script>
+    function init() {
+      if (!window.__TAURI__) {
+        setTimeout(init, 50);
+        return;
+      }
+      const invoke = window.__TAURI__.core.invoke;
+      // Tauri 2 global bundle: listen lives on __TAURI__.event, not __TAURI__.core.event
+      const listen = window.__TAURI__.event.listen;
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+      (async function refreshSevenZipBanner() {
+        const el = document.getElementById('sevenzip-banner');
+        const rarEl = document.getElementById('rar-format-note');
+        try {
+          const s = await invoke('seven_zip_status');
+          if (rarEl) {
+            rarEl.textContent = s.rar_note || '';
+          }
+          if (!el) return;
+          el.classList.remove('deps-banner-pending');
+          if (s.available) {
+            el.className = 'deps-banner deps-ok';
+            const pathPart = s.executable
+              ? ' <code>' + escapeHtml(s.executable) + '</code>'
+              : '';
+            el.innerHTML =
+              '<strong>7-Zip:</strong> найден' +
+              pathPart +
+              '. Распаковка и упаковка .7z, RAR, ISO, WIM, MSI и других форматов, которые открывает 7-Zip.';
+          } else {
+            el.className = 'deps-banner deps-warn';
+            el.innerHTML =
+              '<strong>7-Zip не найден.</strong> На Android внешний 7-Zip не используется — доступны встроенные форматы (.oz, ZIP, tar, CAB и др.). ' +
+              'На ПК для .7z и RAR установите ' +
+              '<a href="https://www.7-zip.org/" target="_blank" rel="noopener noreferrer">7-Zip</a> или p7zip.' +
+              '<p class="deps-more">Документация в репозитории: <code>docs/FORMATS.md</code>, <code>docs/INSTALL.md</code>.</p>';
+          }
+        } catch (e) {
+          if (el) {
+            el.classList.remove('deps-banner-pending');
+            el.className = 'deps-banner deps-warn';
+            el.textContent = 'Не удалось проверить 7-Zip: ' + String(e);
+          }
+        }
+      })();
+
+      // WebKit (macOS): без preventDefault на dragover страница не принимает сброс файлов.
+      document.addEventListener(
+        'dragover',
+        function (e) {
+          e.preventDefault();
+          try {
+            e.dataTransfer.dropEffect = 'copy';
+          } catch (_) {}
+        },
+        { passive: false }
+      );
+      document.addEventListener(
+        'dragenter',
+        function (e) {
+          e.preventDefault();
+        },
+        { passive: false }
+      );
+
+      const compressSrcPath = document.getElementById('compress-src-path');
+      const compressDestPath = document.getElementById('compress-dest-path');
+      const compressStatus = document.getElementById('compress-status');
+      const extractSrcPath = document.getElementById('extract-src-path');
+      const extractDestPath = document.getElementById('extract-dest-path');
+      const extractStatus = document.getElementById('extract-status');
+
+      let compressSrc = null;
+      let compressDest = null;
+      let extractSrc = null;
+      let extractDest = null;
+      let exportOz = null;
+      let exportZip = null;
+
+      const setStatus = (el, text, ok) => {
+        el.textContent = text;
+        el.className = 'status ' + (ok ? 'ok' : 'err');
+      };
+      function normPath(v) {
+        if (v == null || v === '') return v;
+        const s = String(v);
+        return s.replace(/^file:\/\//i, '').replace(/^\/\//, '');
+      }
+      /** Всегда строка; пустая строка вместо null/undefined — иначе ключ пропадает из JSON IPC. */
+      function ipcPath(v) {
+        return v == null ? '' : String(v);
+      }
+      /** Дублируем snake_case и camelCase: совместимо с любым бинарником Tauri. */
+      function ipcArchivePath(v) {
+        const s = ipcPath(v);
+        return { archive_path: s, archivePath: s };
+      }
+      function ipcDestDir(v) {
+        const s = ipcPath(v);
+        return { dest_dir: s, destDir: s };
+      }
+      function ipcZipPath(v) {
+        const s = ipcPath(v);
+        return { zip_path: s, zipPath: s };
+      }
+      function ipcSaveDialog(name, defaultDir) {
+        const o = { default_name: name, defaultName: name };
+        if (defaultDir) {
+          o.default_directory = defaultDir;
+          o.defaultDirectory = defaultDir;
+        }
+        return o;
+      }
+      function pathStemBaseName(srcPath) {
+        if (!srcPath) return 'archive';
+        let s = String(srcPath).replace(/[/\\]+$/, '');
+        const parts = s.split(/[/\\]/);
+        const seg = parts.pop() || 'archive';
+        const d = seg.lastIndexOf('.');
+        const stem = d > 0 && d < seg.length - 1 ? seg.slice(0, d) : seg;
+        return stem || seg;
+      }
+      function suggestedCompressSaveFileName(srcPath) {
+        return pathStemBaseName(srcPath) + '.oz';
+      }
+      function suggestedExportZipFileName(ozPath) {
+        return pathStemBaseName(ozPath) + '.zip';
+      }
+      function ipcRcloneLocal(v) {
+        const s = ipcPath(v);
+        return { local_path: s, localPath: s };
+      }
+      function ipcRcloneRemote(v) {
+        const s = ipcPath(v);
+        return { remote_spec: s, remoteSpec: s };
+      }
+
+      function isExtractArchivePath(normalized) {
+        const p = normalized.toLowerCase();
+        return (
+          p.endsWith('.oz') ||
+          p.endsWith('.zip') ||
+          p.endsWith('.cab') ||
+          p.endsWith('.zst') ||
+          p.endsWith('.tzst') ||
+          p.endsWith('.tar.zst') ||
+          p.endsWith('.jar') ||
+          p.endsWith('.war') ||
+          p.endsWith('.apk') ||
+          p.endsWith('.ipa') ||
+          p.endsWith('.tar') ||
+          p.endsWith('.tar.gz') ||
+          p.endsWith('.tgz') ||
+          p.endsWith('.tar.xz') ||
+          p.endsWith('.txz') ||
+          p.endsWith('.tar.bz2') ||
+          p.endsWith('.tbz2') ||
+          p.endsWith('.tbz') ||
+          p.endsWith('.gz') ||
+          p.endsWith('.xz') ||
+          p.endsWith('.bz2') ||
+          p.endsWith('.docx') ||
+          p.endsWith('.xlsx') ||
+          p.endsWith('.pptx') ||
+          p.endsWith('.odt') ||
+          p.endsWith('.ods') ||
+          p.endsWith('.odp') ||
+          p.endsWith('.cbz') ||
+          p.endsWith('.xar') ||
+          p.endsWith('.lzma') ||
+          p.endsWith('.arj') ||
+          p.endsWith('.lzh') ||
+          p.endsWith('.lha')
+        );
+      }
+      function parentDirForPath(p) {
+        const s = String(p).replace(/^file:\/\//i, '').replace(/[/\\]+$/, '');
+        const i = Math.max(s.lastIndexOf('/'), s.lastIndexOf('\\'));
+        if (i <= 0) return null;
+        let out = s.slice(0, i);
+        if (/^[a-zA-Z]:$/.test(out)) out += '\\';
+        return out;
+      }
+      async function refreshCompressAutoHint() {
+        const hint = document.getElementById('compress-preset-hint');
+        const presetEl = document.getElementById('compress-preset');
+        if (!hint || !presetEl || presetEl.value !== 'auto') return;
+        if (!compressSrc) {
+          hint.textContent =
+            'Выберите источник — подставим рекомендуемый профиль для .oz по расширениям.';
+          return;
+        }
+        try {
+          const h = await invoke('suggest_compress_preset', { path: ipcPath(compressSrc) });
+          const name = h.preset != null ? String(h.preset) : '';
+          const reason = h.reason != null ? String(h.reason) : '';
+          hint.innerHTML =
+            escapeHtml(reason) + ' <strong>→</strong> <code>' + escapeHtml(name) + '</code>';
+        } catch (e) {
+          hint.textContent = 'Не удалось получить подсказку: ' + String(e);
+        }
+      }
+      function applyPaths(paths) {
+        if (!paths || paths.length === 0) return;
+        const path = (typeof paths[0] === 'string') ? paths[0] : String(paths[0] || '');
+        if (!path) return;
+        const normalized = path.replace(/^file:\/\//i, '');
+        if (isExtractArchivePath(normalized)) {
+          extractSrc = normalized;
+          extractSrcPath.textContent = normalized;
+          if (paths.length === 1) {
+            const parent = parentDirForPath(normalized);
+            if (parent) {
+              extractDest = parent;
+              extractDestPath.textContent = parent;
+            }
+          }
+        } else {
+          compressSrc = normalized;
+          compressSrcPath.textContent = normalized;
+          const parent = parentDirForPath(normalized);
+          if (parent) {
+            const sep = normalized.indexOf('\\') >= 0 ? '\\' : '/';
+            compressDest = parent + sep + suggestedCompressSaveFileName(normalized);
+            compressDestPath.textContent = compressDest;
+          }
+          void refreshCompressAutoHint();
+        }
+      }
+      listen('open-files', function (ev) {
+        applyPaths(Array.isArray(ev.payload) ? ev.payload : [ev.payload]);
+      });
+      listen('drop-files', function (ev) {
+        const payload = ev.payload;
+        const paths = Array.isArray(payload) ? payload : (payload != null ? [payload] : []);
+        applyPaths(paths);
+      });
+      listen('tauri://drop', function (ev) {
+        const payload = ev.payload;
+        if (payload && (payload.paths || Array.isArray(payload))) {
+          const paths = payload.paths || payload;
+          applyPaths(Array.isArray(paths) ? paths : [paths]);
+        }
+      });
+      const compressDropZone = document.getElementById('drop-compress');
+      const extractDropZone = document.getElementById('drop-extract');
+      function setNativeDragHighlight(on) {
+        [compressDropZone, extractDropZone].forEach(function (z) {
+          if (z) z.classList.toggle('dragover', on);
+        });
+      }
+      (async function setupNativeFileDrop() {
+        const handler = function (event) {
+          const p = event && event.payload;
+          if (!p) return;
+          if (p.type === 'enter') setNativeDragHighlight(true);
+          else if (p.type === 'leave') setNativeDragHighlight(false);
+          else if (p.type === 'drop' && p.paths && p.paths.length) {
+            setNativeDragHighlight(false);
+            applyPaths(p.paths.map(function (x) { return String(x); }));
+          }
+        };
+        const candidates = [];
+        if (window.__TAURI__.webview?.getCurrentWebview) {
+          candidates.push(window.__TAURI__.webview.getCurrentWebview());
+        }
+        if (window.__TAURI__.webviewWindow?.getCurrentWebviewWindow) {
+          candidates.push(window.__TAURI__.webviewWindow.getCurrentWebviewWindow());
+        }
+        if (window.__TAURI__.window?.getCurrentWindow) {
+          candidates.push(window.__TAURI__.window.getCurrentWindow());
+        }
+        for (let i = 0; i < candidates.length; i++) {
+          const t = candidates[i];
+          if (t && typeof t.onDragDropEvent === 'function') {
+            try {
+              await t.onDragDropEvent(handler);
+              break;
+            } catch (e) {
+              console.warn('OmegaZip onDragDropEvent:', e);
+            }
+          }
+        }
+      })();
+
+      listen('compress-progress', function (ev) {
+        const p = ev.payload;
+        const wrap = document.getElementById('compress-progress-wrap');
+        const fill = document.getElementById('compress-progress-fill');
+        const text = document.getElementById('compress-progress-text');
+        if (!p || p.phase === 'done') {
+          wrap.classList.remove('visible');
+          return;
+        }
+        wrap.classList.add('visible');
+        const total = p.files_total || 1;
+        const done = p.files_done || 0;
+        fill.style.width = (total ? (100 * done / total) : 0) + '%';
+        text.textContent = p.current_path ? p.current_path : (p.phase === 'scanning' ? 'Сканирование…' : p.phase === 'compressing' ? 'Сжатие…' : 'Запись…');
+      });
+      listen('decompress-progress', function (ev) {
+        const p = ev.payload;
+        const wrap = document.getElementById('extract-progress-wrap');
+        const fill = document.getElementById('extract-progress-fill');
+        const text = document.getElementById('extract-progress-text');
+        if (!p || p.phase === 'done') {
+          wrap.classList.remove('visible');
+          return;
+        }
+        wrap.classList.add('visible');
+        const total = p.files_total || 1;
+        const done = p.files_done || 0;
+        fill.style.width = (total ? (100 * done / total) : 0) + '%';
+        text.textContent = p.current_path ? p.current_path : 'Распаковка…';
+      });
+
+      document.getElementById('btn-compress-src').onclick = async () => {
+        try {
+          const p = await invoke('pick_file_or_folder');
+          const path = Array.isArray(p) ? p[0] : p;
+          if (path != null && path !== '') {
+            compressSrc = normPath(path);
+            compressSrcPath.textContent = compressSrc;
+            setStatus(compressStatus, '', true);
+            void refreshCompressAutoHint();
+          }
+        } catch (e) {
+          setStatus(compressStatus, 'Ошибка: ' + String(e), false);
+        }
+      };
+
+      document.getElementById('btn-compress-dest').onclick = async () => {
+        try {
+          const p = await invoke(
+            'pick_save_file',
+            ipcSaveDialog(suggestedCompressSaveFileName(compressSrc), compressSrc ? parentDirForPath(compressSrc) : null)
+          );
+          if (p != null && p !== '') {
+            compressDest = normPath(p);
+            compressDestPath.textContent = compressDest;
+            setStatus(compressStatus, '', true);
+          }
+        } catch (e) {
+          setStatus(compressStatus, 'Ошибка: ' + String(e), false);
+        }
+      };
+
+      function openCompressAdvancedIfNeeded() {
+        const details = document.getElementById('compress-advanced-details');
+        const pwdEl = document.getElementById('compress-password');
+        const presetEl = document.getElementById('compress-preset');
+        if (!details) return;
+        const hasPwd = pwdEl && pwdEl.value.trim().length > 0;
+        const custom = presetEl && presetEl.value === 'custom';
+        if (hasPwd || custom) details.open = true;
+      }
+
+      function syncCompressPresetUi() {
+        const presetEl = document.getElementById('compress-preset');
+        const custom = presetEl && presetEl.value === 'custom';
+        const hint = document.getElementById('compress-preset-hint');
+        ['compress-label-chunked', 'compress-label-solid', 'compress-label-recovery'].forEach(function (id) {
+          const lab = document.getElementById(id);
+          if (lab) lab.classList.toggle('is-disabled', !custom);
+        });
+        ['compress-chunked', 'compress-solid', 'compress-recovery'].forEach(function (id) {
+          const el = document.getElementById(id);
+          if (el) {
+            el.disabled = !custom;
+            if (!custom) el.checked = false;
+          }
+        });
+        if (hint) {
+          if (custom) {
+            hint.textContent = 'Включите опции ниже — готовые профили в этом режиме не используются.';
+          } else if (presetEl && presetEl.value === 'auto') {
+            hint.textContent = 'Подбор профиля по расширениям (только для .oz)…';
+            void refreshCompressAutoHint();
+          } else {
+            hint.textContent = 'Профиль для .oz. Для .zip / .tar.gz — расширение в диалоге сохранения.';
+          }
+        }
+        openCompressAdvancedIfNeeded();
+      }
+      const compressPresetEl = document.getElementById('compress-preset');
+      if (compressPresetEl) {
+        compressPresetEl.addEventListener('change', syncCompressPresetUi);
+        syncCompressPresetUi();
+      }
+      const compressPwdEl = document.getElementById('compress-password');
+      const compressDetailsEl = document.getElementById('compress-advanced-details');
+      if (compressPwdEl && compressDetailsEl) {
+        compressPwdEl.addEventListener('input', openCompressAdvancedIfNeeded);
+        compressPwdEl.addEventListener('focus', function () {
+          compressDetailsEl.open = true;
+        });
+      }
+
+      document.getElementById('btn-compress-run').onclick = async () => {
+        if (!compressSrc || !compressDest) {
+          setStatus(compressStatus, 'Выберите источник и место сохранения', false);
+          return;
+        }
+        document.getElementById('compress-progress-wrap').classList.add('visible');
+        compressStatus.textContent = 'Сжатие…';
+        compressStatus.className = 'status';
+        const presetEl = document.getElementById('compress-preset');
+        const presetVal = presetEl ? presetEl.value : 'balanced';
+        const custom = presetVal === 'custom';
+        let preset = null;
+        if (!custom) {
+          if (presetVal === 'auto') {
+            const h = await invoke('suggest_compress_preset', { path: ipcPath(compressSrc) });
+            preset = h.preset != null ? String(h.preset) : 'balanced';
+          } else {
+            preset = presetVal;
+          }
+        }
+        const pwd = document.getElementById('compress-password').value.trim() || null;
+        const chunked = custom && document.getElementById('compress-chunked').checked;
+        const solid = custom && document.getElementById('compress-solid').checked;
+        const recovery = custom && document.getElementById('compress-recovery').checked;
+        const useAdvanced = custom ? !!(chunked || solid || recovery || pwd) : true;
+        try {
+          const n = useAdvanced
+            ? await invoke('compress_advanced', {
+                source: ipcPath(compressSrc),
+                ...ipcArchivePath(compressDest),
+                password: pwd ? pwd : null,
+                chunked,
+                solid,
+                recovery,
+                preset,
+              })
+            : await invoke('compress', { source: ipcPath(compressSrc), ...ipcArchivePath(compressDest) });
+          document.getElementById('compress-progress-wrap').classList.remove('visible');
+          setStatus(compressStatus, 'Готово: сжато файлов: ' + n, true);
+        } catch (e) {
+          document.getElementById('compress-progress-wrap').classList.remove('visible');
+          setStatus(compressStatus, String(e), false);
+        }
+      };
+
+      document.getElementById('btn-extract-src').onclick = async () => {
+        try {
+          const p = await invoke('pick_archive_file');
+          const path = Array.isArray(p) ? p[0] : p;
+          if (path != null && path !== '') {
+            extractSrc = normPath(path);
+            extractSrcPath.textContent = extractSrc;
+            const parent = parentDirForPath(extractSrc);
+            if (parent) {
+              extractDest = parent;
+              extractDestPath.textContent = parent;
+            }
+            setStatus(extractStatus, '', true);
+          }
+        } catch (e) {
+          setStatus(extractStatus, 'Ошибка: ' + String(e), false);
+        }
+      };
+
+      document.getElementById('btn-extract-dest').onclick = async () => {
+        try {
+          const p = await invoke('pick_folder');
+          const path = Array.isArray(p) ? p[0] : p;
+          if (path != null && path !== '') {
+            extractDest = normPath(path);
+            extractDestPath.textContent = extractDest;
+            setStatus(extractStatus, '', true);
+          }
+        } catch (e) {
+          setStatus(extractStatus, 'Ошибка: ' + String(e), false);
+        }
+      };
+
+      document.getElementById('btn-extract-list').onclick = async () => {
+        if (!extractSrc) {
+          setStatus(extractStatus, 'Выберите архив', false);
+          return;
+        }
+        try {
+          const pwd = document.getElementById('extract-password').value.trim();
+          const paths = await invoke('list_archive', {
+            ...ipcArchivePath(extractSrc),
+            password: pwd ? pwd : null,
+          });
+          setStatus(extractStatus, 'Файлов: ' + (paths && paths.length ? paths.length : 0), true);
+          if (paths && paths.length) alert(paths.slice(0, 50).join('\n') + (paths.length > 50 ? '\n… ещё ' + (paths.length - 50) : ''));
+        } catch (e) {
+          setStatus(extractStatus, String(e), false);
+        }
+      };
+      document.getElementById('btn-extract-run').onclick = async () => {
+        if (!extractSrc || !extractDest) {
+          setStatus(extractStatus, 'Выберите архив и папку назначения', false);
+          return;
+        }
+        document.getElementById('extract-progress-wrap').classList.add('visible');
+        extractStatus.textContent = 'Распаковка…';
+        extractStatus.className = 'status';
+        const pwd = document.getElementById('extract-password').value.trim() || null;
+        try {
+          const n = await invoke('decompress_with_password', {
+                ...ipcArchivePath(extractSrc),
+                ...ipcDestDir(extractDest),
+                password: pwd ? pwd : null,
+              });
+          document.getElementById('extract-progress-wrap').classList.remove('visible');
+          setStatus(extractStatus, 'Готово: извлечено файлов: ' + n, true);
+        } catch (e) {
+          document.getElementById('extract-progress-wrap').classList.remove('visible');
+          setStatus(extractStatus, String(e), false);
+        }
+      };
+
+      document.getElementById('btn-export-oz').onclick = async () => {
+        try {
+          const p = await invoke('pick_oz_file');
+          const path = Array.isArray(p) ? p[0] : p;
+          if (path) { exportOz = normPath(path); document.getElementById('export-oz-path').textContent = exportOz; }
+        } catch (e) {
+          setStatus(document.getElementById('export-status'), 'Ошибка: ' + String(e), false);
+        }
+      };
+      document.getElementById('btn-export-zip').onclick = async () => {
+        try {
+          const p = await invoke(
+            'pick_save_file',
+            ipcSaveDialog(
+              exportOz ? suggestedExportZipFileName(exportOz) : 'archive.zip',
+              exportOz ? parentDirForPath(exportOz) : null
+            )
+          );
+          if (p) { exportZip = normPath(p); document.getElementById('export-zip-path').textContent = exportZip; }
+        } catch (e) {
+          setStatus(document.getElementById('export-status'), 'Ошибка: ' + String(e), false);
+        }
+      };
+      document.getElementById('btn-export-run').onclick = async () => {
+        if (!exportOz || !exportZip) {
+          setStatus(document.getElementById('export-status'), 'Выберите .oz и куда сохранить .zip', false);
+          return;
+        }
+        const pwd = document.getElementById('export-password').value.trim() || null;
+        const st = document.getElementById('export-status');
+        st.textContent = 'Экспорт…';
+        st.className = 'status';
+        try {
+          const n = await invoke('export_to_zip', {
+                ...ipcArchivePath(exportOz),
+                ...ipcZipPath(exportZip),
+                password: pwd,
+              });
+          setStatus(st, 'Готово: экспортировано файлов: ' + n, true);
+        } catch (e) {
+          setStatus(st, String(e), false);
+        }
+      };
+
+      const rcloneStatusEl = document.getElementById('rclone-status');
+      const rcloneResultEl = document.getElementById('rclone-result');
+      invoke('rclone_available').then(function(ok) {
+        rcloneStatusEl.textContent = ok ? 'rclone найден. Введите remote:path и нажмите Загрузить или Скачать.' : 'rclone не найден. Установите: https://rclone.org/downloads';
+        rcloneStatusEl.className = 'status ' + (ok ? 'ok' : 'err');
+      }).catch(function() {
+        rcloneStatusEl.textContent = 'rclone не найден. Установите с https://rclone.org/downloads';
+        rcloneStatusEl.className = 'status err';
+      });
+      document.getElementById('btn-rclone-upload').onclick = async () => {
+        try {
+          let local = compressDest || extractSrc || null;
+          if (!local) {
+            const p = await invoke('pick_file_or_folder');
+            local = p ? normPath(Array.isArray(p) ? p[0] : p) : null;
+          }
+          const remote = document.getElementById('rclone-remote-path').value.trim();
+          if (!local || !remote) {
+            setStatus(rcloneResultEl, 'Выберите локальный файл/папку и укажите remote:path', false);
+            return;
+          }
+          rcloneResultEl.textContent = 'Загрузка…';
+          rcloneResultEl.className = 'status';
+          await invoke('rclone_upload', { ...ipcRcloneLocal(local), ...ipcRcloneRemote(remote) });
+          setStatus(rcloneResultEl, 'Готово: загружено в ' + remote, true);
+        } catch (e) {
+          setStatus(rcloneResultEl, String(e), false);
+        }
+      };
+      document.getElementById('btn-rclone-download').onclick = async () => {
+        try {
+          const remote = document.getElementById('rclone-remote-path').value.trim();
+          if (!remote) {
+            setStatus(rcloneResultEl, 'Укажите remote:path (например mydrive:Backup/file.oz)', false);
+            return;
+          }
+          let p = await invoke('pick_folder');
+          const local = p ? normPath(Array.isArray(p) ? p[0] : p) : null;
+          if (!local) {
+            setStatus(rcloneResultEl, 'Выберите папку для сохранения', false);
+            return;
+          }
+          rcloneResultEl.textContent = 'Скачивание…';
+          rcloneResultEl.className = 'status';
+          await invoke('rclone_download', { ...ipcRcloneRemote(remote), ...ipcRcloneLocal(local) });
+          setStatus(rcloneResultEl, 'Готово: скачано в ' + local, true);
+        } catch (e) {
+          setStatus(rcloneResultEl, String(e), false);
+        }
+      };
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
