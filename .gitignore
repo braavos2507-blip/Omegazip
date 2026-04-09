@@ -13,3 +13,6 @@ out/
 # Env & local
 .env
 .env.*
+
+# Local AI / editor tooling (not part of OmegaZip product)
+.claude/
