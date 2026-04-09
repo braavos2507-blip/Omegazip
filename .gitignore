@@ -16,3 +16,8 @@ out/
 
 # Local AI / editor tooling (not part of OmegaZip product)
 .claude/
+
+# Local artifacts / bulky outputs (not source of truth)
+backups/
+OmegaZip-for-review.tar.gz
+archive.oz

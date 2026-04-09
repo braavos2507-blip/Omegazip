@@ -1,0 +1,27 @@
+[package]
+name = "omegazip-app"
+version = "0.4.0"
+edition = "2021"
+description = "OmegaZip desktop app — Windows, macOS, Linux. Built-in rclone."
+
+[lib]
+name = "omegazip_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+omegazip = { path = ".." }
+tauri = { version = "2", features = [] }
+tauri-plugin-fs = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri-plugin-dialog = "2"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3", features = ["NSApplication", "NSPasteboard", "NSPasteboardItem"] }
+objc2-foundation = { version = "0.3", features = ["NSArray", "NSString"] }
+urlencoding = "2"
+rfd = "0.15"

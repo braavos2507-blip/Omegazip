@@ -1,0 +1,21 @@
+{
+  "name": "omegazip-app",
+  "version": "0.4.0",
+  "private": true,
+  "scripts": {
+    "tauri": "tauri",
+    "build": "tauri build",
+    "build:macos": "env -u CI npx tauri build && bash scripts/inject-macos-services.sh",
+    "dev": "tauri dev",
+    "android:init": "cargo tauri android init",
+    "android:dev": "cargo tauri android dev",
+    "android:build": "cargo tauri android build",
+    "android:open": "cargo tauri android dev --open"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  },
+  "dependencies": {
+    "@tauri-apps/plugin-dialog": "2.6.0"
+  }
+}

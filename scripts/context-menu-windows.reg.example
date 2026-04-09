@@ -1,0 +1,15 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\*\shell\OmegaZipCompressOz]
+@="Сжать в .oz (OmegaZip)"
+"NoWorkingDirectory"=""
+
+[HKEY_CLASSES_ROOT\*\shell\OmegaZipCompressOz\command]
+@="cmd.exe /c \"\"C:\\Path\\To\\omegazip.exe\" compress \"%1\" \"%~dpn1.oz\"\""
+
+[HKEY_CLASSES_ROOT\*\shell\OmegaZipCompressZip]
+@="Сжать в .zip (OmegaZip)"
+"NoWorkingDirectory"=""
+
+[HKEY_CLASSES_ROOT\*\shell\OmegaZipCompressZip\command]
+@="cmd.exe /c \"\"C:\\Path\\To\\omegazip.exe\" compress \"%1\" \"%~dpn1.zip\"\""

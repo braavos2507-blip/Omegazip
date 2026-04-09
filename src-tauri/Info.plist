@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- NSServices убраны: Tauri не обрабатывает openFiles, пункты только открывали окно.
+	     Рабочие пункты меню ставятся скриптом scripts/install-context-menu.sh (Quick Actions). -->
+</dict>
+</plist>

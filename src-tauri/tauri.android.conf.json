@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "OmegaZip Android",
+  "identifier": "app.omegazip.android",
+  "build": {
+    "frontendDist": "../ui-android"
+  },
+  "app": {
+    "security": {
+      "capabilities": ["android"]
+    }
+  },
+  "bundle": {
+    "android": {
+      "minSdkVersion": 24,
+      "versionCode": 1
+    }
+  }
+}
