@@ -6,7 +6,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-09)
 
 **Core value:** Надёжное сжатие/распаковка с нативным ядром и опциональным 7-Zip на десктопе; честные ограничения на Android.  
 **Майлстоун v1.0:** **закрыт и заархивирован** — `.planning/MILESTONES.md`, `.planning/milestones/v1.0-*.md`, `.planning/MILESTONE-V1.0.md`.  
-**Current focus:** Майлстоун **v1.2** по **GAP** — **закрыт**. **v2:** **QA-03** (CI roundtrip) и **DIST-01** (подпись macOS + GHA `macos-signed-build`, см. `docs/DIST-01-MACOS-SIGNING.md`) — частично закрыты; остаётся настройка секретов у владельца репо и при желании нотаризация в CI.
+**Current focus:** Майлстоун **v1.2** по **GAP** — **закрыт**. **v2:** **QA-03** (CI roundtrip) и **DIST-01** (подпись macOS + GHA `macos-signed-build`, см. `docs/DIST-01-MACOS-SIGNING.md`) — в workflow добавлена **опциональная нотаризация** при заданных секретах; остаётся **добавить remote/push**, заполнить **secrets** у владельца репо и при необходимости **честный** clean-machine smoke перед `GO-PUBLIC`.
 
 ## Current Position
 
@@ -28,7 +28,7 @@ Progress: [REQUIREMENTS.md](REQUIREMENTS.md) v1.2.
 ### Pending Todos
 
 - Опционально перед релизом: смоук ПКМ по [docs/QA-WIN-LINUX-PREP.md](../docs/QA-WIN-LINUX-PREP.md).
-- По продукту: расширение **QA-03** (пороги/тяжёлый корпус); **DIST-01** — добавить secrets и при необходимости шаг notarize в GHA — см. [REQUIREMENTS.md](REQUIREMENTS.md) v2, [docs/DIST-01-MACOS-SIGNING.md](../docs/DIST-01-MACOS-SIGNING.md).
+- По продукту: расширение **QA-03** (пороги/тяжёлый корпус); **DIST-01** — задать secrets в GitHub и при необходимости прогнать **macOS signed build** (подпись + опционально notarize) — см. [REQUIREMENTS.md](REQUIREMENTS.md) v2, [docs/DIST-01-MACOS-SIGNING.md](../docs/DIST-01-MACOS-SIGNING.md).
 
 ### Blockers
 

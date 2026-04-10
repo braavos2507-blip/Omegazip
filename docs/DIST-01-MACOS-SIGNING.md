@@ -10,7 +10,7 @@
 - **`build-app.sh`** — после копирования `omegazip` в `.app` выполняет **повторную подпись** (`codesign --deep --options runtime`), если задано `APPLE_SIGNING_IDENTITY` или `MACOS_CODESIGN_IDENTITY`. Без этого вставка CLI ломает подпись Tauri.
 - **`scripts/macos-import-certificate-ci.sh`** — импорт `.p12` в keychain (CI / локально).
 - **`scripts/macos-notarize-app.sh`** — отправка `.app` в Notary Service и `stapler staple`.
-- **GitHub Actions**: [`.github/workflows/macos-signed-build.yml`](../.github/workflows/macos-signed-build.yml) — **только `workflow_dispatch`**, нужны secrets (см. ниже).
+- **GitHub Actions**: [`.github/workflows/macos-signed-build.yml`](../.github/workflows/macos-signed-build.yml) — **только `workflow_dispatch`**, нужны secrets (см. ниже). После `./build-app.sh` workflow **по возможности** вызывает `scripts/macos-notarize-app.sh` (если заданы секреты нотаризации); иначе шаг пишет *skipped* и всё равно выкладывает подписанный `.zip`.
 
 ## Сертификат и учётные записи Apple
 
@@ -52,14 +52,21 @@ bash scripts/macos-notarize-app.sh dist/OmegaZip.app
 | `APPLE_CERTIFICATE_PASSWORD` | Пароль экспорта `.p12` |
 | `KEYCHAIN_PASSWORD` | Произвольный пароль для временного keychain в CI |
 
-Опционально для нотаризации в workflow (если включите шаг вручную):
+Опционально для **нотаризации в том же workflow** (шаг пропускается, если ни один набор не задан):
 
 | Secret | Назначение |
 |--------|------------|
-| `APPLE_API_ISSUER`, `APPLE_API_KEY` | Issuer ID и Key ID |
-| Файл ключа | Сохраните `.p8` как секрет (например base64 в отдельный secret) и распакуйте в job в файл; укажите `APPLE_API_KEY_PATH` |
+| `APPLE_API_ISSUER` | Issuer ID (App Store Connect API) |
+| `APPLE_API_KEY` | Key ID |
+| `APPLE_API_KEY_P8_BASE64` | Содержимое файла `.p8` в **base64** (как для `APPLE_CERTIFICATE`) |
 
-Либо: `APPLE_ID`, `APPLE_PASSWORD` (пароль приложения), при необходимости `APPLE_TEAM_ID`.
+**Либо** вместо API-ключа:
+
+| Secret | Назначение |
+|--------|------------|
+| `APPLE_ID` | Apple ID для notarytool |
+| `APPLE_PASSWORD` | Пароль приложения |
+| `APPLE_TEAM_ID` | При необходимости (несколько команд) |
 
 ## DMG из `target/.../bundle/dmg`
 

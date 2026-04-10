@@ -1,10 +1,15 @@
 # Подписанная macOS-сборка (Developer ID). Только ручной запуск — нужны secrets.
+# Нотаризация выполняется, если заданы ASC API (issuer + key id + .p8 base64) либо Apple ID + пароль приложения.
 # См. docs/DIST-01-MACOS-SIGNING.md
 
 name: macOS signed build
 
 on:
   workflow_dispatch:
+
+concurrency:
+  group: macos-signed-build-${{ github.repository }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -31,6 +36,27 @@ jobs:
 
       - name: Build app + embed CLI + re-sign
         run: ./build-app.sh
+
+      - name: Notarize and staple (optional)
+        env:
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${APPLE_API_ISSUER:-}" && -n "${APPLE_API_KEY:-}" && -n "${APPLE_API_KEY_P8_BASE64:-}" ]]; then
+            echo "$APPLE_API_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/AuthKey.p8"
+            chmod 600 "$RUNNER_TEMP/AuthKey.p8"
+            export APPLE_API_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+            bash scripts/macos-notarize-app.sh dist/OmegaZip.app
+          elif [[ -n "${APPLE_ID:-}" && -n "${APPLE_PASSWORD:-}" ]]; then
+            bash scripts/macos-notarize-app.sh dist/OmegaZip.app
+          else
+            echo "Notarization skipped (set ASC API secrets or APPLE_ID + APPLE_PASSWORD)."
+          fi
 
       - name: Package .app for artifact
         run: ditto -c -k --keepParent dist/OmegaZip.app dist/OmegaZip-signed.zip
