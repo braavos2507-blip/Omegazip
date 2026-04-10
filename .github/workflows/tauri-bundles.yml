@@ -1,0 +1,55 @@
+# Полная сборка Tauri (MSI / AppImage или deb / macOS bundle) — как у пользователя после установщика.
+# Отдельно от быстрого CI (cargo test / cargo check), чтобы не дублировать время на каждом push при необходимости.
+name: Tauri bundles
+
+on:
+  push:
+    # main/master — релизные ветки; fix/** — полные bundle-сборки на feature-ветках без ожидания merge
+    branches: [main, master, "fix/**"]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: tauri-bundles-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tauri-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            name: linux
+          - os: windows-latest
+            name: windows
+          - os: macos-latest
+            name: macos
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Linux dependencies (WebKit + GTK)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            pkg-config \
+            build-essential \
+            curl
+      - run: npm ci
+      - name: Tauri build
+        run: npx tauri build
+        env:
+          CI: false
