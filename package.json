@@ -3,6 +3,7 @@
   "version": "0.4.0",
   "private": true,
   "scripts": {
+    "audit:deps": "bash scripts/security-audit.sh",
     "test:context-menu": "bash scripts/test-context-menu-logic.sh",
     "test:bench-ci": "bash scripts/qa03-benchmark-ci.sh",
     "measure:oz-advantage": "bash scripts/measure-oz-advantage.sh",

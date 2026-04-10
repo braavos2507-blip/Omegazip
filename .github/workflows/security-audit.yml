@@ -1,0 +1,40 @@
+# Аудит зависимостей: Rust (корень + src-tauri) и npm. См. docs/SECURITY.md
+name: Security audit
+
+on:
+  push:
+    branches: [main, master, "fix/**"]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+
+      - name: cargo audit (omegazip)
+        run: cargo audit
+
+      - name: cargo audit (src-tauri)
+        working-directory: src-tauri
+        run: cargo audit
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high

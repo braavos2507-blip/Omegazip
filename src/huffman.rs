@@ -167,7 +167,7 @@ pub fn decode(data: &[u8]) -> std::io::Result<Vec<u8>> {
             break;
         }
         let mut acc: u32 = 0;
-        let mut acc_bits = 0u8;
+        let mut acc_bits: u32 = 0;
         let mut matched = false;
         while bit_pos < bit_slice.len() * 8 && !matched {
             let byte = bit_slice[bit_pos / 8];
@@ -176,7 +176,13 @@ pub fn decode(data: &[u8]) -> std::io::Result<Vec<u8>> {
             acc_bits += 1;
             bit_pos += 1;
             for &(sym, code, len) in &sym_to_bits {
-                if len == acc_bits && code == (acc & ((1u32 << len) - 1)) {
+                let len_u = len as u32;
+                let mask = if len_u >= 32 {
+                    u32::MAX
+                } else {
+                    (1u32 << len_u) - 1
+                };
+                if len_u == acc_bits && code == (acc & mask) {
                     out.push(sym);
                     matched = true;
                     break;

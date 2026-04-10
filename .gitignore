@@ -3,6 +3,12 @@ node_modules/
 **/target/
 dist/
 out/
+/fuzz/artifacts/
+/fuzz/corpus/
+/fuzz/Cargo.lock
+
+# proptest (локальные сиды сбоя)
+**/*.proptest-regressions
 
 # OS / IDE
 .DS_Store

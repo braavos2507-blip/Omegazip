@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, "fix/**"]
   pull_request:
     branches: [main, master]
 
@@ -48,6 +48,7 @@ jobs:
           bash -n scripts/release-gate-strict.sh
           bash -n scripts/install-oz-file-association-linux.sh
           bash -n scripts/record-clean-machine-smoke.sh
+          bash -n scripts/security-audit.sh
 
   context-menu-powershell:
     runs-on: windows-latest

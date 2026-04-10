@@ -8,6 +8,8 @@
 - **v1.1** (интеграция в ОС по ТЗ) — планы 4–7 сданы; п.8 в ТЗ не входил.  
 - **v1.2** (строгое ТЗ, только пробелы: тихая распаковка, ПКМ из коробки, vs топ-5, установка, опц. трей) — [.planning/MILESTONE-V1.2.md](.planning/MILESTONE-V1.2.md), [.planning/ROADMAP.md](.planning/ROADMAP.md).
 
+**Безопасность и аудит зависимостей:** [docs/SECURITY.md](docs/SECURITY.md), локально `npm run audit:deps` (нужен `cargo-audit`).
+
 ## Сборка и запуск
 
 ```bash

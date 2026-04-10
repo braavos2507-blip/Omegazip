@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-04-11
+
+### security & quality: dependency audit, threat notes, property tests, fuzz seed
+- [SECURITY.md](SECURITY.md) — краткий threat model, fuzz/SBOM, как сообщать об уязвимостях.
+- GitHub Actions **Security audit** (еженедельно + push в `main`/`master`/`fix/**`): `cargo audit` в корне и `src-tauri`, `npm audit --audit-level=high`.
+- `scripts/security-audit.sh`, `npm run audit:deps` — тот же контур локально (нужен `cargo install cargo-audit`).
+- Интеграционные property-тесты [tests/property_codecs.rs](../tests/property_codecs.rs) (proptest): roundtrip Store / Balanced / Fast / MaxRatio + smoke `analyze_bytes`.
+- Каталог [fuzz/](../fuzz/) + цель `huffman_decode` для `cargo-fuzz` (декодер Huffman + анализатор на случайных байтах).
+- Huffman `decode`: счётчик бит `u32` и маска для `len >= 32` — без переполнения `u8` и без `1u32 << len` при `len >= 32`.
+- CI **test** workflow: push также на ветки `fix/**`; `bash -n` для `security-audit.sh`.
+
 ## 2026-04-10
 
 ### feat(bench): competitive ZIP vs .oz vs 7z + KPI/strict gates
