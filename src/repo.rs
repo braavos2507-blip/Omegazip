@@ -4,9 +4,30 @@ use crate::chunked::{chunks, DEFAULT_CHUNK_SIZE};
 use crate::codec::{best_compress, decompress, codec_id, codec_from_id, Codec};
 use crate::dedup::BlockStore;
 use crate::{analyze_bytes, preprocess, read_preprocess_result};
+use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
+
+/// Локальное хранилище репозитория (корень с `chunks/` и `snapshots/`). Задел под SFTP/S3 — отдельные типы с тем же интерфейсом путей.
+#[derive(Clone, Debug)]
+pub struct LocalRepo {
+    pub root: PathBuf,
+}
+
+impl LocalRepo {
+    pub fn new(root: PathBuf) -> Self {
+        Self { root }
+    }
+
+    pub fn chunks_dir(&self) -> PathBuf {
+        self.root.join("chunks")
+    }
+
+    pub fn snapshots_dir(&self) -> PathBuf {
+        self.root.join("snapshots")
+    }
+}
 
 const CHUNK_PREFIX_LEN: usize = 4;
 
@@ -44,8 +65,9 @@ struct Snapshot {
 
 /// Создаёт пустой репозиторий в path.
 pub fn repo_init(path: &Path) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    fs::create_dir_all(path.join("chunks"))?;
-    fs::create_dir_all(path.join("snapshots"))?;
+    let r = LocalRepo::new(path.to_path_buf());
+    fs::create_dir_all(r.chunks_dir())?;
+    fs::create_dir_all(r.snapshots_dir())?;
     Ok(())
 }
 
@@ -240,4 +262,75 @@ pub fn repo_push(
         copy_dir(&snapshots_src, &snapshots_dst, &mut files_copied)?;
     }
     Ok(files_copied)
+}
+
+/// Удаляет старые снапшоты, оставляя последние `keep_last` по id. При `gc_chunks` удаляет чанки, на которые больше не ссылаются оставшиеся снапшоты.
+/// Возвращает `(удалено_снапшотов, удалено_чанков)`.
+pub fn repo_prune(
+    repo_path: &Path,
+    keep_last: usize,
+    gc_chunks: bool,
+) -> Result<(u32, u32), Box<dyn std::error::Error + Send + Sync>> {
+    let snapshots_dir = repo_path.join("snapshots");
+    let mut ids = list_snapshots(repo_path)?;
+    if ids.len() <= keep_last {
+        return Ok((0, 0));
+    }
+    let n_remove = ids.len() - keep_last;
+    let to_remove: Vec<u64> = ids.drain(..n_remove).collect();
+    let mut removed_snaps = 0u32;
+    for id in &to_remove {
+        let p = snapshots_dir.join(format!("snapshot_{}.json", id));
+        if p.is_file() {
+            fs::remove_file(&p)?;
+            removed_snaps += 1;
+        }
+    }
+    let mut removed_chunks = 0u32;
+    if gc_chunks {
+        let mut used = HashSet::<String>::new();
+        for id in list_snapshots(repo_path)? {
+            let p = snapshots_dir.join(format!("snapshot_{}.json", id));
+            let data = fs::read(&p)?;
+            let snap: Snapshot = serde_json::from_slice(&data)?;
+            for file in &snap.files {
+                if let Some(ref refs) = file.chunks {
+                    for cr in refs {
+                        used.insert(cr.hash_hex.clone());
+                    }
+                }
+            }
+        }
+        let chunks_root = repo_path.join("chunks");
+        if chunks_root.is_dir() {
+            for e1 in fs::read_dir(&chunks_root)? {
+                let e1 = e1?;
+                if !e1.file_type()?.is_dir() {
+                    continue;
+                }
+                for e2 in fs::read_dir(e1.path())? {
+                    let e2 = e2?;
+                    if !e2.file_type()?.is_dir() {
+                        continue;
+                    }
+                    for e3 in fs::read_dir(e2.path())? {
+                        let e3 = e3?;
+                        let p = e3.path();
+                        if !p.is_file() {
+                            continue;
+                        }
+                        let name = p
+                            .file_name()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or("");
+                        if !used.contains(name) {
+                            fs::remove_file(&p)?;
+                            removed_chunks += 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Ok((removed_snaps, removed_chunks))
 }

@@ -17,6 +17,9 @@ out/
 # Local AI / editor tooling (not part of OmegaZip product)
 .claude/
 
+# Optional local benchmark corpus (CORPUS_EXTRA); do not commit
+Архивы/
+
 # Local artifacts / bulky outputs (not source of truth)
 backups/
 OmegaZip-for-review.tar.gz

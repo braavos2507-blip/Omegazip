@@ -21,7 +21,7 @@
      - **Большие папки → `max`:** по умолчанию порог **200 MB** (`du -sk`): при `auto` и каталоге не меньше этого размера вызывается **`--preset max`**. Переопределить: переменная **`OMEGAZIP_AUTO_UPGRADE_FOLDER_MB`** или файл **`~/.config/omegazip/auto_upgrade_folder_mb`** (одна строка, число МБ). **`0`** — отключить автоповышение.
      - Для **`.zip`** по-прежнему обычный `compress` (Deflate).
 4. После установки в Finder: **ПКМ → Сервисы** (или **Быстрые действия**) — выберите нужный пункт. При необходимости включите пункты в **Системные настройки → Клавиатура → Сочетания клавиш → Сервисы**.
-5. Если пункты дублируются (`…workflow` и `(OmegaZip)`), переустановите приложение без инжекта `NSServices` и снова запустите `./scripts/install-context-menu.sh`.
+5. Если пункты дублируются (`…workflow` и `(OmegaZip)`): в релизной сборке по умолчанию **не** запускайте инжект `NSServices` (стандартная команда `npm run build:macos` его не добавляет). Удалите из `Info.plist` внутри `.app` ключ `NSServices` или переустановите приложение без шага `inject-macos-services.sh`, затем снова `./scripts/install-context-menu.sh`. Нужны только пункты из приложения — наоборот: уберите workflow из `~/Library/Services/` и используйте `npm run build:macos:with-nsservices`.
 
 ### Диагностика (macOS)
 
@@ -40,10 +40,10 @@
    powershell -ExecutionPolicy Bypass -File .\scripts\install-context-menu-windows.ps1 -OmegaZipExe "C:\Path\To\omegazip.exe"
    ```
 
-3. Скрипт добавит пункты:
-   - `Сжать в .oz (OmegaZip)`
-   - `Сжать в .zip (OmegaZip)`
-   - `Распаковать (OmegaZip)` -> `%~dpn1_распаковано`
+3. Скрипт ставит **`scripts/omega-context-helper.ps1`** рядом с установщиком и регистрирует в HKCU пункты (все вызовы через PowerShell, корректный **stem** для `*.tar.gz` и т.п., паритет с macOS):
+   - **`Сжать OmegaZip (авто .oz/.zip)`** — то же правило `pick_ext_auto`, что в `install-context-menu.sh`; для `.oz` — `compress --preset auto` (или `max`/`ultra`/… из `%USERPROFILE%\.config\omegazip\context_preset` и переменной **`OMEGAZIP_CONTEXT_PRESET`**; большие папки → `max`, см. **`OMEGAZIP_AUTO_UPGRADE_FOLDER_MB`** — как в [macOS-разделе](#macos) выше).
+   - **`Сжать в .oz (OmegaZip)`** / **`Сжать в .zip (OmegaZip)`** — явный формат с теми же пресетами для `.oz`.
+   - **`Распаковать (OmegaZip)`** → папка `stem_распаковано` рядом с архивом.
 
 4. Удаление:
 
@@ -51,7 +51,7 @@
    powershell -ExecutionPolicy Bypass -File .\scripts\install-context-menu-windows.ps1 -Uninstall
    ```
 
-Если нужен полностью ручной режим/шаблон `.reg`, остаётся `scripts/context-menu-windows.reg.example`.
+Ручной шаблон `.reg` без helper (устаревает для точных имён): `scripts/context-menu-windows.reg.example` — предпочтительнее установщик `.ps1`.
 
 Пример вызова вручную из `cmd` (аналог одного из пунктов меню):
 
@@ -70,8 +70,8 @@
 Что ставится:
 
 - **Nautilus Scripts** (`~/.local/share/nautilus/scripts/`):
-  - `OmegaZip Compress (Auto)` -> авто `.oz/.zip` (для `.oz` использует `--preset auto`);
-  - `OmegaZip Extract Here` -> `${stem}_распаковано`.
+  - `OmegaZip Compress (Auto)` — тот же **`pick_ext_auto`**, что на macOS (`install-context-menu.sh`); для `.oz` — пресеты из **`~/.config/omegazip/context_preset`**, **`OMEGAZIP_CONTEXT_PRESET`**, автоповышение больших папок (**`OMEGAZIP_AUTO_UPGRADE_FOLDER_MB`** / `~/.config/omegazip/auto_upgrade_folder_mb`), см. [macOS-раздел](#macos).
+  - `OmegaZip Extract Here` — папка **`stem_распаковано`**; stem с учётом **`*.tar.gz`**, `*.tgz`, `*.tar.bz2` и т.д. (как helper на Windows).
 - **KDE Service Menu** (`~/.local/share/kio/servicemenus/omegazip.desktop`) с теми же действиями.
 
 Удаление:
@@ -106,4 +106,4 @@ Exec=sh -c '/usr/local/bin/omegazip decompress "$1" "$(dirname "$1")/$(basename 
 
 ## Отложено
 
-- **Трей / фоновый режим** (расширенный SHELL-03) — не входит в этот план; при необходимости отдельная фаза.
+- **Трей / фоновый режим** (GAP-05 / SHELL-03b) — не реализуется в v1.2; обоснование: [GAP05-TRAY-DEFERRED.md](GAP05-TRAY-DEFERRED.md).

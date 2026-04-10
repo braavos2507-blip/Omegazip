@@ -1,9 +1,9 @@
 # OmegaZip workflow benchmark
 
-- Generated: 2026-04-08
-- Binary: `/Applications/OmegaZip.app/Contents/MacOS/omegazip`
+- Generated: 2026-04-10
+- Binary: `/Users/renat/01Project/OmegaZip/target/release/omegazip`
 - Mode: **real-only (samples from TEST_DIR)**
-- Test dir source: `/Users/renat/Documents/Project/Для тестов`
+- Test dir source: `/Users/renat/01Project/OmegaZip/tests/manual-files/downloads`
 - Work dir: `/tmp/omegazip-full-bench`
 
 ## Format selection (install-context-menu `pick_ext_auto`)
@@ -34,3 +34,14 @@ Decompress: **Archive** = размер файла архива; **Extracted** = 
 | real_sample_zip_zip_decompress | 2.8275 | — | 2.8412 | 1.0048 | 0.00 | 0.00 | 0.00 | ok |
 
 CSV: `/tmp/omegazip-full-bench/results.csv`
+
+Источник данных: `tests/manual-files/results-auto/BENCH-WORKFLOW-LATEST.md` (автопрогон из `scripts/run-full-local-qa.sh`).
+
+## Competitive bench (ZIP vs .oz vs 7z)
+
+См. полный отчёт: `tests/manual-files/results-auto/OZ-ZIP-7Z-LATEST.md`.
+
+- **versioned corpus** (jQuery/Bootstrap multi-version): `.oz` меньше ZIP на **~18.0%**.
+- **mixed corpus** (docs+code+assets): после режима `--preset competitive` и оптимизации solid-decompress `.oz` меньше ZIP на **~4.9%**.
+
+Вывод: преимущество `.oz` наиболее выражено на versioned/dedup-сценариях; на mixed-наборах также достигнут выигрыш по размеру, при этом скорость компрессии `.oz` остаётся выше ZIP/7z.

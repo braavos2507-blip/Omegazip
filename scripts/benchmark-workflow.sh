@@ -14,10 +14,13 @@
 # Outputs:
 #   /tmp/omegazip-full-bench/results.csv
 #   REPORT.md (default: /tmp/omegazip-full-bench/REPORT.md, or --out-report)
+#
+# Бинарник: по умолчанию OmegaZip.app; иначе target/release/omegazip (сборка при отсутствии);
+# переопределение: OMEGZIP_BIN=/path/to/omegazip
 
 set -euo pipefail
 
-TEST_DIR="${TEST_DIR:-/Users/renat/Documents/Project/Для тестов}"
+TEST_DIR="${TEST_DIR:-/Users/renat/01Project/OmegaZip/tests/manual-files/downloads}"
 REAL_ONLY=0
 OUT_REPORT=""
 
@@ -42,13 +45,26 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-BIN="/Applications/OmegaZip.app/Contents/MacOS/omegazip"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+APP_BIN="/Applications/OmegaZip.app/Contents/MacOS/omegazip"
+REL_BIN="$ROOT/target/release/omegazip"
+if [[ -n "${OMEGAZIP_BIN:-}" ]]; then
+  BIN="$OMEGAZIP_BIN"
+elif [[ -x "$APP_BIN" ]]; then
+  BIN="$APP_BIN"
+elif [[ -x "$REL_BIN" ]]; then
+  BIN="$REL_BIN"
+else
+  echo "Сборка omegazip (release) для benchmark..."
+  (cd "$ROOT" && cargo build --release -p omegazip -q)
+  BIN="$REL_BIN"
+fi
 WORK="/tmp/omegazip-full-bench"
 IN_DIR="$WORK/inputs"
 OUT_DIR="$WORK/outputs"
 
 if [[ ! -x "$BIN" ]]; then
-  echo "ERROR: omegazip binary not found at: $BIN" >&2
+  echo "ERROR: omegazip binary not found (OMEGAZIP_BIN, $APP_BIN, $REL_BIN)" >&2
   exit 1
 fi
 

@@ -17,7 +17,7 @@
 
 **Frontend UI (Tauri/HTML):**
 - Purpose: Desktop application interface for file compression/decompression, archive inspection, cloud backup via rclone
-- Location: `ui/index.html`, `/Users/busyden/Documents/Projects/OmegaZip/UI/index.html`
+- Location: `ui/index.html`, `/Users/renat/01Project/OmegaZip/ui/index.html`
 - Contains: HTML, inline CSS, embedded JavaScript logic for UI state and user interactions
 - Depends on: Tauri v2 API for IPC with backend commands
 - Used by: End users; provides drag-drop support, file pickers, progress tracking, archive info display

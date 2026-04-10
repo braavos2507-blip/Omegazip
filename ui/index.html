@@ -371,7 +371,7 @@
 
   <div class="footer-hint card" style="margin-top:1rem; padding:1rem;">
     <strong>Сжать из Finder (macOS):</strong> правый клик по файлу или папке → <strong>Сервисы</strong> → <strong>Сжать в OmegaZip</strong> (или «Распаковать в OmegaZip» для .oz).<br>
-    Если пункта нет: соберите с <code>npm run build:macos</code>, скопируйте OmegaZip.app в «Программы», выполните <code>xattr -cr /Applications/OmegaZip.app</code>, откройте приложение один раз и перезапустите Finder (⌥+правый клик по иконке Finder в Dock → Перезапустить).
+    Если пункта нет: из корня репозитория выполните <code>./scripts/install-context-menu.sh</code> (ставит workflow в «Сервисы»), затем <code>killall Finder</code>. Сборка приложения: <code>npm run build:macos</code>, копия в «Программы», при блокировке Gatekeeper — <code>xattr -cr /Applications/OmegaZip.app</code>.
   </div>
   <p class="footer-hint" id="rar-format-note"></p>
   <p class="footer-hint">OmegaZip — Windows, macOS, Linux. В терминале: <code>omegazip deps</code> — проверка 7-Zip. Rclone: rclone.org для облака.</p>

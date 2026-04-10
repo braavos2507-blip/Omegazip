@@ -56,7 +56,9 @@ pub fn best_compress(data: &[u8], context: DataContext) -> std::io::Result<(Code
     for c in candidates {
         if let Ok(compressed) = compress(c, data) {
             if compressed.len() < data.len() {
-                let is_better = best.as_ref().map_or(true, |(_, b)| compressed.len() < b.len());
+                let is_better = best
+                    .as_ref()
+                    .is_none_or(|(_, b)| compressed.len() < b.len());
                 if is_better {
                     best = Some((c, compressed));
                 }

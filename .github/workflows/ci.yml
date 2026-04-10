@@ -10,13 +10,65 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Test core (omegazip)
         run: cargo test --verbose
+      - name: QA-03 compress/decompress roundtrip (CI)
+        if: runner.os != 'Windows'
+        run: bash scripts/qa03-benchmark-ci.sh
+      - name: Clippy (omegazip)
+        run: cargo clippy --all-targets -p omegazip --verbose
       - name: Check Tauri app crate
         run: cargo check --verbose
         working-directory: src-tauri
+      - name: Context menu bash (logic + syntax)
+        if: runner.os != 'Windows'
+        run: |
+          bash scripts/test-context-menu-logic.sh
+          bash -n scripts/install-context-menu-linux.sh
+          bash -n scripts/install-context-menu.sh
+          bash -n scripts/test-context-menu-logic.sh
+          bash -n scripts/qa03-benchmark-ci.sh
+          bash -n scripts/macos-import-certificate-ci.sh
+          bash -n scripts/macos-notarize-app.sh
+          bash -n scripts/measure-oz-advantage.sh
+          bash -n scripts/baseline-all-local.sh
+          bash -n scripts/profile-compress-local.sh
+          bash -n scripts/checklist-d-automated.sh
+          bash -n scripts/measure-oz-repo-corpora.sh
+          bash -n scripts/profile-compress-heavy-smoke.sh
+          bash -n scripts/run-full-local-qa.sh
+          bash -n scripts/release-readiness-local.sh
+          bash -n scripts/measure-competitive-bench.sh
+          bash -n scripts/kpi-check-local.sh
+          bash -n scripts/release-gate-strict.sh
+          bash -n scripts/install-oz-file-association-linux.sh
+          bash -n scripts/record-clean-machine-smoke.sh
+
+  context-menu-powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse PowerShell (AST)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($rel in @(
+            'scripts/omega-context-helper.ps1',
+            'scripts/install-context-menu-windows.ps1',
+            'scripts/install-oz-file-association-windows.ps1'
+          )) {
+            $path = Join-Path $env:GITHUB_WORKSPACE $rel
+            $tok = $null
+            $errs = $null
+            $null = [System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$tok, [ref]$errs)
+            if ($errs -and $errs.Count -gt 0) {
+              $errs | ForEach-Object { Write-Error $_ }
+              exit 1
+            }
+            Write-Host "OK $rel"
+          }

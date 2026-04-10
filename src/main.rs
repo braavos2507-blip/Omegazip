@@ -4,7 +4,9 @@ use omegazip::{
     archive_info, compress_advanced_dispatch, compress_dispatch, decompress_any_to_path,
     decompress_any_to_path_with_password, export_to_zip, list_any_archive,
     list_any_archive_with_password, repo_init, repo_backup, repo_restore, list_snapshots, repo_push,
-    seven_zip_status, suggested_preset_for_path, CompressOptions, Preset, DEFAULT_CHUNK_SIZE,
+    repo_prune,
+    seven_zip_status, suggested_preset_for_path, suggest_competitive_plan,
+    CompressOptions, Preset, DEFAULT_CHUNK_SIZE,
 };
 use std::path::{Path, PathBuf};
 use std::{env, fs};
@@ -23,6 +25,13 @@ fn default_compress_output_from_input(input: &Path) -> PathBuf {
     PathBuf::from(format!("{base}.oz"))
 }
 
+fn output_is_oz(path: &Path) -> bool {
+    path.extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.eq_ignore_ascii_case("oz"))
+        .unwrap_or(false)
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -38,6 +47,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 || opts.password.is_some()
                 || opts.recovery_parity > 0
                 || opts.preset.is_some()
+                || opts.solid_block_size_bytes.is_some()
+                || opts.zip_analyzed
             {
                 compress_advanced_dispatch(&input, &output, opts)?
             } else {
@@ -135,7 +146,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             }
         }
         "repo" => {
-            let sub = args.get(2).map(String::as_str).ok_or("repo: укажите init|backup|restore|push|list")?;
+            let sub = args.get(2).map(String::as_str).ok_or("repo: укажите init|backup|restore|push|list|prune")?;
             match sub {
                 "init" => {
                     let path = args.get(3).map(PathBuf::from).ok_or("repo init: укажите путь")?;
@@ -169,7 +180,26 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     }
                     eprintln!("Total: {} snapshots", ids.len());
                 }
-                _ => eprintln!("repo: init|backup|restore|push|list"),
+                "prune" => {
+                    let repo_path = args.get(3).map(PathBuf::from).ok_or("repo prune: укажите путь к репо")?;
+                    let keep: usize = args
+                        .get(4)
+                        .ok_or("repo prune: укажите keep (число последних снапшотов)")?
+                        .parse()
+                        .map_err(|_| "repo prune: keep должен быть числом")?;
+                    let gc = args.iter().any(|a| a == "--gc-chunks");
+                    let (snaps, chunks) = repo_prune(&repo_path, keep, gc)?;
+                    println!(
+                        "Pruned {} snapshot(s){}",
+                        snaps,
+                        if gc {
+                            format!(", {} unused chunk file(s)", chunks)
+                        } else {
+                            String::new()
+                        }
+                    );
+                }
+                _ => eprintln!("repo: init|backup|restore|push|list|prune"),
             }
         }
         _ => print_usage(),
@@ -180,9 +210,12 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 fn print_usage() {
     eprintln!("OmegaZip 0.3 — chunked dedup, solid, шифрование, recovery, repo push");
     eprintln!("  compress [OPTIONS] <file|dir> <output.oz|.zip|.tar.gz|.tgz|.7z>");
-    eprintln!("    --preset fast|balanced|max|ultra|maxcompression|auto   auto = по типу файлов; ultra = макс. сжатие (XZ-9 + recovery)");
+    eprintln!("    --preset fast|balanced|max|ultra|maxcompression|auto|competitive");
+    eprintln!("      auto = по типу файлов; competitive = dry-run режим для .oz (size/speed)");
     eprintln!("    --chunked [SIZE]   чанковая дедупликация (default {} bytes)", DEFAULT_CHUNK_SIZE);
     eprintln!("    --solid            solid-сжатие");
+    eprintln!("    --solid-block-mi N solid: сырой поток по блокам ≥N MiB (мин. 1 MiB), несколько блоков в архиве");
+    eprintln!("    --zip-analyzed     для .zip: preprocess + Stored/Deflate по размеру");
     eprintln!("    --recovery [N]     восстановительные записи (0, 1 или 2)");
     eprintln!("    --password PASS    шифрование (или OMEGAZIP_PASSWORD, --password-file)");
     eprintln!("  decompress [--password PASS] <архив> <output_dir>  — .oz, ZIP/tar/zstd/CAB + 7z/RAR/ISO… (7-Zip в PATH)");
@@ -195,6 +228,7 @@ fn print_usage() {
     eprintln!("  repo restore <repo> <id> [dest]  — восстановить снапшот");
     eprintln!("  repo push <repo> <dest>  — синхронизировать репо в папку/облако (rclone mount и т.д.)");
     eprintln!("  repo list <repo>    — список снапшотов");
+    eprintln!("  repo prune <repo> <keep> [--gc-chunks]  — оставить последние keep снапшотов");
 }
 
 fn read_password_from_env_or_file(
@@ -225,6 +259,9 @@ fn parse_compress_args(args: &[String]) -> Result<(PathBuf, PathBuf, CompressOpt
     let mut recovery = 0u32;
     let mut preset = None;
     let mut preset_auto = false;
+    let mut preset_competitive = false;
+    let mut solid_block_mi: Option<usize> = None;
+    let mut zip_analyzed = false;
     let mut i = 2;
     while i < args.len() {
         match args[i].as_str() {
@@ -233,8 +270,10 @@ fn parse_compress_args(args: &[String]) -> Result<(PathBuf, PathBuf, CompressOpt
                 if i < args.len() {
                     if args[i].eq_ignore_ascii_case("auto") {
                         preset_auto = true;
+                    } else if args[i].eq_ignore_ascii_case("competitive") {
+                        preset_competitive = true;
                     } else {
-                        preset = Preset::from_str(&args[i]);
+                        preset = Preset::parse_name(&args[i]);
                     }
                     i += 1;
                 }
@@ -251,6 +290,17 @@ fn parse_compress_args(args: &[String]) -> Result<(PathBuf, PathBuf, CompressOpt
             }
             "--solid" => {
                 solid = true;
+                i += 1;
+            }
+            "--solid-block-mi" => {
+                i += 1;
+                if i < args.len() {
+                    solid_block_mi = args[i].parse::<usize>().ok();
+                    i += 1;
+                }
+            }
+            "--zip-analyzed" => {
+                zip_analyzed = true;
                 i += 1;
             }
             "--recovery" => {
@@ -289,11 +339,25 @@ fn parse_compress_args(args: &[String]) -> Result<(PathBuf, PathBuf, CompressOpt
     }
     let password = read_password_from_env_or_file(password, password_file);
     let input = input.ok_or("compress: укажите входной файл или папку")?;
-    let mut preset = preset;
     if preset_auto {
         preset = Some(suggested_preset_for_path(&input));
     }
     let output = output.unwrap_or_else(|| default_compress_output_from_input(&input));
+    if preset_competitive {
+        if output_is_oz(&output) {
+            let plan = suggest_competitive_plan(&input);
+            preset = Preset::parse_name(&plan.preset);
+            chunk_size = if plan.chunked { Some(DEFAULT_CHUNK_SIZE) } else { None };
+            solid = false;
+            eprintln!(
+                "competitive preset: preset={}, chunked={} ({})",
+                plan.preset, plan.chunked, plan.reason
+            );
+        } else {
+            eprintln!("--preset competitive применяется только для .oz; для других форматов игнорируется");
+        }
+    }
+    let solid_block_size_bytes = solid_block_mi.map(|n| n.saturating_mul(1024 * 1024).max(1024 * 1024));
     let opts = CompressOptions {
         chunk_size,
         solid,
@@ -302,6 +366,8 @@ fn parse_compress_args(args: &[String]) -> Result<(PathBuf, PathBuf, CompressOpt
         preset,
         parallel: true,
         progress: None,
+        solid_block_size_bytes,
+        zip_analyzed,
     };
     Ok((input, output, opts))
 }

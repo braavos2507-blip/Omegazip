@@ -101,7 +101,7 @@ pub fn encode(data: &[u8]) -> std::io::Result<Vec<u8>> {
             let len = codes[i].1 as usize;
             out.push(len as u8);
             let prefix = codes[i].0;
-            let n = (len + 7) / 8;
+            let n = len.div_ceil(8);
             if n > 0 {
                 let shifted = prefix << (n * 8 - len);
                 for j in 0..n {
@@ -142,7 +142,7 @@ pub fn decode(data: &[u8]) -> std::io::Result<Vec<u8>> {
         pos += 1;
         let len = data.get(pos).copied().unwrap_or(0) as usize;
         pos += 1;
-        let bytes = (len + 7) / 8;
+        let bytes = len.div_ceil(8);
         if pos + bytes > data.len() {
             break;
         }

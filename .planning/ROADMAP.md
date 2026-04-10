@@ -3,8 +3,8 @@
 ## Overview
 
 **v1.0** — **закрыт и заархивирован** — [MILESTONES.md](MILESTONES.md), [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md), [MILESTONE-V1.0.md](MILESTONE-V1.0.md).  
-**v1.1** — планы **4–7** доставлены; остаётся **фаза 8** (**TBD-01**). Честные пробелы ТЗ вынесены в **v1.2**.  
-**v1.2** — **строгое ТЗ** (`GAP-01`…`GAP-05`): тихая распаковка при открытии, ПКМ «из коробки» Win/Linux, честный vs топ-5, установка, опционально трей.
+**v1.1** — планы **4–7** доставлены; **фаза 8 (п.8 ТЗ)** не ведётся — в объёме спецификации пункта 8 нет. Честные пробелы ТЗ вынесены в **v1.2**.  
+**v1.2** — **строгое ТЗ** (`GAP-01`…`GAP-05`): **все GAP закрыты** (GAP-02: CI + `scripts/test-context-menu-logic.sh` + AST PowerShell); ручной смоук — `docs/QA-WIN-LINUX-PREP.md` при релизе.
 
 ---
 
@@ -52,7 +52,7 @@
 - [x] **Phase 5: ПКМ и фон** — `phases/05-context-menu-background/`
 - [x] **Phase 6: Форматы и установка** — `phases/06-formats-install/`
 - [x] **Phase 7: Умные пресеты** — `phases/07-smart-presets/`
-- [ ] **Phase 8 (gate): ТЗ п.8** — TBD-01 — закрыть после уточнения требований
+- [x] **Phase 8** — *не применяется*: п.8 в ТЗ отсутствует (ранее обозначался как TBD-01).
 
 *Итог v1.1:* ассоциации, доки ПКМ, матрица форматов, INSTALL, smart preset — **есть**; формулировки «без окна / как топ-5 из коробки» — **v1.2 (GAP-*)**. См. [REQUIREMENTS.md](REQUIREMENTS.md).
 
@@ -86,11 +86,9 @@
 **Requirements**: SMART-01, SMART-02  
 **Success Criteria**: Таблица эвристик в коде или конфиге; тесты на 2–3 класса файлов.
 
-#### Phase 8: Уточнение п.8 ТЗ
+#### Phase 8 (не ведётся)
 
-**Goal**: Заполнить пропуск в ТЗ (TBD-01).  
-**Depends on**: заказчик  
-**Requirements**: TBD-01  
+**Статус:** в действующей спецификации **нет п.8** — отдельная фаза и требование TBD-01 сняты.
 
 ---
 
@@ -101,10 +99,10 @@
 ### Phases
 
 - [x] **Phase 9: Тихое открытие архива** — GAP-01 — `phases/09-silent-open-extract/` ([09-01-SUMMARY.md](phases/09-silent-open-extract/09-01-SUMMARY.md))
-- [ ] **Phase 10: ПКМ Win/Linux «из коробки»** — GAP-02 (implementation complete, manual QA pending; см. `phases/10-pkm-win-linux/10-01-SUMMARY.md`)
-- [ ] **Phase 11: Честный паритет форматов** — GAP-03 (таблица vs топ-5 + решение по одному нативному пробелу или явный non-goals)
-- [ ] **Phase 12: Установка end-to-end** — GAP-04 (README/INSTALL, 7-Zip, первый «внешний» формат)
-- [ ] **Phase 13 (опционально): Трей / фон** — GAP-05
+- [x] **Phase 10: ПКМ Win/Linux «из коробки»** — GAP-02 — `phases/10-pkm-win-linux/` ([10-01-SUMMARY.md](phases/10-pkm-win-linux/10-01-SUMMARY.md))
+- [x] **Phase 11: Честный паритет форматов** — GAP-03 — `phases/11-format-parity/` ([11-01-SUMMARY.md](phases/11-format-parity/11-01-SUMMARY.md))
+- [x] **Phase 12: Установка end-to-end** — GAP-04 — `phases/12-install-e2e/` ([12-01-SUMMARY.md](phases/12-install-e2e/12-01-SUMMARY.md))
+- [x] **Phase 13 (опционально): Трей / фон** — GAP-05 — `phases/13-tray-optional/` ([13-01-SUMMARY.md](phases/13-tray-optional/13-01-SUMMARY.md); отложено, [docs/GAP05-TRAY-DEFERRED.md](../docs/GAP05-TRAY-DEFERRED.md))
 
 Папки фаз создаются при **`/gsd:plan-phase 9`** … **`13`**.
 
@@ -120,9 +118,9 @@
 #### Phase 10: ПКМ Win/Linux «из коробки»
 
 **Goal:** Типовой пользователь получает пункты «Сжать в .oz/.zip» без ручной правки реестра (Windows) и с ясным шагом на Linux.  
-**Depends on:** Phase 9 (желательно параллельно)  
+**Итог:** скрипты + `omega-context-helper.ps1`, автотесты и CI; см. [10-01-SUMMARY.md](phases/10-pkm-win-linux/10-01-SUMMARY.md).  
 **Requirements:** GAP-02  
-**Success Criteria:** Обновлённый `CONTEXT-MENU.md` + артефакт установки или инсталляторный хук (по выбранной платформе в плане).
+**Success Criteria:** Выполнено: `CONTEXT-MENU.md`, установщики, `npm run test:context-menu`, workflow `context-menu-powershell`.
 
 #### Phase 11: Честный паритет форматов
 
@@ -141,10 +139,10 @@
 #### Phase 13 (опционально): Трей / фон
 
 **Goal:** Поведение ближе к «архиватор в фоне».  
-**Depends on:** GAP-01 желательно  
+**Итог v1.2:** не реализуется; зафиксировано в [docs/GAP05-TRAY-DEFERRED.md](../docs/GAP05-TRAY-DEFERRED.md) ([13-01-SUMMARY.md](phases/13-tray-optional/13-01-SUMMARY.md)).  
 **Requirements:** GAP-05  
-**Success Criteria:** Трей или эквивалент согласован с ограничениями Tauri на целевых ОС.
+**Success Criteria (выполнено документом):** явное решение и тех. заметки для будущей фазы.
 
 ---
 
-*Roadmap updated: 2026-03-29 — фаза 9 (GAP-01) выполнена; далее фаза 10.*
+*Roadmap updated: 2026-04-09 — v1.2 GAP-01…05 закрыты; GAP-02 подтверждён CI + автотестами; TBD-01 (п.8 ТЗ) снят — пункта нет в ТЗ.*

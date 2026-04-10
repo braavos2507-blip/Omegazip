@@ -2,11 +2,11 @@
 // Имена не упоминаются в интерфейсе.
 
 pub fn balanced_encode(data: &[u8]) -> Result<Vec<u8>, std::io::Error> {
-    zstd::encode_all(data, 3).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+    zstd::encode_all(data, 3).map_err(std::io::Error::other)
 }
 
 pub fn balanced_decode(data: &[u8]) -> Result<Vec<u8>, std::io::Error> {
-    zstd::decode_all(data).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+    zstd::decode_all(data).map_err(std::io::Error::other)
 }
 
 pub fn fast_encode(data: &[u8]) -> Vec<u8> {
@@ -15,7 +15,7 @@ pub fn fast_encode(data: &[u8]) -> Vec<u8> {
 
 pub fn fast_decode(data: &[u8]) -> Result<Vec<u8>, std::io::Error> {
     lz4_flex::block::decompress_size_prepended(data)
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+        .map_err(std::io::Error::other)
 }
 
 pub fn max_ratio_encode(data: &[u8]) -> std::io::Result<Vec<u8>> {

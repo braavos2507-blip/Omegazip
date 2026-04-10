@@ -5,6 +5,7 @@ use chacha20poly1305::aead::{Aead, KeyInit};
 use chacha20poly1305::ChaCha20Poly1305;
 use rand::RngCore;
 use rand::rngs::OsRng;
+use zeroize::Zeroizing;
 
 const SALT_LEN: usize = 16;
 const NONCE_LEN: usize = 12;
@@ -18,11 +19,11 @@ pub fn random_salt() -> [u8; SALT_LEN] {
     s
 }
 
-/// Выводит ключ из пароля и соли (Argon2id).
-pub fn derive_key(password: &str, salt: &[u8]) -> [u8; KEY_LEN] {
-    let mut key = [0u8; KEY_LEN];
+/// Выводит ключ из пароля и соли (Argon2id). Память ключа обнуляется при drop (`Zeroizing`).
+pub fn derive_key(password: &str, salt: &[u8]) -> Zeroizing<[u8; KEY_LEN]> {
+    let mut key = Zeroizing::new([0u8; KEY_LEN]);
     Argon2::default()
-        .hash_password_into(password.as_bytes(), salt, &mut key)
+        .hash_password_into(password.as_bytes(), salt, key.as_mut())
         .expect("argon2");
     key
 }

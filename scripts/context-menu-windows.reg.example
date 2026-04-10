@@ -1,4 +1,6 @@
 Windows Registry Editor Version 5.00
+; УСТАРЕВАЮЩИЙ пример: имена без helper дают неверный stem для *.tar.gz и нет pick_ext_auto.
+; Рекомендуется: scripts/install-context-menu-windows.ps1 + scripts/omega-context-helper.ps1
 
 [HKEY_CLASSES_ROOT\*\shell\OmegaZipCompressOz]
 @="Сжать в .oz (OmegaZip)"

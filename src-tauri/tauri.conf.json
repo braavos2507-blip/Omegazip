@@ -40,7 +40,7 @@
       "minimumSystemVersion": "10.15",
       "signingIdentity": null,
       "providerShortName": null,
-      "entitlements": null,
+      "entitlements": "entitlements/macos-release.plist",
       "infoPlist": "Info.plist"
     },
     "resources": [],

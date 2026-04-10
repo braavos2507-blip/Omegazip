@@ -15,7 +15,9 @@
 
 ## Manifest (JSON)
 
-- `version`: 2
+- **Legacy:** JSON-массив записей `ManifestEntry` (как раньше).
+- **Solid multi-block:** JSON-объект `{ "files": [ ... ], "solid_segments": [ { hash_hex, algo, len }, ... ] }` — порядок сегментов совпадает с порядком физических блоков solid-потока; логические смещения файлов (`solid.offset` / `length`) отсчитываются в объединённом распакованном потоке.
+- `version`: 2 (в коде версия в magic, не в JSON)
 - `files`: массив `{ path, size, [chunks], [solid] }`
   - **Обычный режим:** `chunks`: `[{ hash_hex, algo, len }]`
   - **Solid:** `solid`: `{ stream_id, offset, length }`

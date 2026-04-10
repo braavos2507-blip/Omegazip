@@ -24,4 +24,4 @@
 - **Дроп:** улучшен за счёт `onDragDropEvent`; если не работает — ограничение платформы.
 - **Сервисы:** без нативного Obj-C/Swift обработчика пункты меню по сути пустые; пока надёжный способ — кнопки в приложении или дроп.
 
-Пересборка: `npm run build:macos` (или без CI: `unset CI && npx tauri build`), затем `bash scripts/inject-macos-services.sh` при необходимости.
+Пересборка: `npm run build:macos` (или без CI: `unset CI && npx tauri build`). Контекстное меню в Finder — `./scripts/install-context-menu.sh`. Опциональный инжект `NSServices` в `.app`: `npm run build:macos:with-nsservices` (не смешивать с workflows, иначе дубликаты в «Сервисы»).

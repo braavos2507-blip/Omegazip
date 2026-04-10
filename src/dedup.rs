@@ -31,7 +31,7 @@ impl BlockStore {
     pub fn new() -> Self {
         Self {
             blocks: HashMap::new(),
-            bloom: vec![0; (BLOOM_BITS + 7) / 8],
+            bloom: vec![0; BLOOM_BITS.div_ceil(8)],
         }
     }
 
@@ -67,13 +67,18 @@ impl BlockStore {
     pub fn add_file(&mut self, data: &[u8], compressed: &[u8], algo_id: u8) -> BlockRef {
         let hash = Self::block_hash(data);
         let need_insert = !self.bloom_may_contain(&hash) || !self.blocks.contains_key(&hash);
+        let used_algo = if need_insert {
+            algo_id
+        } else {
+            self.blocks.get(&hash).map(|(a, _)| *a).unwrap_or(algo_id)
+        };
         if need_insert {
             self.blocks.insert(hash, (algo_id, compressed.to_vec()));
             self.bloom_insert(&hash);
         }
         BlockRef {
             hash,
-            algo: algo_id,
+            algo: used_algo,
             offset: 0,
             len: data.len() as u32,
         }
@@ -83,13 +88,18 @@ impl BlockStore {
     pub fn add_chunk(&mut self, data: &[u8], compressed: &[u8], algo_id: u8) -> BlockRef {
         let hash = Self::block_hash(data);
         let need_insert = !self.bloom_may_contain(&hash) || !self.blocks.contains_key(&hash);
+        let used_algo = if need_insert {
+            algo_id
+        } else {
+            self.blocks.get(&hash).map(|(a, _)| *a).unwrap_or(algo_id)
+        };
         if need_insert {
             self.blocks.insert(hash, (algo_id, compressed.to_vec()));
             self.bloom_insert(&hash);
         }
         BlockRef {
             hash,
-            algo: algo_id,
+            algo: used_algo,
             offset: 0,
             len: data.len() as u32,
         }

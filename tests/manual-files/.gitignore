@@ -1,5 +1,7 @@
 workflow-run/
 results/
+results-auto/baselines/*.log
+results-auto/profile-smoke-last.txt
 results-auto/extract/
 results-auto/oz/
 results-auto/zip/

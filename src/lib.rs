@@ -31,9 +31,13 @@ pub use preprocess::{preprocess, read_preprocess_result, PreprocessResult};
 pub use codec::{Codec, compress, decompress, best_compress};
 pub use dedup::{BlockStore, BlockRef};
 pub use chunked::{chunks, DEFAULT_CHUNK_SIZE};
-pub use repo::{repo_init, backup as repo_backup, restore as repo_restore, list_snapshots, repo_push};
+pub use repo::{
+    repo_init, backup as repo_backup, restore as repo_restore, list_snapshots, repo_push, repo_prune,
+    LocalRepo,
+};
 pub use smart_preset::{
     effective_compress_preset_hint, effective_oz_preset_from_service_context,
-    suggest_compress_preset_hint, suggested_preset_for_path, CompressPresetHint, DIRECTORY_MAX_DEPTH,
+    suggest_compress_preset_hint, suggested_preset_for_path, suggest_competitive_plan,
+    CompetitivePresetPlan, CompressPresetHint, DIRECTORY_MAX_DEPTH,
     DIRECTORY_SAMPLE_CAP,
 };

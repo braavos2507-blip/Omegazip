@@ -36,4 +36,4 @@ dist/OmegaZip.app/Contents/MacOS/omegazip --help
 
 ## Примечание про подпись
 
-Без **codesign / notarization** macOS может показывать предупреждения Gatekeeper при первом запуске. Для публичного распространения нужна отдельная подготовительная процедура (вне этого документа).
+Без **codesign / notarization** macOS может показывать предупреждения Gatekeeper при первом запуске. Автоматизация Developer ID и нотаризации: **[DIST-01-MACOS-SIGNING.md](DIST-01-MACOS-SIGNING.md)** (скрипты, keychain, workflow `macos-signed-build.yml`).

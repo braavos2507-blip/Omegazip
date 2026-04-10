@@ -40,6 +40,8 @@
 
 ## 6. Бенчмарк CLI
 
+Обзор сценариев (CI и локально): [QA-03-BENCHMARKS.md](QA-03-BENCHMARKS.md).
+
 Скрипт **`scripts/benchmark-workflow.sh`** измеряет сжатие/распаковку через установленный `omegazip`. Результаты по умолчанию в `/tmp/omegazip-full-bench/`; пример отчёта в репозитории: [BENCH_RESULTS.md](BENCH_RESULTS.md).
 
 ```bash

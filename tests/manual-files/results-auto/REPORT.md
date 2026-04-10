@@ -1,7 +1,7 @@
 # Manual Files Auto-Test Report
 
 - Binary: `/var/folders/1_/m403l98566bg591g5ntty2200000gn/T/cursor-sandbox-cache/c42e5b2d9569bef721be0c4826a6de59/cargo-target/debug/omegazip`
-- Source dir: `/Users/renat/Documents/Project/OmegaZip/tests/manual-files/downloads`
+- Source dir: `/Users/renat/01Project/OmegaZip/tests/manual-files/downloads`
 
 ## Cases
 

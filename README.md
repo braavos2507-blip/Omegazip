@@ -5,7 +5,7 @@
 ## Майлстоуны
 
 - **v1.0** (ядро, GUI, Android, CI, документация) — закрыт; журнал: [.planning/MILESTONES.md](.planning/MILESTONES.md), индекс: [.planning/MILESTONE-V1.0.md](.planning/MILESTONE-V1.0.md).
-- **v1.1** (интеграция в ОС по ТЗ) — планы 4–7 сданы; gate **п.8 ТЗ** (TBD-01).  
+- **v1.1** (интеграция в ОС по ТЗ) — планы 4–7 сданы; п.8 в ТЗ не входил.  
 - **v1.2** (строгое ТЗ, только пробелы: тихая распаковка, ПКМ из коробки, vs топ-5, установка, опц. трей) — [.planning/MILESTONE-V1.2.md](.planning/MILESTONE-V1.2.md), [.planning/ROADMAP.md](.planning/ROADMAP.md).
 
 ## Сборка и запуск
@@ -35,16 +35,16 @@ cargo build --release
 
 ## Форматы и 7-Zip
 
-- **Нативно (без 7-Zip):** OmegaZip открывает ZIP, tar (включая .gz/.xz/.bz2/.zst), одиночные .gz/.xz/.bz2/.zst, CAB и `.oz`. Подробная матрица: [docs/FORMATS.md](docs/FORMATS.md).
+- **Нативно (без 7-Zip):** OmegaZip открывает ZIP, tar (включая .gz/.xz/.bz2/.zst), одиночные .gz/.xz/.bz2/.zst, CAB и `.oz`. Подробная матрица: [docs/FORMATS.md](docs/FORMATS.md). Честное сравнение с ориентиром «топ-5 архиваторов» (7-Zip, WinRAR, …): [docs/VERSUS-TOP5.md](docs/VERSUS-TOP5.md).
 - **С [7-Zip](https://www.7-zip.org/) или p7zip** (`7z` / `7zz` / `7za` в `PATH`; на Windows часто находится `Program Files\7-Zip\7z.exe`): создание и чтение **.7z**, распаковка **RAR, ISO, WIM, MSI** и других форматов, которые открывает ваш 7-Zip.
-- **Установка OmegaZip и 7-Zip**, автообнаружение: [docs/INSTALL.md](docs/INSTALL.md). Проверка: `omegazip deps` или баннер в GUI.
+- **Установка OmegaZip и 7-Zip**, автообнаружение: [docs/INSTALL.md](docs/INSTALL.md) (сквозной сценарий «от установки до первой проверки» и чеклист — в начале файла). Проверка: `omegazip deps` или баннер в GUI.
 - **RAR:** только распаковка через 7-Zip. Создание `.rar` не поддерживается.
 
 **GUI (сборка):** `npm run build` или `npm run tauri build` → артефакты в `src-tauri/target/release/bundle/` (на macOS при необходимости также `dist/OmegaZip.app`). Статус 7-Zip, чанки, solid, пароль, прогресс, экспорт в ZIP.
 
 **Ассоциации файлов и двойной щелчок:** [docs/FILE-ASSOCIATIONS.md](docs/FILE-ASSOCIATIONS.md).
 
-**Контекстное меню** (сжатие в `.oz` / `.zip` без окна): [docs/CONTEXT-MENU.md](docs/CONTEXT-MENU.md). Кратко: установка, логи, переустановка — [docs/MACOS-QUICKSTART.md](docs/MACOS-QUICKSTART.md).
+**Контекстное меню** (сжатие в `.oz` / `.zip` без окна): [docs/CONTEXT-MENU.md](docs/CONTEXT-MENU.md). Кратко: установка, логи, переустановка — [docs/MACOS-QUICKSTART.md](docs/MACOS-QUICKSTART.md). Чеклист приёмки ПКМ на Windows/Linux (когда появятся машины): [docs/QA-WIN-LINUX-PREP.md](docs/QA-WIN-LINUX-PREP.md).
 
 **Умные пресеты .oz** (авто по типу файлов, CLI `--preset auto`): [docs/SMART-PRESETS.md](docs/SMART-PRESETS.md).
 
@@ -60,6 +60,7 @@ cargo build --release
 
 ## Скрипты
 
+- **`npm run test:context-menu`** — автотест логики ПКМ (`pick_ext` / stem для Win/Linux-скриптов); в CI также проверка синтаксиса PowerShell (`omega-context-helper.ps1`).
 - `scripts/detect_context.sh` — по MIME и первым байтам выдаёт контекст.
 - `scripts/preprocess_pdf.sh` — вызов внешней команды для оптимизации PDF (команда задаётся через переменные).
 - `scripts/entropy.sh` — энтропия файла.

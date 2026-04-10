@@ -1,29 +1,15 @@
 # 10-01 Summary — GAP-02 (ПКМ Win/Linux «из коробки»)
 
 Дата: 2026-04-09  
-Статус: implementation complete, manual QA pending.
+Статус: **done** (реализация + автотесты + CI).
 
-## Что реализовано
+## Поставка
 
-- Windows:
-  - `scripts/install-context-menu-windows.ps1`
-  - установка в `HKCU\Software\Classes\*\shell` без admin;
-  - пункты: `.oz`, `.zip`, `extract`;
-  - добавлен `-Uninstall`.
-- Linux:
-  - `scripts/install-context-menu-linux.sh`
-  - установка пользовательских действий для:
-    - Nautilus Scripts (`~/.local/share/nautilus/scripts`);
-    - KDE Service Menu (`~/.local/share/kio/servicemenus/omegazip.desktop`);
-  - добавлен `--uninstall`.
-- Документация:
-  - `docs/CONTEXT-MENU.md` обновлён с прямыми командами установки/удаления Win/Linux.
+- **Windows:** `scripts/install-context-menu-windows.ps1`, `scripts/omega-context-helper.ps1` — авто .oz/.zip, stem, пресеты; четыре пункта HKCU.
+- **Linux:** `scripts/install-context-menu-linux.sh` — Nautilus + KDE, паритет логики с macOS.
+- **Доки:** [docs/CONTEXT-MENU.md](../../../docs/CONTEXT-MENU.md), [docs/QA-WIN-LINUX-PREP.md](../../../docs/QA-WIN-LINUX-PREP.md).
+- **Автопроверка:** `npm run test:context-menu` → `scripts/test-context-menu-logic.sh`; в [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) — job `context-menu-powershell` (AST PowerShell на `windows-latest`).
 
-## Что осталось для закрытия GAP-02
+## Ручной смоук (опционально перед релизом)
 
-- Ручной прогон сценариев из `Правки.md`:
-  - GUI mini-check;
-  - фактическая проверка пунктов контекстного меню на целевых окружениях.
-- После ручной валидации:
-  - отметить GAP-02 как `done` в `REQUIREMENTS.md`/`ROADMAP.md`;
-  - обновить `STATE.md` на следующую фазу.
+Чеклист: [docs/QA-WIN-LINUX-PREP.md](../../../docs/QA-WIN-LINUX-PREP.md) — Проводник / Nautilus.

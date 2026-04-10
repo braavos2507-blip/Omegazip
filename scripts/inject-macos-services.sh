@@ -1,6 +1,9 @@
 #!/bin/bash
-# Injects NSServices into OmegaZip.app for one-click background actions.
-# App handles files via openFiles and performs silent compress/extract.
+# Optional: injects NSServices into OmegaZip.app (Finder shows «… (OmegaZip)»).
+# If you also ran ./scripts/install-context-menu.sh, Services will list BOTH
+# workflow entries («…workflow») and these — four lines total. Prefer workflows
+# only: use build:macos without this script, or uninstall ~/Library/Services/*OmegaZip*.
+# App handles files via openFiles (see macos_open_files.rs).
 # Run after: npm run tauri build
 set -e
 APP="${1:-src-tauri/target/release/bundle/macos/OmegaZip.app}"

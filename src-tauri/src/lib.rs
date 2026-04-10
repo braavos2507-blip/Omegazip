@@ -82,7 +82,7 @@ fn compress_advanced(
     let progress = Arc::new(move |p: omegazip::Progress| {
         let _ = app.emit("compress-progress", &p);
     });
-    let preset_parsed = preset.and_then(|s| omegazip::Preset::from_str(&s));
+    let preset_parsed = preset.and_then(|s| omegazip::Preset::parse_name(&s));
     let opts = omegazip::CompressOptions {
         chunk_size: if chunked {
             Some(omegazip::DEFAULT_CHUNK_SIZE)
@@ -95,6 +95,8 @@ fn compress_advanced(
         preset: preset_parsed,
         parallel: true,
         progress: Some(progress),
+        solid_block_size_bytes: None,
+        zip_analyzed: false,
     };
     omegazip::compress_advanced_dispatch(&source, &archive_path, opts).map_err(|e| e.to_string())
 }

@@ -14,24 +14,23 @@
 
 - Сжатие/распаковка `.oz`, ZIP, tar-семейство, zstd, CAB в ядре на Rust
 - GUI с диалогами, прогрессом, статусом 7-Zip
-- CI: `cargo test` (корень) + `cargo check` в `src-tauri` на Ubuntu и macOS
+- CI: `cargo test` (корень) + `cargo check` в `src-tauri` на Ubuntu и macOS; `scripts/test-context-menu-logic.sh` + AST PowerShell (`context-menu-powershell` на Windows)
 - **v1.0 закрыт** (2026-03-29): см. `.planning/MILESTONE-V1.0.md`
 - **OmegaZip Android**: отдельный `ui-android/`, `ANDROID_BUILD.md`, ограничения без 7-Zip/rclone задокументированы
+- **GAP-01 (v1.2):** тихая распаковка — `docs/SILENT-EXTRACT.md`
+- **GAP-03 (v1.2):** документ «OmegaZip vs топ-5» — `docs/VERSUS-TOP5.md`
+- **GAP-04 (v1.2):** сквозной сценарий установки — `docs/INSTALL.md`
+- **GAP-05 (v1.2):** трей не входит в релиз — `docs/GAP05-TRAY-DEFERRED.md`
+- **GAP-02 (v1.2):** ПКМ Win/Linux — `omega-context-helper.ps1`, установщики, CI + `npm run test:context-menu`
 
 ### Active
 
-- [x] **v1.2 GAP-01** — тихая распаковка при открытии архива из ОС (фаза 9)
-- [ ] **v1.2 GAP-02** — ПКМ Win/Linux ближе к «из коробки» (фаза 10; impl complete, QA pending)
-- [ ] **v1.2 GAP-03** — честный документ vs топ-5 (фаза 11)
-- [ ] **v1.2 GAP-04** — установка end-to-end (фаза 12)
-- [ ] **v1.2 GAP-05** — трей/фон (фаза 13, опционально)
-- [ ] П.8 ТЗ (**TBD-01**) — после заказчика (фаза 8, параллельно допустимо)
-- [ ] Стабильность редких edge-case (расширенные бенчмарки — v2 / QA-03)
+- [ ] Стабильность редких edge-case; измеримый контур — [docs/MEASURABLE-QUALITY.md](../docs/MEASURABLE-QUALITY.md) (`measure:baseline-local`, `measure:oz-advantage`)
 
 ### Out of Scope
 
 - **Создание RAR** — проприетарный формат WinRAR; только распаковка через 7-Zip на десктопе
-- **Нотаризация / подпись Apple** в репозитории не автоматизированы
+- **Полный** конвейер нотаризации в CI без секретов не запускается; подпись и сценарии — [docs/DIST-01-MACOS-SIGNING.md](../docs/DIST-01-MACOS-SIGNING.md)
 - Полная замена коммерческим архиваторам по всем нишевым форматам без 7-Zip
 
 ## Context
@@ -46,19 +45,18 @@
 - **Android:** нет встроенного 7-Zip в процессе — отдельные сообщения и возможности форматов.
 - **Совместимость:** поведение CLI и GUI должно оставаться предсказуемым при отсутствии 7-Zip.
 
-## Current Milestone: v1.2 — ТЗ: строгая доводка (GAP)
+## Current Milestone: v1.2 — ТЗ: строгая доводка (GAP) — **закрыт**
 
-**Предыдущие майлстоуны:** **v1.0** закрыт ([MILESTONE-V1.0.md](MILESTONE-V1.0.md)); **v1.1** — планы 4–7 сданы, остаётся gate **TBD-01** (фаза 8).
+**Предыдущие майлстоуны:** **v1.0** закрыт ([MILESTONE-V1.0.md](MILESTONE-V1.0.md)); **v1.1** — планы 4–7 сданы; **п.8 ТЗ** в объёме спецификации отсутствует (фаза 8 не ведётся).
 
-**Goal:** Устранить **только** пробелы между дословным ТЗ и продуктом: тихая распаковка при двойном щелчке, ПКМ уровня продукта на Win/Linux, честный отчёт vs топ-5, усиленный установочный сценарий, опционально трей. **Не** переписывать уже работающие PATH/SMART/базовую матрицу FMT.
+**Майлстоун v1.2 по GAP:** **закрыт** (GAP-01…05). Дальнейшие пункты — **v2** (см. [REQUIREMENTS.md](REQUIREMENTS.md): QA-03, DIST-01).
 
-**Target features (очередь v1.2):**
-- ~~**GAP-01:**~~ ✅ тихая распаковка при открытии одного архива (`docs/SILENT-EXTRACT.md`).
-- **GAP-02:** Контекстное меню без ручного `.reg` для типового пользователя Win + ясный путь Linux.
-- **GAP-03:** Документ «мы vs топ-5» с Partial/N/A и осознанными non-goals.
-- **GAP-04:** End-to-end установка + 7-Zip в одном сценарии документации.
-- **GAP-05** (опц.): трей / фон.
-- Параллельно: **TBD-01** при появлении п.8 ТЗ от заказчика.
+**Target features (v1.2 — выполнено):**
+- ~~**GAP-01:**~~ ✅ `docs/SILENT-EXTRACT.md`
+- ~~**GAP-02:**~~ ✅ ПКМ Win/Linux, CI, `npm run test:context-menu`; смоук по желанию — [docs/QA-WIN-LINUX-PREP.md](../docs/QA-WIN-LINUX-PREP.md)
+- ~~**GAP-03:**~~ ✅ `docs/VERSUS-TOP5.md`
+- ~~**GAP-04:**~~ ✅ `docs/INSTALL.md`
+- ~~**GAP-05** (опц.):~~ ✅ `docs/GAP05-TRAY-DEFERRED.md`
 
 ## Key Decisions
 
@@ -75,4 +73,4 @@
 Документ обновляется на границах фаз (`/gsd:transition`) и майлстоунов. После фазы: валидированные требования → Validated; новые — Active; решения → Key Decisions.
 
 ---
-*Last updated: 2026-03-29 — `/gsd:new-milestone`: старт v1.2 (GAP), честные статусы v1.1 в REQUIREMENTS*
+*Last updated: 2026-04-09 — v1.2 GAP закрыт; п.8 ТЗ не в объёме — TBD-01 снят.*

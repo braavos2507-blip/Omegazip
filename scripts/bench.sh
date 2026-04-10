@@ -109,6 +109,7 @@ print_table() {
 
 # --- main ---
 prepare_suite
+mkdir -p "$RESULTS_DIR"
 echo "Running presets: fast, balanced, max, ultra..."
 {
   run_bench fast

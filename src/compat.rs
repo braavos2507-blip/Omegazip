@@ -2,13 +2,13 @@
 
 use std::env;
 use std::fs::{self, File};
-use std::io::{self, Read};
+use std::io::{self, Read, Write};
 use std::path::{Component, Path, PathBuf};
 use std::process::Command;
 
 use bzip2::read::BzDecoder;
 use flate2::read::GzDecoder;
-use flate2::write::GzEncoder;
+use flate2::write::{DeflateEncoder, GzEncoder};
 use flate2::Compression;
 use walkdir::WalkDir;
 use xz2::read::XzDecoder;
@@ -822,6 +822,73 @@ pub fn compress_to_zip(source: &Path, zip_path: &Path) -> Result<u32, Box<dyn st
     Ok(count)
 }
 
+/// Как `compress_to_zip`, но с `analyze` + `preprocess` и выбором Stored vs Deflated по размеру.
+pub fn compress_to_zip_analyzed(
+    source: &Path,
+    zip_path: &Path,
+) -> Result<u32, Box<dyn std::error::Error + Send + Sync>> {
+    use crate::{analyze_bytes, preprocess, read_preprocess_result};
+
+    fn deflate_for_zip(data: &[u8]) -> io::Result<Vec<u8>> {
+        let mut enc = DeflateEncoder::new(Vec::new(), Compression::best());
+        enc.write_all(data)?;
+        enc.finish()
+    }
+
+    let file = File::create(zip_path)?;
+    let mut zw = ZipWriter::new(file);
+    let opts_deflate = zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+    let opts_stored = zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
+    let mut count = 0u32;
+
+    if source.is_dir() {
+        let base = source.canonicalize().unwrap_or_else(|_| source.to_path_buf());
+        for entry in WalkDir::new(&base).into_iter().filter_map(|e| e.ok()) {
+            if !entry.file_type().is_file() {
+                continue;
+            }
+            let path = entry.path();
+            let rel = path.strip_prefix(&base).unwrap_or(path);
+            let name = rel.to_string_lossy().replace('\\', "/");
+            let data = fs::read(path)?;
+            let _analysis = analyze_bytes(&data, Some(path))?;
+            let pre = preprocess(path, &data)?;
+            let ready = read_preprocess_result(pre)?;
+            let deflated = deflate_for_zip(&ready)?;
+            let (opts, body): (_, Vec<u8>) = if deflated.len() < ready.len() {
+                (opts_deflate, deflated)
+            } else {
+                (opts_stored, ready)
+            };
+            zw.start_file(&name, opts)?;
+            zw.write_all(&body)?;
+            count += 1;
+        }
+    } else if source.is_file() {
+        let name = source
+            .file_name()
+            .map(|s| s.to_string_lossy().into_owned())
+            .unwrap_or_else(|| "file".to_string());
+        let data = fs::read(source)?;
+        let _analysis = analyze_bytes(&data, Some(source))?;
+        let pre = preprocess(source, &data)?;
+        let ready = read_preprocess_result(pre)?;
+        let deflated = deflate_for_zip(&ready)?;
+        let (opts, body): (_, Vec<u8>) = if deflated.len() < ready.len() {
+            (opts_deflate, deflated)
+        } else {
+            (opts_stored, ready)
+        };
+        zw.start_file(&name, opts)?;
+        zw.write_all(&body)?;
+        count = 1;
+    } else {
+        return Err("источник не найден".into());
+    }
+    zw.finish()?;
+    Ok(count)
+}
+
 /// Папка или файл → tar.gz (как в типичных архиваторах).
 pub fn compress_to_tar_gz(source: &Path, dest: &Path) -> Result<u32, Box<dyn std::error::Error + Send + Sync>> {
     let enc = GzEncoder::new(File::create(dest)?, Compression::default());
@@ -850,7 +917,9 @@ pub fn compress_to_tar_gz(source: &Path, dest: &Path) -> Result<u32, Box<dyn std
         return Err("источник не найден".into());
     }
     builder.finish()?;
-    let gz = builder.into_inner().map_err(|e| io::Error::new(io::ErrorKind::Other, format!("{e:?}")))?;
+    let gz = builder
+        .into_inner()
+        .map_err(|e| io::Error::other(format!("{e:?}")))?;
     gz.finish()?;
     Ok(count)
 }
@@ -885,13 +954,14 @@ pub fn compress_to_7z(
     }
     if source.is_dir() {
         cmd.current_dir(&source);
-        for entry in WalkDir::new(".")
+        for entry in WalkDir::new(&source)
             .min_depth(1)
             .into_iter()
             .filter_map(|e| e.ok())
         {
             if entry.file_type().is_file() {
-                cmd.arg(entry.path());
+                let rel = entry.path().strip_prefix(&source).unwrap_or(entry.path());
+                cmd.arg(rel);
                 count += 1;
             }
         }

@@ -103,6 +103,7 @@ echo "[$(date '+%F %T')] [compress-auto] start args=$#" >> "/tmp/OmegaZip-workfl
 # По умолчанию .oz (сильная сторона OmegaZip на тексте/разметке/документах).
 # .zip только для явного «бинарного» набора: медиа, уже сжатые контейнеры, прошивки и т.п.
 # Дублируется в scripts/benchmark-workflow.sh — менять синхронно.
+# Паритет Windows: scripts/omega-context-helper.ps1 ($ZipLikeExt); Linux: install-context-menu-linux.sh (pick_ext_auto).
 # (без case/;; — иначе bash путает разбор при вложенном heredoc в install-context-menu.sh)
 pick_ext_auto() {
   local f="$1"

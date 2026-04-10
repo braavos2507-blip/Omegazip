@@ -350,6 +350,8 @@ fn try_start_silent_compress_background_impl(app: &AppHandle, paths: &[String], 
             preset: Some(preset),
             parallel: true,
             progress: None,
+            solid_block_size_bytes: None,
+            zip_analyzed: fmt == "zip",
         };
         let r = omegazip::compress_advanced_dispatch(&source, &dest, opts);
         match r {
@@ -389,6 +391,8 @@ fn try_start_silent_compress_background_impl(app: &AppHandle, paths: &[String], 
             preset: Some(preset),
             parallel: true,
             progress: None,
+            solid_block_size_bytes: None,
+            zip_analyzed: fmt == "zip",
         };
         let r = omegazip::compress_advanced_dispatch(&source, &dest, opts);
         match r {

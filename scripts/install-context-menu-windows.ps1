@@ -1,5 +1,5 @@
 # Устанавливает пункты контекстного меню проводника для **текущего пользователя** (HKCU),
-# без прав администратора. Аналогично по смыслу `scripts/context-menu-windows.reg.example`.
+# без прав администратора. Логика сжатия/имён — через omega-context-helper.ps1 (паритет с macOS).
 #
 # Использование:
 #   Установка:
@@ -14,6 +14,7 @@ param(
 )
 
 $shell = "Registry::HKEY_CURRENT_USER\Software\Classes\*\shell"
+$helper = Join-Path $PSScriptRoot "omega-context-helper.ps1"
 
 function Set-OmegaZipMenu {
     param([string]$Name, [string]$Label, [string]$Arguments)
@@ -37,15 +38,21 @@ function Remove-OmegaZipMenu {
 }
 
 if ($Uninstall) {
+    Remove-OmegaZipMenu -Name "OmegaZipCompressAuto"
     Remove-OmegaZipMenu -Name "OmegaZipCompressOz"
     Remove-OmegaZipMenu -Name "OmegaZipCompressZip"
     Remove-OmegaZipMenu -Name "OmegaZipExtractHere"
-    Write-Host "Удалено: HKCU\Software\Classes\*\shell\OmegaZipCompressOz|Zip|ExtractHere"
+    Write-Host "Удалено: HKCU\Software\Classes\*\shell\OmegaZip*"
     exit 0
 }
 
 if ([string]::IsNullOrWhiteSpace($OmegaZipExe)) {
     Write-Error "Укажите -OmegaZipExe \"C:\Path\To\omegazip.exe\" или запустите с -Uninstall."
+    exit 1
+}
+
+if (-not (Test-Path -LiteralPath $helper)) {
+    Write-Error "Не найден helper: $helper (нужен omega-context-helper.ps1 рядом со скриптом)."
     exit 1
 }
 
@@ -55,14 +62,22 @@ if (-not (Test-Path -LiteralPath $exe)) {
     exit 1
 }
 
-# Кавычки как в `context-menu-windows.reg.example`: cmd.exe /c ""<exe>" compress "%1" "%~dpn1.oz""
-$cmdOz = 'cmd.exe /c ""' + $exe + '" compress "%1" "%~dpn1.oz"'
-$cmdZip = 'cmd.exe /c ""' + $exe + '" compress "%1" "%~dpn1.zip"'
-$cmdExtract = 'cmd.exe /c ""' + $exe + '" decompress "%1" "%~dpn1_распаковано"'
+function New-HelperCommand {
+    param([string]$Mode)
+    return "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$helper`" -OmegaZipExe `"$exe`" $Mode -LiteralPath `"%1`""
+}
 
+$cmdAuto = New-HelperCommand -Mode "CompressAuto"
+$cmdOz = New-HelperCommand -Mode "CompressOz"
+$cmdZip = New-HelperCommand -Mode "CompressZip"
+$cmdExtract = New-HelperCommand -Mode "Extract"
+
+Set-OmegaZipMenu -Name "OmegaZipCompressAuto" -Label "Сжать OmegaZip (авто .oz/.zip)" -Arguments $cmdAuto
 Set-OmegaZipMenu -Name "OmegaZipCompressOz" -Label "Сжать в .oz (OmegaZip)" -Arguments $cmdOz
 Set-OmegaZipMenu -Name "OmegaZipCompressZip" -Label "Сжать в .zip (OmegaZip)" -Arguments $cmdZip
 Set-OmegaZipMenu -Name "OmegaZipExtractHere" -Label "Распаковать (OmegaZip)" -Arguments $cmdExtract
 
-Write-Host "Готово: HKCU\Software\Classes\*\shell\OmegaZipCompressOz|Zip|ExtractHere"
-Write-Host "Удаление: powershell -ExecutionPolicy Bypass -File .\scripts\install-context-menu-windows.ps1 -Uninstall"
+Write-Host "Готово: HKCU\Software\Classes\*\shell\OmegaZip*"
+Write-Host "  — Сжать OmegaZip (авто .oz/.zip) — как Services на macOS (pick_ext_auto + пресеты)."
+$self = Join-Path $PSScriptRoot "install-context-menu-windows.ps1"
+Write-Host "Удаление: powershell -ExecutionPolicy Bypass -File `"$self`" -Uninstall"

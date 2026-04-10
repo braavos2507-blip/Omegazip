@@ -1,0 +1,19 @@
+# Clean-machine smoke — запись для релизного gate
+
+После ручного прогона по [docs/CLEAN-MACHINE-SMOKE.md](../../docs/CLEAN-MACHINE-SMOKE.md) скопируйте этот файл:
+
+```bash
+cp tests/manual-files/results-auto/CLEAN-MACHINE-SMOKE-LATEST.md.example \
+   tests/manual-files/results-auto/CLEAN-MACHINE-SMOKE-LATEST.md
+```
+
+Отредактируйте поля ниже. Скрипт `scripts/release-readiness-local.sh` в режиме **public** ищет строку **`Status: PASS`** (или `**Status:** PASS`).
+
+---
+
+**Date:** YYYY-MM-DD  
+**Status:** PENDING  
+**OS:** macOS 14.x / Windows 11 / Ubuntu 24.04  
+**Artifact:** путь или имя DMG/MSI/AppImage/deb  
+**Tester:**  
+**Notes:** после прогона замените строку выше на `**Status:** PASS`

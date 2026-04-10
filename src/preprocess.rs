@@ -42,9 +42,8 @@ pub fn preprocess(_path: &Path, data: &[u8]) -> std::io::Result<PreprocessResult
 
 pub fn read_preprocess_result(r: PreprocessResult) -> std::io::Result<Vec<u8>> {
     match r {
-        PreprocessResult::WrittenTo(p) => fs::read(&p).and_then(|d| {
+        PreprocessResult::WrittenTo(p) => fs::read(&p).inspect(|_| {
             let _ = fs::remove_file(&p);
-            Ok(d)
         }),
         PreprocessResult::Unchanged(d) => Ok(d),
     }

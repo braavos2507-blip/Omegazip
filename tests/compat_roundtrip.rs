@@ -1,10 +1,39 @@
 //! Интеграционные проверки совместимости: ZIP, tar.gz, безопасные пути.
 
 use std::fs;
-use std::io::Write;
+use std::io::{self, Write};
 use std::path::Path;
 
 use omegazip::compat;
+use zip::write::{FileOptions, ZipWriter};
+use zip::CompressionMethod;
+
+fn build_zip_duplicate_same_name(zip_path: &Path) -> io::Result<()> {
+    let f = fs::File::create(zip_path)?;
+    let mut zw = ZipWriter::new(f);
+    let opts = FileOptions::default().compression_method(CompressionMethod::Stored);
+    zw.start_file("dup.txt", opts)?;
+    zw.write_all(b"first")?;
+    zw.start_file("dup.txt", opts)?;
+    zw.write_all(b"second")?;
+    zw.finish()?;
+    Ok(())
+}
+
+fn build_zip_deep_nested_leaf(zip_path: &Path, depth: usize) -> io::Result<()> {
+    let f = fs::File::create(zip_path)?;
+    let mut zw = ZipWriter::new(f);
+    let opts = FileOptions::default().compression_method(CompressionMethod::Stored);
+    let mut rel = String::new();
+    for i in 0..depth {
+        rel.push_str(&format!("d{i}/"));
+    }
+    rel.push_str("leaf.txt");
+    zw.start_file(&rel, opts)?;
+    zw.write_all(b"deep-value")?;
+    zw.finish()?;
+    Ok(())
+}
 
 #[test]
 fn zip_compress_and_extract_roundtrip() {
@@ -31,13 +60,13 @@ fn tar_gz_roundtrip() {
     let dir = tempfile::tempdir().expect("tempdir");
     let src = dir.path().join("data");
     fs::create_dir_all(&src).unwrap();
-    fs::write(src.join("a.bin"), &[1u8, 2, 3]).unwrap();
+    fs::write(src.join("a.bin"), [1u8, 2, 3]).unwrap();
 
     let tgz = dir.path().join("bundle.tar.gz");
     {
         let enc = flate2::write::GzEncoder::new(fs::File::create(&tgz).unwrap(), flate2::Compression::default());
         let mut ar = tar::Builder::new(enc);
-        ar.append_path_with_name(&src.join("a.bin"), "a.bin").unwrap();
+        ar.append_path_with_name(src.join("a.bin"), "a.bin").unwrap();
         ar.finish().unwrap();
     }
 
@@ -75,6 +104,67 @@ fn tar_gz_compress_and_extract() {
     let m = compat::extract_foreign(&tgz, &out).expect("extract tgz");
     assert!(m >= 1);
     assert_eq!(fs::read_to_string(out.join("note.txt")).unwrap(), "tg");
+}
+
+#[test]
+fn zip_truncated_file_errors_cleanly() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let zip_path = dir.path().join("trunc.zip");
+    build_zip_with_raw_path(&zip_path, "a.txt", b"hello world this is longer data");
+
+    let mut data = fs::read(&zip_path).expect("read zip");
+    let cut = data.len().saturating_sub(30);
+    data.truncate(cut.max(20));
+    fs::write(&zip_path, data).expect("truncate zip");
+
+    let out = dir.path().join("out_trunc");
+    let r = compat::extract_foreign(&zip_path, &out);
+    assert!(
+        r.is_err(),
+        "truncated zip must not succeed, got {:?}",
+        r.ok()
+    );
+}
+
+/// D9: два локальных файла с одним именем в ZIP — при распаковке последний перезаписывает (политика OmegaZip).
+#[test]
+fn zip_duplicate_entry_paths_last_content_wins() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let zip_path = dir.path().join("dup.zip");
+    build_zip_duplicate_same_name(&zip_path).expect("build dup zip");
+
+    let out = dir.path().join("out_dup");
+    let n = compat::extract_foreign(&zip_path, &out).expect("extract");
+    assert_eq!(n, 2, "обе записи обработаны");
+    assert_eq!(
+        fs::read_to_string(out.join("dup.txt")).unwrap(),
+        "second",
+        "ожидается содержимое последней записи с тем же именем"
+    );
+}
+
+/// D6: длинная вложенность путей внутри ZIP (без обхода `..`).
+#[test]
+fn zip_deep_nested_path_extracts() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let zip_path = dir.path().join("deep.zip");
+    build_zip_deep_nested_leaf(&zip_path, 32).expect("build deep zip");
+
+    let out = dir.path().join("out_deep");
+    let n = compat::extract_foreign(&zip_path, &out).expect("extract");
+    assert_eq!(n, 1);
+
+    let mut p = out.to_path_buf();
+    for i in 0..32 {
+        p.push(format!("d{i}"));
+    }
+    p.push("leaf.txt");
+    assert!(
+        p.is_file(),
+        "ожидался файл по вложенному пути: {}",
+        p.display()
+    );
+    assert_eq!(fs::read_to_string(&p).unwrap(), "deep-value");
 }
 
 #[test]

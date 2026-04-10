@@ -2,6 +2,7 @@
 
 use std::io::Write;
 use std::path::Path;
+use std::str::FromStr;
 
 use crate::chunked::chunks;
 use crate::codec::{best_compress, decompress, codec_id, codec_from_id, Codec};
@@ -19,6 +20,7 @@ use crate::{
     analyze_bytes, preprocess, read_preprocess_result,
 };
 use std::fs;
+use std::io::{self, BufReader, Read};
 use std::path::PathBuf;
 use std::sync::Arc;
 use rayon::prelude::*;
@@ -73,6 +75,71 @@ struct SolidRef {
     length: u32,
 }
 
+/// Манифест на диске: либо массив записей (legacy), либо объект с `solid_segments` для multi-segment solid.
+#[derive(serde::Deserialize)]
+#[serde(untagged)]
+enum ManifestFromDisk {
+    Legacy(Vec<ManifestEntry>),
+    Wrapped {
+        files: Vec<ManifestEntry>,
+        #[serde(default)]
+        solid_segments: Option<Vec<ChunkRef>>,
+    },
+}
+
+#[derive(serde::Serialize)]
+struct ManifestWrapped<'a> {
+    files: &'a [ManifestEntry],
+    #[serde(skip_serializing_if = "Option::is_none")]
+    solid_segments: Option<&'a [ChunkRef]>,
+}
+
+fn parse_manifest_json(slice: &[u8]) -> Result<(Vec<ManifestEntry>, Option<Vec<ChunkRef>>), serde_json::Error> {
+    match serde_json::from_slice::<ManifestFromDisk>(slice)? {
+        ManifestFromDisk::Legacy(files) => Ok((files, None)),
+        ManifestFromDisk::Wrapped { files, solid_segments } => Ok((files, solid_segments)),
+    }
+}
+
+/// Multi-segment solid (>1 сырого блока) сериализуется как объект; иначе — legacy-массив.
+fn serialize_manifest_for_solid(
+    files: &[ManifestEntry],
+    solid_segments: Option<&[ChunkRef]>,
+) -> Result<String, serde_json::Error> {
+    if solid_segments.map(|s| s.len()).unwrap_or(0) > 1 {
+        serde_json::to_string(&ManifestWrapped {
+            files,
+            solid_segments,
+        })
+    } else {
+        serde_json::to_string(files)
+    }
+}
+
+fn decompress_solid_stream(
+    blocks: &std::collections::HashMap<[u8; 32], (u8, Vec<u8>)>,
+    solid_segments: Option<&[ChunkRef]>,
+) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
+    match solid_segments {
+        Some(segs) if !segs.is_empty() => {
+            let mut out = Vec::new();
+            for cr in segs {
+                let h = hex_to_hash(&cr.hash_hex).ok_or("invalid solid segment hash")?;
+                let (_, comp) = blocks
+                    .get(&h)
+                    .ok_or("missing solid segment block")?;
+                let dec = decompress(codec_from_id(cr.algo), comp)?;
+                out.extend_from_slice(&dec);
+            }
+            Ok(out)
+        }
+        _ => {
+            let (_, (algo, stream_comp)) = blocks.iter().next().ok_or("no solid stream")?;
+            decompress(codec_from_id(*algo), stream_comp).map_err(|e| -> Box<dyn std::error::Error + Send + Sync> { e.into() })
+        }
+    }
+}
+
 fn hex_to_hash(s: &str) -> Option<[u8; 32]> {
     if s.len() != 64 {
         return None;
@@ -86,6 +153,52 @@ fn hex_to_hash(s: &str) -> Option<[u8; 32]> {
         a[i] = u8::from_str_radix(h, 16).ok()?;
     }
     Some(a)
+}
+
+fn read_u32_le<R: Read>(r: &mut R) -> io::Result<u32> {
+    let mut b = [0u8; 4];
+    r.read_exact(&mut b)?;
+    Ok(u32::from_le_bytes(b))
+}
+
+/// Заголовок .oz + только JSON манифеста (без чтения блоков в память целиком).
+struct OzReadHeader {
+    version: u8,
+    flags: u8,
+    salt: [u8; 16],
+    manifest_bytes: Vec<u8>,
+}
+
+fn read_oz_header<R: Read>(r: &mut R) -> Result<OzReadHeader, Box<dyn std::error::Error + Send + Sync>> {
+    let mut magic = [0u8; 8];
+    r.read_exact(&mut magic)?;
+    if &magic != b"OMEGAZIP" {
+        return Err("Invalid archive".into());
+    }
+    let mut vb = [0u8; 1];
+    r.read_exact(&mut vb)?;
+    let version = vb[0];
+    let flags;
+    let mut salt = [0u8; 16];
+    if version >= 2 {
+        let mut fb = [0u8; 1];
+        r.read_exact(&mut fb)?;
+        flags = fb[0];
+        if (flags & 2) != 0 {
+            r.read_exact(&mut salt)?;
+        }
+    } else {
+        flags = 0;
+    }
+    let manifest_len = read_u32_le(r)? as usize;
+    let mut manifest_bytes = vec![0u8; manifest_len];
+    r.read_exact(&mut manifest_bytes)?;
+    Ok(OzReadHeader {
+        version,
+        flags,
+        salt,
+        manifest_bytes,
+    })
 }
 
 // ============== Опции и прогресс ==============
@@ -119,13 +232,21 @@ pub enum Preset {
 }
 
 impl Preset {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse_name(s: &str) -> Option<Self> {
+        s.parse().ok()
+    }
+}
+
+impl FromStr for Preset {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "fast" => Some(Preset::Fast),
-            "balanced" | "balance" => Some(Preset::Balanced),
-            "max" => Some(Preset::Max),
-            "ultra" | "maxcompression" | "maxcomp" => Some(Preset::Ultra),
-            _ => None,
+            "fast" => Ok(Preset::Fast),
+            "balanced" | "balance" => Ok(Preset::Balanced),
+            "max" => Ok(Preset::Max),
+            "ultra" | "maxcompression" | "maxcomp" => Ok(Preset::Ultra),
+            _ => Err(()),
         }
     }
 }
@@ -147,6 +268,10 @@ pub struct CompressOptions {
     pub parallel: bool,
     /// Callback прогресса.
     pub progress: Option<Arc<dyn Fn(Progress) + Send + Sync>>,
+    /// Solid: макс. размер сырого сегмента в байтах (≥ 1 MiB при задании). Несколько сегментов → отдельный манифест v2.
+    pub solid_block_size_bytes: Option<usize>,
+    /// ZIP: пройти анализ/preprocess и выбирать Stored vs Deflate по размеру (макс. совместимость .zip).
+    pub zip_analyzed: bool,
 }
 
 impl Default for CompressOptions {
@@ -159,6 +284,8 @@ impl Default for CompressOptions {
             preset: None,
             parallel: true,
             progress: None,
+            solid_block_size_bytes: None,
+            zip_analyzed: false,
         }
     }
 }
@@ -242,7 +369,16 @@ pub fn compress_to_path_with_options(
 
     if use_solid {
         let use_ultra = options.preset == Some(Preset::Ultra);
-        return compress_solid(&files, &base, output, password, recovery, progress, total, use_ultra);
+        return compress_solid(SolidCompressPlan {
+            files: &files,
+            base: &base,
+            output,
+            password,
+            progress,
+            total,
+            use_ultra,
+            solid_block_size_bytes: options.solid_block_size_bytes,
+        });
     }
 
     let mut store = BlockStore::new();
@@ -311,7 +447,7 @@ pub fn compress_to_path_with_options(
             let block_ref = store.add_file(&data_ready, &compressed, algo_id);
             manifest.push(ManifestEntry {
                 path: rel_str,
-                algo: algo_id,
+                algo: block_ref.algo,
                 hash_hex: block_ref.hash.iter().map(|b| format!("{:02x}", b)).collect::<String>(),
                 len: block_ref.len,
                 chunks: None,
@@ -388,7 +524,7 @@ pub fn compress_to_path_with_options(
     }
 
     if use_recovery && !block_payloads.is_empty() {
-        let num_stripes = (block_payloads.len() + STRIPE_DATA_SHARDS - 1) / STRIPE_DATA_SHARDS;
+        let num_stripes = block_payloads.len().div_ceil(STRIPE_DATA_SHARDS);
         out.write_all(&(num_stripes as u32).to_le_bytes())?;
         for stripe_start in (0..block_payloads.len()).step_by(STRIPE_DATA_SHARDS) {
             let stripe_blocks: Vec<Vec<u8>> = block_payloads[stripe_start..]
@@ -420,16 +556,30 @@ pub fn compress_to_path_with_options(
 }
 
 /// Solid: один сжатый поток на все файлы (как 7-Zip). use_ultra = XZ-9.
-fn compress_solid(
-    files: &[std::path::PathBuf],
-    base: &Path,
-    output: &Path,
-    password: Option<&str>,
-    _recovery: u32,
+struct SolidCompressPlan<'a> {
+    files: &'a [std::path::PathBuf],
+    base: &'a Path,
+    output: &'a Path,
+    password: Option<&'a str>,
     progress: Option<Arc<dyn Fn(Progress) + Send + Sync>>,
     total: u32,
     use_ultra: bool,
-) -> Result<u32, Box<dyn std::error::Error + Send + Sync>> {
+    solid_block_size_bytes: Option<usize>,
+}
+
+/// Solid: один сжатый поток на все файлы (как 7-Zip). use_ultra = XZ-9.
+fn compress_solid(plan: SolidCompressPlan<'_>) -> Result<u32, Box<dyn std::error::Error + Send + Sync>> {
+    const MIN_SOLID_BLOCK: usize = 1024 * 1024;
+    let SolidCompressPlan {
+        files,
+        base,
+        output,
+        password,
+        progress,
+        total,
+        use_ultra,
+        solid_block_size_bytes,
+    } = plan;
     let mut stream_raw: Vec<u8> = Vec::new();
     let mut offsets: Vec<(String, u64, u32)> = Vec::new();
     let mut pos: u64 = 0;
@@ -453,15 +603,44 @@ fn compress_solid(
         pos += len as u64;
     }
 
-    let compressed = if use_ultra {
-        crate::codec_backend::max_ratio_ultra_encode(&stream_raw)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?
-    } else {
-        crate::codec_backend::balanced_encode(&stream_raw)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?
+    let raw_slices: Vec<(usize, usize)> = match solid_block_size_bytes {
+        None => vec![(0, stream_raw.len())],
+        Some(bs) => {
+            let cap = bs.max(MIN_SOLID_BLOCK);
+            let mut v = Vec::new();
+            let mut off = 0usize;
+            while off < stream_raw.len() {
+                let end = (off + cap).min(stream_raw.len());
+                v.push((off, end - off));
+                off = end;
+            }
+            v
+        }
     };
-    let hash = BlockStore::block_hash(&stream_raw);
-    let algo_id = if use_ultra { 3u8 } else { 1u8 }; // 3 = MaxRatio/ultra
+    let multi_solid = raw_slices.len() > 1;
+
+    let mut solid_segments: Option<Vec<ChunkRef>> = None;
+    let mut blocks_to_write: Vec<([u8; 32], u8, Vec<u8>)> = Vec::new();
+
+    for (start, len) in &raw_slices {
+        let seg = &stream_raw[*start..*start + *len];
+        let compressed = if use_ultra {
+            crate::codec_backend::max_ratio_ultra_encode(seg).map_err(std::io::Error::other)?
+        } else {
+            crate::codec_backend::balanced_encode(seg).map_err(std::io::Error::other)?
+        };
+        let algo_id = if use_ultra { 3u8 } else { 1u8 };
+        let hash = BlockStore::block_hash(seg);
+        if multi_solid {
+            let hash_hex: String = hash.iter().map(|b| format!("{:02x}", b)).collect();
+            solid_segments.get_or_insert_with(Vec::new).push(ChunkRef {
+                hash_hex,
+                algo: algo_id,
+                len: seg.len() as u32,
+            });
+        }
+        blocks_to_write.push((hash, algo_id, compressed));
+    }
 
     let version = 2u8;
     let flags = 4u8 | (if password.is_some() { 2u8 } else { 0 }); // bit2=solid, bit1=encrypted
@@ -492,20 +671,22 @@ fn compress_solid(
             }),
         })
         .collect();
-    let manifest_json = serde_json::to_string(&manifest)?;
+    let manifest_json = serialize_manifest_for_solid(&manifest, solid_segments.as_deref())?;
     out.write_all(&(manifest_json.len() as u32).to_le_bytes())?;
     out.write_all(manifest_json.as_bytes())?;
 
-    let payload = if let Some(pass) = password {
-        let key = derive_key(pass, &salt);
-        encrypt_block(&key, &compressed)
-    } else {
-        compressed
-    };
-    out.write_all(&hash)?;
-    out.write_all(&[algo_id])?;
-    out.write_all(&(payload.len() as u32).to_le_bytes())?;
-    out.write_all(&payload)?;
+    let enc_key = password.map(|p| derive_key(p, &salt));
+    for (hash, algo_id, compressed) in blocks_to_write {
+        let payload = if let Some(ref k) = enc_key {
+            encrypt_block(k, &compressed)
+        } else {
+            compressed
+        };
+        out.write_all(&hash)?;
+        out.write_all(&[algo_id])?;
+        out.write_all(&(payload.len() as u32).to_le_bytes())?;
+        out.write_all(&payload)?;
+    }
 
     if let Some(ref cb) = progress {
         cb(Progress {
@@ -544,33 +725,17 @@ pub fn decompress_to_path_with_options(
     password: Option<&str>,
     progress: Option<Arc<dyn Fn(Progress) + Send + Sync>>,
 ) -> Result<u32, Box<dyn std::error::Error + Send + Sync>> {
-    let data = fs::read(archive)?;
-    if !data.starts_with(b"OMEGAZIP") {
-        return Err("Invalid archive".into());
-    }
-    let version = data.get(8).copied().unwrap_or(1);
-    let mut pos = 9usize;
-
-    let (flags, salt) = if version >= 2 {
-        let f = data.get(pos).copied().unwrap_or(0);
-        pos += 1;
-        let s = if (f & 2) != 0 {
-            if data.len() < pos + 16 {
-                return Err("Archive truncated (salt)".into());
-            }
-            let s: [u8; 16] = data[pos..pos + 16].try_into().unwrap();
-            pos += 16;
-            s
-        } else {
-            [0u8; 16]
-        };
-        (f, s)
-    } else {
-        (0, [0u8; 16])
-    };
+    let f = fs::File::open(archive)?;
+    let mut r = BufReader::new(f);
+    let OzReadHeader {
+        flags,
+        salt,
+        manifest_bytes,
+        ..
+    } = read_oz_header(&mut r)?;
 
     let encrypted = (flags & 2) != 0;
-    let key: Option<[u8; 32]> = if encrypted {
+    let key = if encrypted {
         Some(derive_key(
             password.ok_or("Encrypted archive requires password")?,
             &salt,
@@ -579,58 +744,54 @@ pub fn decompress_to_path_with_options(
         None
     };
 
-    let manifest_len = u32::from_le_bytes(
-        data[pos..pos + 4].try_into().map_err(|_| "manifest len")?,
-    ) as usize;
-    pos += 4;
-    if data.len() < pos + manifest_len {
-        return Err("Archive truncated (manifest)".into());
-    }
-    let manifest: Vec<ManifestEntry> = serde_json::from_slice(&data[pos..pos + manifest_len])?;
-    pos += manifest_len;
+    let (manifest, solid_segments_meta) = parse_manifest_json(&manifest_bytes)?;
 
     let has_recovery = (flags & 8) != 0;
     let num_blocks = if has_recovery {
-        if data.len() < pos + 4 {
-            return Err("Archive truncated (num_blocks)".into());
-        }
-        let n = u32::from_le_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
-        pos += 4;
-        n
+        read_u32_le(&mut r)? as usize
     } else {
         usize::MAX
     };
-
-    let block_header_len = if has_recovery { 32 + 1 + 4 + 4 } else { 32 + 1 + 4 };
-    let mut blocks_vec: Vec<([u8; 32], u8, usize, Option<Vec<u8>>)> = Vec::new();
+    type BlockRow = ([u8; 32], u8, usize, Option<Vec<u8>>);
+    let mut blocks_vec: Vec<BlockRow> = Vec::new();
     let mut bad_indices: Vec<usize> = Vec::new();
     let mut block_count = 0usize;
-    while block_count < num_blocks && pos + block_header_len <= data.len() {
+
+    loop {
+        if has_recovery && block_count >= num_blocks {
+            break;
+        }
         let mut hash = [0u8; 32];
-        hash.copy_from_slice(&data[pos..pos + 32]);
-        pos += 32;
-        let algo = data[pos];
-        pos += 1;
-        let blen = u32::from_le_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
-        pos += 4;
+        match r.read_exact(&mut hash) {
+            Ok(()) => {}
+            Err(e) if e.kind() == io::ErrorKind::UnexpectedEof => {
+                if has_recovery {
+                    return Err("Archive truncated (blocks)".into());
+                }
+                break;
+            }
+            Err(e) => return Err(e.into()),
+        }
+        if !has_recovery && block_count > 0 {
+            // allow EOF only before a new block header
+        }
+        let mut algo_b = [0u8; 1];
+        r.read_exact(&mut algo_b)?;
+        let algo = algo_b[0];
+        let blen = read_u32_le(&mut r)? as usize;
         let stored_crc = if has_recovery {
-            let c = u32::from_le_bytes(data[pos..pos + 4].try_into().unwrap());
-            pos += 4;
-            Some(c)
+            Some(read_u32_le(&mut r)?)
         } else {
             None
         };
-        if data.len() < pos + blen {
-            break;
-        }
-        let raw = data[pos..pos + blen].to_vec();
-        pos += blen;
+        let mut raw = vec![0u8; blen];
+        r.read_exact(&mut raw)?;
         let block = if let Some(ref k) = key {
             decrypt_block(k, &raw).map_err(|e| -> Box<dyn std::error::Error + Send + Sync> { e.into() })?
         } else {
             raw
         };
-        let ok = stored_crc.map_or(true, |c| crc32_bytes(&block) == c);
+        let ok = stored_crc.is_none_or(|c| crc32_bytes(&block) == c);
         if ok {
             blocks_vec.push((hash, algo, blen, Some(block)));
         } else {
@@ -640,59 +801,56 @@ pub fn decompress_to_path_with_options(
         block_count += 1;
     }
 
-    if has_recovery && !bad_indices.is_empty() && pos + 4 <= data.len() {
-        let num_stripes = u32::from_le_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
-        pos += 4;
-        let mut parity_data: Vec<(usize, Vec<Vec<u8>>)> = Vec::new();
-        for _ in 0..num_stripes {
-            if pos + 4 > data.len() {
-                break;
+    if has_recovery && !bad_indices.is_empty() {
+        let mut ns_buf = [0u8; 4];
+        if r.read_exact(&mut ns_buf).is_ok() {
+            let num_stripes = u32::from_le_bytes(ns_buf) as usize;
+            let mut parity_data: Vec<(usize, Vec<Vec<u8>>)> = Vec::new();
+            for _ in 0..num_stripes {
+                let max_len = match read_u32_le(&mut r) {
+                    Ok(v) => v as usize,
+                    Err(_) => break,
+                };
+                let mut p0 = vec![0u8; max_len];
+                if r.read_exact(&mut p0).is_err() {
+                    break;
+                }
+                let mut p1 = vec![0u8; max_len];
+                if r.read_exact(&mut p1).is_err() {
+                    break;
+                }
+                parity_data.push((max_len, vec![p0, p1]));
             }
-            let max_len = u32::from_le_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
-            pos += 4;
-            let p0 = if pos + max_len <= data.len() {
-                data[pos..pos + max_len].to_vec()
-            } else {
-                break;
-            };
-            pos += max_len;
-            let p1 = if pos + max_len <= data.len() {
-                data[pos..pos + max_len].to_vec()
-            } else {
-                break;
-            };
-            pos += max_len;
-            parity_data.push((max_len, vec![p0, p1]));
-        }
-        for (stripe_idx, (max_len, parity)) in parity_data.iter().enumerate() {
-            let start = stripe_idx * STRIPE_DATA_SHARDS;
-            let end = (start + STRIPE_DATA_SHARDS).min(blocks_vec.len());
-            let stripe_bad: Vec<usize> = bad_indices
-                .iter()
-                .copied()
-                .filter(|&i| i >= start && i < end)
-                .collect();
-            if stripe_bad.is_empty() || stripe_bad.len() > STRIPE_PARITY_SHARDS {
-                continue;
-            }
-            let mut shards: Vec<Option<Vec<u8>>> = (start..end)
-                .map(|i| {
-                    blocks_vec[i].3.as_ref().map(|v| {
-                        let mut b = v.clone();
-                        b.resize(*max_len, 0);
-                        b
+            for (stripe_idx, (max_len, parity)) in parity_data.iter().enumerate() {
+                let start = stripe_idx * STRIPE_DATA_SHARDS;
+                let end = (start + STRIPE_DATA_SHARDS).min(blocks_vec.len());
+                let stripe_bad: Vec<usize> = bad_indices
+                    .iter()
+                    .copied()
+                    .filter(|&i| i >= start && i < end)
+                    .collect();
+                if stripe_bad.is_empty() || stripe_bad.len() > STRIPE_PARITY_SHARDS {
+                    continue;
+                }
+                let mut shards: Vec<Option<Vec<u8>>> = (start..end)
+                    .map(|i| {
+                        blocks_vec[i].3.as_ref().map(|v| {
+                            let mut b = v.clone();
+                            b.resize(*max_len, 0);
+                            b
+                        })
                     })
-                })
-                .collect();
-            while shards.len() < STRIPE_DATA_SHARDS {
-                shards.push(Some(vec![0u8; *max_len]));
-            }
-            shards.truncate(STRIPE_DATA_SHARDS);
-            for p in parity {
-                shards.push(Some(p.clone()));
-            }
-            if shards.len() == STRIPE_DATA_SHARDS + STRIPE_PARITY_SHARDS {
-                if decode_stripe(&mut shards, *max_len).is_ok() {
+                    .collect();
+                while shards.len() < STRIPE_DATA_SHARDS {
+                    shards.push(Some(vec![0u8; *max_len]));
+                }
+                shards.truncate(STRIPE_DATA_SHARDS);
+                for p in parity {
+                    shards.push(Some(p.clone()));
+                }
+                if shards.len() == STRIPE_DATA_SHARDS + STRIPE_PARITY_SHARDS
+                    && decode_stripe(&mut shards, *max_len).is_ok()
+                {
                     for (j, i) in (start..end).enumerate() {
                         if blocks_vec[i].3.is_none() {
                             let mut rec = shards[j].clone().unwrap_or_default();
@@ -712,6 +870,15 @@ pub fn decompress_to_path_with_options(
 
     fs::create_dir_all(out_dir)?;
     let total_files = manifest.len() as u32;
+    let has_solid_entries = manifest.iter().any(|e| e.solid.is_some());
+    let solid_stream_raw: Option<Vec<u8>> = if has_solid_entries {
+        Some(decompress_solid_stream(
+            &blocks,
+            solid_segments_meta.as_deref(),
+        )?)
+    } else {
+        None
+    };
     let mut count = 0u32;
     for (idx, entry) in manifest.iter().enumerate() {
         if let Some(ref cb) = progress {
@@ -727,8 +894,7 @@ pub fn decompress_to_path_with_options(
             fs::create_dir_all(p)?;
         }
         let file_data: Vec<u8> = if let Some(ref solid_ref) = entry.solid {
-            let (_, (algo, stream_comp)) = blocks.iter().next().ok_or("No solid stream")?;
-            let stream_raw = decompress(codec_from_id(*algo), stream_comp)?;
+            let stream_raw = solid_stream_raw.as_ref().ok_or("No solid stream")?;
             let o = solid_ref.offset as usize;
             let l = solid_ref.length as usize;
             stream_raw[o..o + l].to_vec()
@@ -839,6 +1005,9 @@ pub fn compress_advanced_dispatch(
                 "Для ZIP шифрование не поддерживается — сохраните как .oz или .7z (7-Zip) или уберите пароль.".into(),
             );
         }
+        if options.zip_analyzed {
+            return crate::compat::compress_to_zip_analyzed(source, dest);
+        }
         crate::compat::compress_to_zip(source, dest)
     } else if crate::compat::output_is_tar_gz(dest) {
         if options.password.is_some() {
@@ -860,30 +1029,12 @@ pub fn export_to_zip(
     output_zip: &Path,
     password: Option<&str>,
 ) -> Result<u32, Box<dyn std::error::Error + Send + Sync>> {
-    let data = fs::read(archive_oz)?;
-    if !data.starts_with(b"OMEGAZIP") {
-        return Err("Invalid archive".into());
-    }
-    let version = data.get(8).copied().unwrap_or(1);
-    let mut pos = 9usize;
-    let (flags, salt) = if version >= 2 {
-        let f = data.get(pos).copied().unwrap_or(0);
-        pos += 1;
-        let s = if (f & 2) != 0 {
-            if data.len() < pos + 16 {
-                return Err("Archive truncated".into());
-            }
-            let s: [u8; 16] = data[pos..pos + 16].try_into().unwrap();
-            pos += 16;
-            s
-        } else {
-            [0u8; 16]
-        };
-        (f, s)
-    } else {
-        (0, [0u8; 16])
-    };
-    let key: Option<[u8; 32]> = if (flags & 2) != 0 {
+    let f_in = fs::File::open(archive_oz)?;
+    let mut r = BufReader::new(f_in);
+    let h = read_oz_header(&mut r)?;
+    let flags = h.flags;
+    let salt = h.salt;
+    let key = if (flags & 2) != 0 {
         Some(derive_key(
             password.ok_or("Password required for encrypted archive")?,
             &salt,
@@ -891,38 +1042,38 @@ pub fn export_to_zip(
     } else {
         None
     };
-    let manifest_len = u32::from_le_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
-    pos += 4;
-    let manifest: Vec<ManifestEntry> = serde_json::from_slice(&data[pos..pos + manifest_len])?;
-    pos += manifest_len;
+    let (manifest, solid_segments_export) = parse_manifest_json(&h.manifest_bytes)?;
     let has_recovery_export = (flags & 8) != 0;
-    let num_blocks_export = if has_recovery_export && pos + 4 <= data.len() {
-        let n = u32::from_le_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
-        pos += 4;
-        n
+    let num_blocks_export = if has_recovery_export {
+        read_u32_le(&mut r)? as usize
     } else {
         usize::MAX
     };
-    let block_header_export = if has_recovery_export { 41 } else { 37 };
     let mut blocks: std::collections::HashMap<[u8; 32], (u8, Vec<u8>)> = std::collections::HashMap::new();
     let mut blocks_read = 0usize;
-    while blocks_read < num_blocks_export && pos + block_header_export <= data.len() {
-        let mut hash = [0u8; 32];
-        hash.copy_from_slice(&data[pos..pos + 32]);
-        pos += 32;
-        let algo = data[pos];
-        pos += 1;
-        let blen = u32::from_le_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
-        pos += 4;
-        if has_recovery_export {
-            pos += 4;
-        }
-        if data.len() < pos + blen {
+    loop {
+        if has_recovery_export && blocks_read >= num_blocks_export {
             break;
         }
-        let raw = data[pos..pos + blen].to_vec();
-        pos += blen;
-        let block = key.as_ref().map(|k| decrypt_block(k, &raw).unwrap()).unwrap_or(raw);
+        let mut hash = [0u8; 32];
+        match r.read_exact(&mut hash) {
+            Ok(()) => {}
+            Err(e) if e.kind() == io::ErrorKind::UnexpectedEof => break,
+            Err(e) => return Err(e.into()),
+        }
+        let mut algo_b = [0u8; 1];
+        r.read_exact(&mut algo_b)?;
+        let algo = algo_b[0];
+        let blen = read_u32_le(&mut r)? as usize;
+        if has_recovery_export {
+            let _crc = read_u32_le(&mut r)?;
+        }
+        let mut raw = vec![0u8; blen];
+        r.read_exact(&mut raw)?;
+        let block = key
+            .as_ref()
+            .map(|k| decrypt_block(k, &raw).unwrap())
+            .unwrap_or(raw);
         blocks.insert(hash, (algo, block));
         blocks_read += 1;
     }
@@ -933,8 +1084,7 @@ pub fn export_to_zip(
     let mut count = 0u32;
     for entry in manifest {
         let file_data: Vec<u8> = if let Some(ref solid_ref) = entry.solid {
-            let (_, (algo, stream_comp)) = blocks.iter().next().ok_or("No stream")?;
-            let stream_raw = decompress(codec_from_id(*algo), stream_comp)?;
+            let stream_raw = decompress_solid_stream(&blocks, solid_segments_export.as_deref())?;
             let o = solid_ref.offset as usize;
             let l = solid_ref.length as usize;
             stream_raw[o..o + l].to_vec()
@@ -976,33 +1126,13 @@ pub struct ArchiveInfo {
 
 /// Читает заголовок и манифест, возвращает информацию об архиве.
 pub fn archive_info(archive: &Path) -> Result<ArchiveInfo, Box<dyn std::error::Error + Send + Sync>> {
-    let data = fs::read(archive)?;
-    if !data.starts_with(b"OMEGAZIP") {
-        return Err("Invalid archive".into());
-    }
-    let version = data.get(8).copied().unwrap_or(1);
-    let mut pos = 9usize;
-    let flags = if version >= 2 {
-        let f = data.get(pos).copied().unwrap_or(0);
-        pos += 1;
-        if (f & 2) != 0 {
-            pos += 16;
-        }
-        f
-    } else {
-        0
-    };
-    if data.len() < pos + 4 {
-        return Err("Archive truncated".into());
-    }
-    let manifest_len = u32::from_le_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
-    pos += 4;
-    if data.len() < pos + manifest_len {
-        return Err("Archive truncated".into());
-    }
-    let manifest: Vec<ManifestEntry> = serde_json::from_slice(&data[pos..pos + manifest_len])?;
+    let f = fs::File::open(archive)?;
+    let mut r = BufReader::new(f);
+    let h = read_oz_header(&mut r)?;
+    let (manifest, _) = parse_manifest_json(&h.manifest_bytes)?;
+    let flags = h.flags;
     Ok(ArchiveInfo {
-        version,
+        version: h.version,
         flags,
         file_count: manifest.len() as u32,
         encrypted: (flags & 2) != 0,
@@ -1014,27 +1144,9 @@ pub fn archive_info(archive: &Path) -> Result<ArchiveInfo, Box<dyn std::error::E
 
 /// Список путей файлов в архиве (только манифест).
 pub fn list_archive(archive: &Path) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> {
-    let data = fs::read(archive)?;
-    if !data.starts_with(b"OMEGAZIP") {
-        return Err("Invalid archive".into());
-    }
-    let version = data.get(8).copied().unwrap_or(1);
-    let mut pos = 9usize;
-    if version >= 2 {
-        let f = data.get(pos).copied().unwrap_or(0);
-        pos += 1;
-        if (f & 2) != 0 {
-            pos += 16;
-        }
-    }
-    if data.len() < pos + 4 {
-        return Err("Archive truncated".into());
-    }
-    let manifest_len = u32::from_le_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
-    pos += 4;
-    if data.len() < pos + manifest_len {
-        return Err("Archive truncated".into());
-    }
-    let manifest: Vec<ManifestEntry> = serde_json::from_slice(&data[pos..pos + manifest_len])?;
+    let f = fs::File::open(archive)?;
+    let mut r = BufReader::new(f);
+    let h = read_oz_header(&mut r)?;
+    let (manifest, _) = parse_manifest_json(&h.manifest_bytes)?;
     Ok(manifest.into_iter().map(|e| e.path).collect())
 }

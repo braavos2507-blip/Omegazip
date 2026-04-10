@@ -1,0 +1,41 @@
+# Подписанная macOS-сборка (Developer ID). Только ручной запуск — нужны secrets.
+# См. docs/DIST-01-MACOS-SIGNING.md
+
+name: macOS signed build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Import Developer ID certificate
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: bash scripts/macos-import-certificate-ci.sh
+
+      - name: Build app + embed CLI + re-sign
+        run: ./build-app.sh
+
+      - name: Package .app for artifact
+        run: ditto -c -k --keepParent dist/OmegaZip.app dist/OmegaZip-signed.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OmegaZip-macos-signed
+          path: dist/OmegaZip-signed.zip

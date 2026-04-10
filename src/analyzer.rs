@@ -50,7 +50,7 @@ fn text_ratio(data: &[u8]) -> f64 {
     }
     let printable = data
         .iter()
-        .filter(|&&b| b >= 32 && b < 127 || b == b'\n' || b == b'\r' || b == b'\t')
+        .filter(|&&b| (32..127).contains(&b) || b == b'\n' || b == b'\r' || b == b'\t')
         .count();
     printable as f64 / data.len() as f64
 }
@@ -121,7 +121,7 @@ pub fn analyze_bytes(data: &[u8], path: Option<&Path>) -> std::io::Result<Analys
     let context = path
         .and_then(script_context)
         .unwrap_or_else(|| {
-            if path.is_some_and(|p| media_extension(p)) {
+            if path.is_some_and(media_extension) {
                 DataContext::Media
             } else {
                 choose_context(entropy, text_ratio, &mime, is_pdf)
