@@ -1,19 +1,19 @@
-# RELEASE READINESS (public)
+# RELEASE READINESS (local)
 
-**Generated:** 2026-04-10T22:56:12+04:00  
-**Mode:** **public**  
-**Overall:** **GO-WITH-FLAGS**
+**Generated:** 2026-04-11T01:25:31+04:00  
+**Mode:** **local**  
+**Overall:** **NO-GO**
 
 ## Gate Status
 
 | Gate | Status | Details |
 |---|---|---|
-| Full local QA | PASS | Есть свежий полный QA за 2026-04-10 |
+| Full local QA | FLAG | Есть LATEST-FULL-QA.md, но не от сегодняшней даты |
 | Real corpus benchmark (A4/B2) | PASS | CORPUS_EXTRA задан: /Users/renat/01Project/OmegaZip/Архивы (файлов: 9235) |
 | 7-Zip dependency (D10) | PASS | Найден: /opt/homebrew/bin/7zz |
-| Signed app ready (E1) | FLAG | Подпись валидна, но не Developer ID (локальная/ad-hoc) |
-| Notarization preflight (E2) | FLAG | notarytool есть, но не заданы credentials Apple |
-| Clean-machine release smoke | PASS | Запись: /Users/renat/01Project/OmegaZip/tests/manual-files/results-auto/CLEAN-MACHINE-SMOKE-LATEST.md (найден **Status:** PASS/GO) |
+| Signed app ready (E1) | N/A | Локальная разработка: Developer ID подпись не требуется. |
+| Notarization preflight (E2) | N/A | Локальная разработка: notarization не требуется. |
+| Clean-machine release smoke | N/A | Локальная разработка: clean-machine smoke не обязателен. |
 
 ## Artifacts
 

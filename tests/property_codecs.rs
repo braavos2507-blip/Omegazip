@@ -14,6 +14,13 @@ proptest! {
     }
 
     #[test]
+    fn prop_dense_roundtrip(data in prop::collection::vec(any::<u8>(), 0..8192)) {
+        let compressed = compress(Codec::Dense, &data).unwrap();
+        let out = decompress(Codec::Dense, &compressed).unwrap();
+        prop_assert_eq!(data, out);
+    }
+
+    #[test]
     fn prop_balanced_roundtrip(data in prop::collection::vec(any::<u8>(), 0..8192)) {
         let compressed = compress(Codec::Balanced, &data).unwrap();
         let out = decompress(Codec::Balanced, &compressed).unwrap();

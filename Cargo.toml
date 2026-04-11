@@ -1,12 +1,12 @@
 [package]
 name = "omegazip"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "OmegaZip: 4-stage pipeline + chunked dedup, solid, encryption, recovery, ZIP export"
 
 [dependencies]
 zstd = "0.13"
-lz4_flex = "0.11"
+lz4_flex = "0.11.6"
 xz2 = "0.1"
 walkdir = "2"
 sha2 = "0.10"

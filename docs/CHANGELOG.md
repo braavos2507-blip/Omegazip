@@ -1,14 +1,25 @@
 # Changelog
 
+## 2026-04-11 (локально)
+
+### fix(core): Huffman — канонические коды, wire format v2, Dense под proptest
+- Дерево → длины → **канонические** коды (`u128`); лимит длины кодового слова **128 бит** (патологические частоты → ошибка сжатия).
+- **Wire v2** (новые сжатия): после `orig_len` — magic `H`, `u16` длина таблицы, сырые записи символов, затем битовый поток (нет разделителя `0xff`: символ 255 и байт `0xff` в коде больше не ломают разбор).
+- **Обратная совместимость:** `decode` по-прежнему читает старый формат (таблица до байта `0xff`).
+- Property-тест `prop_dense_roundtrip` включён в [tests/property_codecs.rs](../tests/property_codecs.rs).
+
+### chore: версия ядра 0.4.0
+- `Cargo.toml` (crate `omegazip`) выровнен с `package.json` / Tauri **0.4.0**; README и сноска в `OZ_FORMAT_SPEC.md`.
+
 ## 2026-04-11
 
 ### security & quality: dependency audit, threat notes, property tests, fuzz seed
 - [SECURITY.md](SECURITY.md) — краткий threat model, fuzz/SBOM, как сообщать об уязвимостях.
 - GitHub Actions **Security audit** (еженедельно + push в `main`/`master`/`fix/**`): `cargo audit` в корне и `src-tauri`, `npm audit --audit-level=high`.
 - `scripts/security-audit.sh`, `npm run audit:deps` — тот же контур локально (нужен `cargo install cargo-audit`).
-- Интеграционные property-тесты [tests/property_codecs.rs](../tests/property_codecs.rs) (proptest): roundtrip Store / Balanced / Fast / MaxRatio + smoke `analyze_bytes`.
+- Интеграционные property-тесты [tests/property_codecs.rs](../tests/property_codecs.rs) (proptest): roundtrip Store / Balanced / Fast / MaxRatio / **Dense** + smoke `analyze_bytes`.
 - Каталог [fuzz/](../fuzz/) + цель `huffman_decode` для `cargo-fuzz` (декодер Huffman + анализатор на случайных байтах).
-- Huffman `decode`: счётчик бит `u32` и маска для `len >= 32` — без переполнения `u8` и без `1u32 << len` при `len >= 32`.
+- Huffman: см. блок выше (канонические коды, wire v2); ранее отмеченные правки маски/счётчика входят в эту переработку.
 - CI **test** workflow: push также на ветки `fix/**`; `bash -n` для `security-audit.sh`.
 
 ## 2026-04-10

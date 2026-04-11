@@ -1,4 +1,4 @@
-# OmegaZip 0.3
+# OmegaZip 0.4
 
 Конвейер из 4 модулей + **chunked dedup**, **solid**, **шифрование**, **recovery (Reed-Solomon)**, **экспорт в ZIP**, **пресеты**, **репозиторий бэкапов**, прогресс в GUI и CLI.
 
