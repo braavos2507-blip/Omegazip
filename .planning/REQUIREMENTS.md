@@ -67,7 +67,7 @@
 
 ## v2 Requirements (отложено)
 
-- **QA-03**: Расширенные бенчмарки и регрессия. **Частично:** CI — roundtrip; локально — [docs/MEASURABLE-QUALITY.md](../docs/MEASURABLE-QUALITY.md), `npm run measure:baseline-local`, `npm run measure:oz-advantage`, [docs/QA-03-BENCHMARKS.md](../docs/QA-03-BENCHMARKS.md). **Дальше (опционально):** пороги по времени в CI, scheduled тяжёлые наборы.
+- **QA-03**: Расширенные бенчмарки и регрессия. **Частично:** CI — roundtrip; локально — [docs/MEASURABLE-QUALITY.md](../docs/MEASURABLE-QUALITY.md), `npm run measure:baseline-local`, `npm run measure:oz-advantage`, [docs/QA-03-BENCHMARKS.md](../docs/QA-03-BENCHMARKS.md). **Scheduled:** workflow [qa03-scheduled.yml](../.github/workflows/qa03-scheduled.yml) (еженедельно + `workflow_dispatch`, Ubuntu + macOS). **Дальше (опционально):** пороги по времени в CI, тяжёлые наборы в scheduled.
 - **DIST-01**: Подпись/нотаризация macOS — **частично:** entitlements, повторная подпись после CLI в [`build-app.sh`](../build-app.sh), [`docs/DIST-01-MACOS-SIGNING.md`](../docs/DIST-01-MACOS-SIGNING.md), скрипты `macos-import-certificate-ci.sh` / `macos-notarize-app.sh`, workflow [`macos-signed-build.yml`](../.github/workflows/macos-signed-build.yml). **Нотаризация в CI** — по желанию (секреты API / Apple ID), локально — `macos-notarize-app.sh`.
 
 ## Out of Scope

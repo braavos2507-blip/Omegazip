@@ -9,6 +9,9 @@ use std::io::Write;
 
 const TABLE_MAGIC_V2: u8 = b'H';
 
+/// Символ Huffman и его каноническое кодовое слово: `(symbol, bits, bit_len)`.
+type HuffmanSymbolEntry = (u8, u128, u8);
+
 #[derive(Clone)]
 struct Node {
     count: u64,
@@ -150,7 +153,7 @@ fn build_symbol_table_bytes(freq: &[u64; 256], codes: &[(u128, u8); 256]) -> Vec
     table
 }
 
-fn parse_symbol_table(data: &[u8], mut pos: usize, end: usize) -> std::io::Result<(Vec<(u8, u128, u8)>, usize)> {
+fn parse_symbol_table(data: &[u8], mut pos: usize, end: usize) -> std::io::Result<(Vec<HuffmanSymbolEntry>, usize)> {
     let mut sym_to_bits = Vec::new();
     while pos < end {
         let sym = data[pos];
@@ -183,7 +186,7 @@ fn parse_symbol_table(data: &[u8], mut pos: usize, end: usize) -> std::io::Resul
 
 fn decode_payload(
     orig_len: usize,
-    sym_to_bits: &[(u8, u128, u8)],
+    sym_to_bits: &[HuffmanSymbolEntry],
     bit_slice: &[u8],
 ) -> std::io::Result<Vec<u8>> {
     let max_code_len = sym_to_bits
@@ -316,7 +319,7 @@ pub fn decode(data: &[u8]) -> std::io::Result<Vec<u8>> {
         let (syms, _) = parse_symbol_table(data, table_start, table_end)?;
         (syms, table_end)
     } else {
-        let mut sym_to_bits: Vec<(u8, u128, u8)> = Vec::new();
+        let mut sym_to_bits: Vec<HuffmanSymbolEntry> = Vec::new();
         while pos < data.len() && data[pos] != 0xff {
             let sym = data[pos];
             pos += 1;

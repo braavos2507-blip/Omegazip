@@ -1,0 +1,19 @@
+# Дополнение к QA-03 в основном CI: еженедельный сигнал регрессии roundtrip без полной матрицы.
+name: QA-03 scheduled
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  qa03-roundtrip:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: QA-03 compress/decompress roundtrip
+        run: bash scripts/qa03-benchmark-ci.sh

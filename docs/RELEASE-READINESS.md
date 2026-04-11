@@ -1,14 +1,14 @@
 # RELEASE READINESS (local)
 
-**Generated:** 2026-04-11T01:25:31+04:00  
+**Generated:** 2026-04-11T10:45:56+04:00  
 **Mode:** **local**  
-**Overall:** **NO-GO**
+**Overall:** **GO-LOCAL**
 
 ## Gate Status
 
 | Gate | Status | Details |
 |---|---|---|
-| Full local QA | FLAG | Есть LATEST-FULL-QA.md, но не от сегодняшней даты |
+| Full local QA | PASS | Есть свежий полный QA за 2026-04-11 |
 | Real corpus benchmark (A4/B2) | PASS | CORPUS_EXTRA задан: /Users/renat/01Project/OmegaZip/Архивы (файлов: 9235) |
 | 7-Zip dependency (D10) | PASS | Найден: /opt/homebrew/bin/7zz |
 | Signed app ready (E1) | N/A | Локальная разработка: Developer ID подпись не требуется. |
@@ -18,7 +18,7 @@
 ## Artifacts
 
 - LATEST QA markdown: `tests/manual-files/results-auto/LATEST-FULL-QA.md`
-- LATEST QA log: `/Users/renat/01Project/OmegaZip/tests/manual-files/results-auto/baselines/full-qa-20260410-225541.log`
+- LATEST QA log: `/Users/renat/01Project/OmegaZip/tests/manual-files/results-auto/baselines/full-qa-20260411-104251.log`
 - Bench workflow report: `tests/manual-files/results-auto/BENCH-WORKFLOW-LATEST.md`
 - Signing/notary guide: [DIST-01-MACOS-SIGNING.md](DIST-01-MACOS-SIGNING.md)
 - Clean-machine checklist: [CLEAN-MACHINE-SMOKE.md](CLEAN-MACHINE-SMOKE.md)

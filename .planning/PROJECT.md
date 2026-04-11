@@ -26,6 +26,7 @@
 ### Active
 
 - [ ] Стабильность редких edge-case; измеримый контур — [docs/MEASURABLE-QUALITY.md](../docs/MEASURABLE-QUALITY.md) (`measure:baseline-local`, `measure:oz-advantage`)
+- **Последний полный локальный контур (фиксация):** 2026-04-11 — `tests/manual-files/results-auto/LATEST-FULL-QA.md`, `docs/RELEASE-READINESS.md` (**GO-LOCAL**), `npm run measure:release-gate-local` (PASS) при `CORPUS_EXTRA=Архивы`; KPI — `tests/manual-files/results-auto/KPI-CHECK-LATEST.md`.
 
 ### Out of Scope
 
@@ -73,4 +74,4 @@
 Документ обновляется на границах фаз (`/gsd:transition`) и майлстоунов. После фазы: валидированные требования → Validated; новые — Active; решения → Key Decisions.
 
 ---
-*Last updated: 2026-04-09 — v1.2 GAP закрыт; п.8 ТЗ не в объёме — TBD-01 снят.*
+*Last updated: 2026-04-11 — v1.2 GAP закрыт; зафиксирован GO-LOCAL + измеримый контур.*
