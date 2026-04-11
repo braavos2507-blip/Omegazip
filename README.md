@@ -31,6 +31,10 @@ cargo build --release
 ./target/release/omegazip repo backup ./myrepo ./data
 ./target/release/omegazip repo list ./myrepo
 ./target/release/omegazip repo restore ./myrepo 1 ./restored
+# Копия репо в другую локальную папку (или в смонтированный каталог)
+./target/release/omegazip repo push ./myrepo /path/to/mirror
+# S3 / SFTP / др. через rclone (после `rclone config`): синхронизация каталога репо на remote
+./target/release/omegazip repo rclone-sync ./myrepo myremote:bucket/prefix
 # Проверка 7-Zip / p7zip и подсказки по установке (нужен для .7z, RAR, ISO, MSI…)
 ./target/release/omegazip deps
 ```
@@ -59,6 +63,19 @@ cargo build --release
 3. **Выбор кодека** — по контексту выбирается предпочтительный кодек, затем в памяти сравниваются несколько вариантов и берётся лучший по размеру. Кодеки: Dense (энтропийный), Balanced, Fast, MaxRatio, Store (без сжатия).
 
 4. **Глобальный дедуп** — блоки по хешу хранятся в одном экземпляре; перед полным хешем используется фильтр по набору (раздел 1.1 документа) для быстрого отсева.
+
+## Публикация в Git и CI
+
+Если `git remote -v` пустой, добавьте origin и отправьте ветку:
+
+```bash
+git remote add origin https://github.com/USER/REPO.git
+git push -u origin master
+```
+
+На GitHub: **Actions** → workflow **CI** (`ci.yml`) после каждого push; полные установщики — **tauri-bundles** (по расписанию релиза / вручную). Локальный контроль перед push: `cargo test -p omegazip`, при необходимости `CORPUS_EXTRA=/путь/к/корпусу npm run measure:release-gate-local`.
+
+**Публичный релиз (macOS):** [docs/DIST-01-MACOS-SIGNING.md](docs/DIST-01-MACOS-SIGNING.md) → задать `APPLE_SIGNING_IDENTITY`, `./build-app.sh`, при необходимости `bash scripts/macos-notarize-app.sh dist/OmegaZip.app`. На чистой VM — [docs/CLEAN-MACHINE-SMOKE.md](docs/CLEAN-MACHINE-SMOKE.md), затем `bash scripts/record-clean-machine-smoke.sh PASS "имя DMG"` и `CORPUS_EXTRA=... RELEASE_MODE=public npm run measure:release-readiness` + `npm run measure:release-gate-strict`.
 
 ## Скрипты
 

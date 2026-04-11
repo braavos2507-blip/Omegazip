@@ -27,6 +27,7 @@
 
 - [ ] Стабильность редких edge-case; измеримый контур — [docs/MEASURABLE-QUALITY.md](../docs/MEASURABLE-QUALITY.md) (`measure:baseline-local`, `measure:oz-advantage`)
 - **Последний полный локальный контур (фиксация):** 2026-04-11 — `tests/manual-files/results-auto/LATEST-FULL-QA.md`, `docs/RELEASE-READINESS.md` (**GO-LOCAL**), `npm run measure:release-gate-local` (PASS) при `CORPUS_EXTRA=Архивы`; KPI — `tests/manual-files/results-auto/KPI-CHECK-LATEST.md`.
+- **Baseline-local (ядро):** 2026-04-11 — лог `tests/manual-files/results-auto/baselines/baseline-20260411-110627.log` (`npm run measure:baseline-local`).
 
 ### Out of Scope
 

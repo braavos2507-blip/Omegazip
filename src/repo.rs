@@ -9,7 +9,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-/// Локальное хранилище репозитория (корень с `chunks/` и `snapshots/`). Задел под SFTP/S3 — отдельные типы с тем же интерфейсом путей.
+/// Локальное хранилище репозитория (корень с `chunks/` и `snapshots/`).
+/// Удалённое хранилище: `repo_push` в локальную папку или [`repo_rclone_sync`] через rclone (S3, SFTP, …).
 #[derive(Clone, Debug)]
 pub struct LocalRepo {
     pub root: PathBuf,
@@ -262,6 +263,42 @@ pub fn repo_push(
         copy_dir(&snapshots_src, &snapshots_dst, &mut files_copied)?;
     }
     Ok(files_copied)
+}
+
+/// Синхронизирует каталог репозитория на удалённое хранилище через [rclone](https://rclone.org/) (`rclone sync`).
+/// Подходит для S3, SFTP, B2 и др. после настройки `rclone config` (имя remote вида `myremote:bucket/prefix`).
+pub fn repo_rclone_sync(
+    repo_path: &Path,
+    remote_spec: &str,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    use std::process::Command;
+
+    let spec = remote_spec.trim();
+    if spec.is_empty() {
+        return Err("repo rclone-sync: укажите назначение (например remote:bucket/omegazip-repo)".into());
+    }
+
+    let repo = repo_path
+        .canonicalize()
+        .map_err(|e| format!("repo rclone-sync: не удалось canonicalize {}: {}", repo_path.display(), e))?;
+
+    let st = Command::new("rclone")
+        .args(["sync", repo.to_str().ok_or("repo rclone-sync: путь к репо не UTF-8")?, spec])
+        .status()
+        .map_err(|e| {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                format!(
+                    "rclone не найден в PATH; установите rclone (https://rclone.org/downloads/ ) и настройте remote для S3/SFTP и т.д.: {e}"
+                )
+            } else {
+                format!("repo rclone-sync: не удалось запустить rclone: {e}")
+            }
+        })?;
+
+    if !st.success() {
+        return Err(format!("rclone sync завершился с кодом {:?}", st.code()).into());
+    }
+    Ok(())
 }
 
 /// Удаляет старые снапшоты, оставляя последние `keep_last` по id. При `gc_chunks` удаляет чанки, на которые больше не ссылаются оставшиеся снапшоты.

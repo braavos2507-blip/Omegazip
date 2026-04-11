@@ -33,7 +33,7 @@ pub use dedup::{BlockStore, BlockRef};
 pub use chunked::{chunks, DEFAULT_CHUNK_SIZE};
 pub use repo::{
     repo_init, backup as repo_backup, restore as repo_restore, list_snapshots, repo_push, repo_prune,
-    LocalRepo,
+    repo_rclone_sync, LocalRepo,
 };
 pub use smart_preset::{
     effective_compress_preset_hint, effective_oz_preset_from_service_context,

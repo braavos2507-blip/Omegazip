@@ -3,7 +3,7 @@
 use omegazip::{
     archive_info, compress_advanced_dispatch, compress_dispatch, decompress_any_to_path,
     decompress_any_to_path_with_password, export_to_zip, list_any_archive,
-    list_any_archive_with_password, repo_init, repo_backup, repo_restore, list_snapshots, repo_push,
+    list_any_archive_with_password,     repo_init, repo_backup, repo_restore, list_snapshots, repo_push, repo_rclone_sync,
     repo_prune,
     seven_zip_status, suggested_preset_for_path, suggest_competitive_plan,
     CompressOptions, Preset, DEFAULT_CHUNK_SIZE,
@@ -146,7 +146,9 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             }
         }
         "repo" => {
-            let sub = args.get(2).map(String::as_str).ok_or("repo: укажите init|backup|restore|push|list|prune")?;
+            let sub = args.get(2).map(String::as_str).ok_or(
+                "repo: укажите init|backup|restore|push|rclone-sync|list|prune",
+            )?;
             match sub {
                 "init" => {
                     let path = args.get(3).map(PathBuf::from).ok_or("repo init: укажите путь")?;
@@ -171,6 +173,15 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                     let dest = args.get(4).map(PathBuf::from).ok_or("repo push: укажите назначение (папка или rclone mount)")?;
                     let n = repo_push(&repo_path, &dest)?;
                     println!("Pushed {} files to {}", n, dest.display());
+                }
+                "rclone-sync" => {
+                    let repo_path = args.get(3).map(PathBuf::from).ok_or("repo rclone-sync: укажите путь к репо")?;
+                    let remote = args
+                        .get(4)
+                        .map(String::as_str)
+                        .ok_or("repo rclone-sync: укажите назначение rclone (например mys3:bucket/prefix)")?;
+                    repo_rclone_sync(&repo_path, remote)?;
+                    println!("rclone sync завершён: {} -> {}", repo_path.display(), remote);
                 }
                 "list" => {
                     let repo_path = args.get(3).map(PathBuf::from).ok_or("repo list: укажите путь к репо")?;
@@ -199,7 +210,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                         }
                     );
                 }
-                _ => eprintln!("repo: init|backup|restore|push|list|prune"),
+                _ => eprintln!("repo: init|backup|restore|push|rclone-sync|list|prune"),
             }
         }
         _ => print_usage(),
@@ -208,7 +219,7 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 
 fn print_usage() {
-    eprintln!("OmegaZip 0.3 — chunked dedup, solid, шифрование, recovery, repo push");
+    eprintln!("OmegaZip 0.4 — chunked dedup, solid, шифрование, recovery, repo");
     eprintln!("  compress [OPTIONS] <file|dir> <output.oz|.zip|.tar.gz|.tgz|.7z>");
     eprintln!("    --preset fast|balanced|max|ultra|maxcompression|auto|competitive");
     eprintln!("      auto = по типу файлов; competitive = dry-run режим для .oz (size/speed)");
@@ -226,7 +237,8 @@ fn print_usage() {
     eprintln!("  repo init <path>    — создать репозиторий");
     eprintln!("  repo backup <repo> <source>  — бэкап в репо");
     eprintln!("  repo restore <repo> <id> [dest]  — восстановить снапшот");
-    eprintln!("  repo push <repo> <dest>  — синхронизировать репо в папку/облако (rclone mount и т.д.)");
+    eprintln!("  repo push <repo> <dest>  — скопировать репо в локальную папку (или смонтированный remote)");
+    eprintln!("  repo rclone-sync <repo> <remote:path>  — то же через rclone sync (S3, SFTP, …)");
     eprintln!("  repo list <repo>    — список снапшотов");
     eprintln!("  repo prune <repo> <keep> [--gc-chunks]  — оставить последние keep снапшотов");
 }
