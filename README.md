@@ -39,6 +39,8 @@ cargo build --release
 ./target/release/omegazip deps
 ```
 
+Если задана переменная **`CARGO_TARGET_DIR`**, бинарник может оказаться вне `./target/release/`. Тогда смотрите путь в выводе `cargo` или соберите в стандартный каталог проекта: `env -u CARGO_TARGET_DIR cargo build --release -p omegazip`.
+
 ## Форматы и 7-Zip
 
 - **Нативно (без 7-Zip):** OmegaZip открывает ZIP, tar (включая .gz/.xz/.bz2/.zst), одиночные .gz/.xz/.bz2/.zst, CAB и `.oz`. Подробная матрица: [docs/FORMATS.md](docs/FORMATS.md). Честное сравнение с ориентиром «топ-5 архиваторов» (7-Zip, WinRAR, …): [docs/VERSUS-TOP5.md](docs/VERSUS-TOP5.md).
