@@ -2,6 +2,11 @@
 
 ## 2026-04-11 (локально)
 
+### feat(preprocess): PNG/JPEG lossy перед сжатием
+- Для `PNG` и `JPEG` включен lossy-препроцесс по умолчанию (`pngquant` / `jpegoptim`, если доступны в системе).
+- Поддержаны переопределения команд через env: `OMEGAZIP_PREPROCESS_PNG`, `OMEGAZIP_PREPROCESS_JPEG`.
+- Результат принимается только если стал меньше исходного.
+
 ### feat(repo): `repo rclone-sync` для S3/SFTP и др. через rclone
 - CLI: `omegazip repo rclone-sync <repo> <remote:path>` вызывает `rclone sync` (нужен бинарник rclone в `PATH` и настроенный remote).
 - README: раздел «Публикация в Git и CI» (push, проверка Actions).

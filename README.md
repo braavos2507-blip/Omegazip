@@ -84,6 +84,11 @@ git push -u origin master
 - **`npm run test:context-menu`** — автотест логики ПКМ (`pick_ext` / stem для Win/Linux-скриптов); в CI также проверка синтаксиса PowerShell (`omega-context-helper.ps1`).
 - `scripts/detect_context.sh` — по MIME и первым байтам выдаёт контекст.
 - `scripts/preprocess_pdf.sh` — вызов внешней команды для оптимизации PDF (команда задаётся через переменные).
+- Препроцесс изображений:
+  - `PNG` — lossy по умолчанию через `pngquant` (`quality=65-85`), если утилита доступна;
+  - `JPEG` — lossy по умолчанию через `jpegoptim` (`--max=82`), если утилита доступна.
+  - Можно переопределить команды: `OMEGAZIP_PREPROCESS_PNG`, `OMEGAZIP_PREPROCESS_JPEG`.
+  OmegaZip применяет результат только если выходной файл меньше исходного.
 - `scripts/entropy.sh` — энтропия файла.
 
 Пример с собственным анализатором:

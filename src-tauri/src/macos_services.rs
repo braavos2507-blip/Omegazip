@@ -59,7 +59,7 @@ pub fn try_emit_open_files_from_pasteboard(app_handle: &tauri::AppHandle) -> boo
     if crate::silent_open::try_start_silent_compress_background_forced(app_handle, &paths) {
         return true;
     }
-    true
+    false
 }
 
 /// No-op: full NSServices provider would require native Obj-C. Pasteboard-on-Resumed is used instead.

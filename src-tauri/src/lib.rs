@@ -61,7 +61,7 @@ use tauri::{AppHandle, DragDropEvent, Emitter, Manager, RunEvent, WebviewEvent, 
 use tauri_plugin_dialog::DialogExt;
 
 #[cfg(target_os = "macos")]
-static SHOW_MAIN_ON_READY: AtomicBool = AtomicBool::new(false);
+static SHOW_MAIN_ON_READY: AtomicBool = AtomicBool::new(true);
 
 #[tauri::command]
 fn compress(source: PathBuf, archive_path: PathBuf) -> Result<u32, String> {
@@ -597,13 +597,24 @@ pub fn run() {
                     handle_opened_paths_from_service(app_handle, ready_paths);
                     return;
                 }
-                let _ = macos_services::try_emit_open_files_from_pasteboard(app_handle);
+                let consumed = macos_services::try_emit_open_files_from_pasteboard(app_handle);
+                if !consumed && SHOW_MAIN_ON_READY.load(Ordering::SeqCst) {
+                    if let Some(w) = app_handle.get_webview_window("main") {
+                        let _ = w.show();
+                        let _ = w.set_focus();
+                    }
+                }
                 return;
             }
             #[cfg(target_os = "macos")]
             if let RunEvent::Resumed = event {
                 macos_open_files::try_install_open_files_hook();
-                let _ = macos_services::try_emit_open_files_from_pasteboard(app_handle);
+                let consumed = macos_services::try_emit_open_files_from_pasteboard(app_handle);
+                if !consumed && SHOW_MAIN_ON_READY.load(Ordering::SeqCst) {
+                    if let Some(w) = app_handle.get_webview_window("main") {
+                        let _ = w.show();
+                    }
+                }
                 return;
             }
             #[cfg(target_os = "macos")]
@@ -618,8 +629,13 @@ pub fn run() {
             }
             #[cfg(target_os = "macos")]
             if let RunEvent::Reopen { has_visible_windows, .. } = event {
-                let _ = has_visible_windows;
-                let _ = macos_services::try_emit_open_files_from_pasteboard(app_handle);
+                let consumed = macos_services::try_emit_open_files_from_pasteboard(app_handle);
+                if !consumed && !has_visible_windows && SHOW_MAIN_ON_READY.load(Ordering::SeqCst) {
+                    if let Some(w) = app_handle.get_webview_window("main") {
+                        let _ = w.show();
+                        let _ = w.set_focus();
+                    }
+                }
                 return;
             }
             #[cfg(any(target_os = "windows", target_os = "linux"))]
