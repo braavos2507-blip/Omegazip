@@ -1,6 +1,6 @@
 # KPI check (local)
 
-- Generated: 2026-04-11T10:45:57+04:00
+- Generated: 2026-04-13T20:35:24+04:00
 - Source: `/Users/renat/01Project/OmegaZip/tests/manual-files/results-auto/profile-smoke-last.txt`
 
 ## Targets

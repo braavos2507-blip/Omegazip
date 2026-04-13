@@ -1,14 +1,14 @@
 # RELEASE READINESS (local)
 
-**Generated:** 2026-04-11T10:45:56+04:00  
+**Generated:** 2026-04-13T20:35:24+04:00  
 **Mode:** **local**  
-**Overall:** **GO-LOCAL**
+**Overall:** **NO-GO**
 
 ## Gate Status
 
 | Gate | Status | Details |
 |---|---|---|
-| Full local QA | PASS | Есть свежий полный QA за 2026-04-11 |
+| Full local QA | FLAG | Есть LATEST-FULL-QA.md, но не от сегодняшней даты |
 | Real corpus benchmark (A4/B2) | PASS | CORPUS_EXTRA задан: /Users/renat/01Project/OmegaZip/Архивы (файлов: 9235) |
 | 7-Zip dependency (D10) | PASS | Найден: /opt/homebrew/bin/7zz |
 | Signed app ready (E1) | N/A | Локальная разработка: Developer ID подпись не требуется. |
