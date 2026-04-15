@@ -77,7 +77,7 @@ git push -u origin master
 
 На GitHub: **Actions** → workflow **CI** (`ci.yml`) после каждого push; полные установщики — **tauri-bundles** (по расписанию релиза / вручную). Локальный контроль перед push: `cargo test -p omegazip`, при необходимости `CORPUS_EXTRA=/путь/к/корпусу npm run measure:release-gate-local`.
 
-**Публичный релиз (macOS):** [docs/DIST-01-MACOS-SIGNING.md](docs/DIST-01-MACOS-SIGNING.md) → задать `APPLE_SIGNING_IDENTITY`, `./build-app.sh`, при необходимости `bash scripts/macos-notarize-app.sh dist/OmegaZip.app`. На чистой VM — [docs/CLEAN-MACHINE-SMOKE.md](docs/CLEAN-MACHINE-SMOKE.md), затем `bash scripts/record-clean-machine-smoke.sh PASS "имя DMG"` и `CORPUS_EXTRA=... RELEASE_MODE=public npm run measure:release-readiness` + `npm run measure:release-gate-strict`. Пошаговый сценарий «день релиза»: [docs/RELEASE-DAY-CHECKLIST.md](docs/RELEASE-DAY-CHECKLIST.md).
+**Публичный релиз (macOS):** [docs/DIST-01-MACOS-SIGNING.md](docs/DIST-01-MACOS-SIGNING.md) → задать `APPLE_SIGNING_IDENTITY`, `./build-app.sh`, при необходимости `bash scripts/macos-notarize-app.sh dist/OmegaZip.app`. На чистой VM — [docs/CLEAN-MACHINE-SMOKE.md](docs/CLEAN-MACHINE-SMOKE.md), затем `bash scripts/record-clean-machine-smoke.sh PASS "имя DMG"` и `CORPUS_EXTRA=... RELEASE_MODE=public npm run measure:release-readiness` + `npm run measure:release-gate-strict`. Пошаговый сценарий «день релиза»: [docs/RELEASE-DAY-CHECKLIST.md](docs/RELEASE-DAY-CHECKLIST.md). Черновик релиз-заметок: [docs/RELEASE-NOTES-0.4.0.md](docs/RELEASE-NOTES-0.4.0.md).
 
 ## Скрипты
 
