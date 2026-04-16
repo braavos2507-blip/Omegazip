@@ -206,10 +206,6 @@ pub fn suggest_competitive_plan(path: &Path) -> CompetitivePresetPlan {
         };
     }
 
-    if let Some(trial_plan) = suggest_competitive_plan_by_trial(path) {
-        return trial_plan;
-    }
-
     let mut sampled_files = 0usize;
     let mut compressed_like = 0usize;
     let mut small_files = 0usize;
@@ -307,6 +303,14 @@ pub fn suggest_competitive_plan(path: &Path) -> CompetitivePresetPlan {
         };
     }
 
+    // Trial-режим хорошо работает на компактных наборах.
+    // На больших деревьях (когда упираемся в sample cap) чаще лучше устойчивые эвристики.
+    if (20..(DIRECTORY_SAMPLE_CAP / 2)).contains(&sampled_files) {
+        if let Some(trial_plan) = suggest_competitive_plan_by_trial(path) {
+            return trial_plan;
+        }
+    }
+
     CompetitivePresetPlan {
         preset: "balanced".to_string(),
         chunked: true,
@@ -322,7 +326,9 @@ pub fn suggest_competitive_plan(path: &Path) -> CompetitivePresetPlan {
 enum CompetitiveCandidate {
     Balanced,
     ChunkedBalanced,
+    ChunkedMax,
     MaxSolid,
+    UltraSolid,
 }
 
 impl CompetitiveCandidate {
@@ -330,7 +336,9 @@ impl CompetitiveCandidate {
         match self {
             CompetitiveCandidate::Balanced => "balanced",
             CompetitiveCandidate::ChunkedBalanced => "balanced+chunked",
+            CompetitiveCandidate::ChunkedMax => "max+chunked",
             CompetitiveCandidate::MaxSolid => "max(solid)",
+            CompetitiveCandidate::UltraSolid => "ultra(solid)",
         }
     }
 }
@@ -395,12 +403,34 @@ fn estimate_candidate(candidate: CompetitiveCandidate, samples: &[Vec<u8>]) -> O
             }
             total
         }
+        CompetitiveCandidate::ChunkedMax => {
+            let mut total = 0usize;
+            let mut seen = HashSet::<[u8; 32]>::new();
+            for data in samples {
+                for ch in chunks(data, crate::DEFAULT_CHUNK_SIZE) {
+                    let h = BlockStore::block_hash(ch);
+                    if !seen.insert(h) {
+                        continue;
+                    }
+                    let c = codec_backend::max_ratio_encode(ch).ok()?;
+                    total += c.len();
+                }
+            }
+            total
+        }
         CompetitiveCandidate::MaxSolid => {
             let mut joined = Vec::new();
             for data in samples {
                 joined.extend_from_slice(data);
             }
-            codec_backend::balanced_encode(&joined).ok()?.len()
+            codec_backend::max_ratio_encode(&joined).ok()?.len()
+        }
+        CompetitiveCandidate::UltraSolid => {
+            let mut joined = Vec::new();
+            for data in samples {
+                joined.extend_from_slice(data);
+            }
+            codec_backend::max_ratio_ultra_encode(&joined).ok()?.len()
         }
     };
     Some((est, t0.elapsed().as_secs_f64()))
@@ -415,7 +445,9 @@ fn suggest_competitive_plan_by_trial(path: &Path) -> Option<CompetitivePresetPla
     let candidates = [
         CompetitiveCandidate::Balanced,
         CompetitiveCandidate::ChunkedBalanced,
+        CompetitiveCandidate::ChunkedMax,
         CompetitiveCandidate::MaxSolid,
+        CompetitiveCandidate::UltraSolid,
     ];
 
     let mut measured: Vec<(CompetitiveCandidate, usize, f64)> = Vec::new();
@@ -426,10 +458,11 @@ fn suggest_competitive_plan_by_trial(path: &Path) -> Option<CompetitivePresetPla
     measured.sort_by_key(|(_, sz, _)| *sz);
     let (best_c, best_sz, best_t) = measured[0];
 
-    // Если размер почти одинаковый (<=3%), предпочесть более быстрый пресет.
+    // Если размер почти одинаковый (<=1%), предпочесть более быстрый пресет.
+    // Для competitive-режима это сохраняет фокус на размере.
     let mut selected = (best_c, best_sz, best_t);
     for (c, sz, t) in &measured {
-        if (*sz as f64) <= (best_sz as f64) * 1.03 && *t < selected.2 {
+        if (*sz as f64) <= (best_sz as f64) * 1.01 && *t < selected.2 {
             selected = (*c, *sz, *t);
         }
     }
@@ -437,7 +470,9 @@ fn suggest_competitive_plan_by_trial(path: &Path) -> Option<CompetitivePresetPla
     let (preset, chunked) = match selected.0 {
         CompetitiveCandidate::Balanced => ("balanced".to_string(), false),
         CompetitiveCandidate::ChunkedBalanced => ("balanced".to_string(), true),
+        CompetitiveCandidate::ChunkedMax => ("max".to_string(), true),
         CompetitiveCandidate::MaxSolid => ("max".to_string(), false),
+        CompetitiveCandidate::UltraSolid => ("ultra".to_string(), false),
     };
     let reason = format!(
         "trial: winner={} est_size={}B est_time={:.3}s (samples: {} files)",
