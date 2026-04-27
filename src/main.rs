@@ -11,7 +11,8 @@ use omegazip::{
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-/// Если выходной файл не указан: `<имя_как_у_источника>.oz` (у файла — без последнего расширения).
+/// Если выходной файл не указан: `<имя_как_у_источника>.zip` (share-safe по умолчанию).
+/// Для внутреннего/эффективного формата `.oz` укажите расширение явно.
 fn default_compress_output_from_input(input: &Path) -> PathBuf {
     let file_name = input
         .file_name()
@@ -22,7 +23,7 @@ fn default_compress_output_from_input(input: &Path) -> PathBuf {
         .and_then(|s| s.to_str())
         .filter(|s| !s.is_empty())
         .unwrap_or(file_name);
-    PathBuf::from(format!("{base}.oz"))
+    PathBuf::from(format!("{base}.zip"))
 }
 
 fn output_is_oz(path: &Path) -> bool {
@@ -220,7 +221,8 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
 fn print_usage() {
     eprintln!("OmegaZip 0.4 — chunked dedup, solid, шифрование, recovery, repo");
-    eprintln!("  compress [OPTIONS] <file|dir> <output.oz|.zip|.tar.gz|.tgz|.7z>");
+    eprintln!("  compress [OPTIONS] <file|dir> [output.oz|.zip|.tar.gz|.tgz|.7z]");
+    eprintln!("    без output: share-safe default -> <name>.zip");
     eprintln!("    --preset fast|balanced|max|ultra|maxcompression|auto|competitive");
     eprintln!("      auto = по типу файлов; competitive = dry-run режим для .oz (size/speed)");
     eprintln!("    --chunked [SIZE]   чанковая дедупликация (default {} bytes)", DEFAULT_CHUNK_SIZE);

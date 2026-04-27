@@ -30,7 +30,8 @@ impl Default for GuiPrefs {
         Self {
             silent_extract_on_open: true,
             silent_compress_on_open: true,
-            silent_compress_format: "oz".to_string(),
+            // Share-safe by default: archives for external exchange should open everywhere.
+            silent_compress_format: "zip".to_string(),
         }
     }
 }
@@ -458,7 +459,7 @@ pub fn set_silent_compress_enabled(_app: &AppHandle, _on: bool) -> Result<(), St
 
 #[cfg(target_os = "android")]
 pub fn silent_compress_format_stored(_app: &AppHandle) -> String {
-    "oz".to_string()
+    "zip".to_string()
 }
 
 #[cfg(target_os = "android")]

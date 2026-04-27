@@ -205,7 +205,7 @@ fn pick_save_file_rfd(
     default_name: Option<String>,
     default_directory: Option<String>,
 ) -> Result<Option<String>, String> {
-    let name = default_name.unwrap_or_else(|| "archive.oz".into());
+    let name = default_name.unwrap_or_else(|| "archive.zip".into());
     let mut dlg = if name.ends_with(".zip") {
         rfd::FileDialog::new()
             .add_filter("ZIP", &["zip"])
@@ -227,7 +227,7 @@ fn pick_save_file_impl(
     default_name: Option<String>,
     default_directory: Option<String>,
 ) -> Result<Option<String>, String> {
-    let name = default_name.unwrap_or_else(|| "archive.oz".into());
+    let name = default_name.unwrap_or_else(|| "archive.zip".into());
     let (filter_name, exts): (&str, &[&str]) = if name.ends_with(".zip") {
         ("ZIP", &["zip"])
     } else {
@@ -651,7 +651,14 @@ pub fn run() {
                         }
                     })
                     .collect();
-                handle_opened_paths(app_handle, paths);
+                if paths.is_empty() {
+                    if let Some(w) = app_handle.get_webview_window("main") {
+                        let _ = w.show();
+                        let _ = w.set_focus();
+                    }
+                } else {
+                    handle_opened_paths(app_handle, paths);
+                }
                 return;
             }
             // macOS + WebviewWindow: сброс файлов часто приходит как WebviewEvent, а не WindowEvent.

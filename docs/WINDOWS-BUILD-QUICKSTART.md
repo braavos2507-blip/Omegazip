@@ -1,0 +1,60 @@
+# Windows Build Quickstart
+
+Короткая инструкция, чтобы получить готовый `.msi/.exe` на машине с Windows.
+
+## 1) Что установить
+
+- Node.js LTS (вместе с npm): https://nodejs.org/
+- Rust toolchain: https://rustup.rs/
+- Visual Studio 2022 Build Tools (компонент **Desktop development with C++**)
+
+Проверка в PowerShell:
+
+```powershell
+node -v
+npm -v
+rustc -V
+cargo -V
+```
+
+## 2) Сборка (одной командой)
+
+Из корня проекта:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\build-windows.ps1
+```
+
+Если `node_modules` уже установлены, можно быстрее:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\build-windows.ps1 -SkipNpmInstall
+```
+
+## 3) Где искать готовые файлы
+
+Обычно:
+
+- `src-tauri\target\release\bundle\msi\`
+- `src-tauri\target\release\bundle\nsis\`
+
+Скрипт сам напечатает полные пути к найденным `.msi/.exe`.
+
+## 4) Типичные ошибки
+
+- `link.exe not found` / ошибки MSVC:
+  - не установлены Visual Studio Build Tools с C++ workload.
+- `WebView2` runtime issues:
+  - на тестовой машине поставьте Microsoft Edge WebView2 Runtime.
+- Ошибки npm:
+  - удалите `node_modules` и `package-lock.json`, затем `npm ci`.
+
+## 5) Smoke-test на Windows
+
+- Установить `.msi/.exe`
+- Запустить GUI
+- Проверить:
+  - сжатие файла/папки в `.zip` (default share-safe)
+  - сжатие в `.oz` вручную (через путь назначения)
+  - распаковку `.zip` и `.oz`
+
