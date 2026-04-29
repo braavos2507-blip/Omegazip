@@ -63,6 +63,66 @@ use tauri_plugin_dialog::DialogExt;
 #[cfg(target_os = "macos")]
 static SHOW_MAIN_ON_READY: AtomicBool = AtomicBool::new(true);
 
+#[cfg(target_os = "windows")]
+fn ensure_windows_shell_integration(app: &AppHandle) {
+    let exe = match std::env::current_exe() {
+        Ok(p) => p,
+        Err(_) => return,
+    };
+    let resource_dir = match app.path().resource_dir() {
+        Ok(p) => p,
+        Err(_) => return,
+    };
+
+    fn pick_script(base: &Path, name: &str) -> Option<PathBuf> {
+        let in_scripts = base.join("scripts").join(name);
+        if in_scripts.exists() {
+            return Some(in_scripts);
+        }
+        let flat = base.join(name);
+        if flat.exists() {
+            return Some(flat);
+        }
+        None
+    }
+
+    let install_context = match pick_script(&resource_dir, "install-context-menu-windows.ps1") {
+        Some(p) => p,
+        None => return,
+    };
+    let install_assoc = match pick_script(&resource_dir, "install-oz-file-association-windows.ps1") {
+        Some(p) => p,
+        None => return,
+    };
+    let install_context_s = install_context.to_string_lossy().into_owned();
+    let install_assoc_s = install_assoc.to_string_lossy().into_owned();
+    let exe_s = exe.to_string_lossy().into_owned();
+
+    let _ = Command::new("powershell.exe")
+        .args([
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            &install_context_s,
+            "-OmegaZipExe",
+            &exe_s,
+        ])
+        .spawn();
+
+    let _ = Command::new("powershell.exe")
+        .args([
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            &install_assoc_s,
+            "-OmegaZipApp",
+            &exe_s,
+        ])
+        .spawn();
+}
+
 #[tauri::command]
 fn compress(source: PathBuf, archive_path: PathBuf) -> Result<u32, String> {
     omegazip::compress_dispatch(&source, &archive_path).map_err(|e| e.to_string())
@@ -640,6 +700,8 @@ pub fn run() {
             }
             #[cfg(any(target_os = "windows", target_os = "linux"))]
             if let RunEvent::Ready = event {
+                #[cfg(target_os = "windows")]
+                ensure_windows_shell_integration(app_handle);
                 let paths: Vec<String> = std::env::args()
                     .skip(1)
                     .filter_map(|a| {

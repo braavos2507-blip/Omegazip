@@ -52,9 +52,17 @@ powershell -ExecutionPolicy Bypass -File .\scripts\build-windows.ps1 -SkipNpmIns
 ## 5) Smoke-test на Windows
 
 - Установить `.msi/.exe`
-- Запустить GUI
+- Один раз запустить GUI (приложение автоматически регистрирует HKCU-контекстное меню и открытие `.oz`)
 - Проверить:
+  - в проводнике по ПКМ доступны действия OmegaZip (на Windows 11 — через "Показать дополнительные параметры")
   - сжатие файла/папки в `.zip` (default share-safe)
   - сжатие в `.oz` вручную (через путь назначения)
   - распаковку `.zip` и `.oz`
+
+Если авто-регистрация не сработала (редко, из-за ограничений политики PowerShell), выполните вручную:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-context-menu-windows.ps1 -OmegaZipExe "C:\Program Files\OmegaZip\OmegaZip.exe"
+powershell -ExecutionPolicy Bypass -File .\scripts\install-oz-file-association-windows.ps1 -OmegaZipApp "C:\Program Files\OmegaZip\OmegaZip.exe"
+```
 
