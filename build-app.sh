@@ -5,12 +5,9 @@ set -e
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
-echo "Сборка CLI (omegazip)..."
-cargo build --release -p omegazip
-
-echo "Сборка приложения (Tauri)..."
+echo "Сборка: sidecar omegazip (externalBin) + Tauri bundle..."
 unset CI
-npm run tauri build
+npm run build
 
 # Bundle лежит в target-dir пакета src-tauri (при CARGO_TARGET_DIR — вне src-tauri/target).
 if [[ -n "${CARGO_TARGET_DIR:-}" && -d "$CARGO_TARGET_DIR/release/bundle/macos/OmegaZip.app" ]]; then

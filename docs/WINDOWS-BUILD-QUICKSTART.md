@@ -19,11 +19,13 @@ cargo -V
 
 ## 2) Сборка (одной командой)
 
-Из корня проекта:
+Из корня проекта. Скрипт собирает **CLI `omegazip` как sidecar** (нужен для пунктов ПКМ) и затем Tauri.
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\build-windows.ps1
 ```
+
+Вручную то же самое: `npm run build` (внутри — `tauri:prepare-sidecar` + `tauri build`).
 
 Если `node_modules` уже установлены, можно быстрее:
 

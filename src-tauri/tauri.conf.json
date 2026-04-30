@@ -49,7 +49,9 @@
       "../scripts/install-oz-file-association-windows.ps1",
       "../scripts/omega-context-helper.ps1"
     ],
-    "externalBin": [],
+    "externalBin": [
+      "binaries/omegazip"
+    ],
     "copyright": "",
     "category": "Utility",
     "shortDescription": "Archive and extract .oz files. Windows, macOS, Linux. Built-in rclone.",

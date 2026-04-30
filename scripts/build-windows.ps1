@@ -51,8 +51,8 @@ if (-not (Test-Path $iconIco)) {
     exit 1
 }
 
-Step "Building Windows bundle via Tauri"
-npx.cmd tauri build
+Step "Building Windows bundle (omegazip sidecar + Tauri)"
+npm.cmd run build
 
 Step "Done. Looking for generated installers"
 $bundleRoot = Join-Path (Get-Location) "src-tauri\target\release\bundle"

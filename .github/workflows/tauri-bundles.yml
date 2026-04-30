@@ -49,7 +49,7 @@ jobs:
             build-essential \
             curl
       - run: npm ci
-      - name: Tauri build
-        run: npx tauri build
+      - name: Tauri build (sidecar + bundle)
+        run: npm run build
         env:
           CI: false

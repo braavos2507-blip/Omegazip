@@ -64,52 +64,113 @@ use tauri_plugin_dialog::DialogExt;
 static SHOW_MAIN_ON_READY: AtomicBool = AtomicBool::new(true);
 
 #[cfg(target_os = "windows")]
+fn windows_resource_dir_for_scripts(app: &AppHandle) -> Option<PathBuf> {
+    if let Ok(p) = app.path().resource_dir() {
+        if pick_script_in_resource(&p, "install-context-menu-windows.ps1").is_some() {
+            return Some(p);
+        }
+    }
+    let base = std::env::current_exe().ok()?.parent()?.to_path_buf();
+    for candidate in [base.join("resources"), base] {
+        if pick_script_in_resource(&candidate, "install-context-menu-windows.ps1").is_some() {
+            return Some(candidate);
+        }
+    }
+    None
+}
+
+#[cfg(target_os = "windows")]
+fn pick_script_in_resource(base: &Path, name: &str) -> Option<PathBuf> {
+    let in_scripts = base.join("scripts").join(name);
+    if in_scripts.is_file() {
+        return Some(in_scripts);
+    }
+    let flat = base.join(name);
+    if flat.is_file() {
+        return Some(flat);
+    }
+    None
+}
+
+/// Explorer context menu runs `omegazip compress|decompress` (CLI), not the Tauri `OmegaZip.exe` GUI.
+#[cfg(target_os = "windows")]
+fn find_omegazip_cli_exe(install_dir: &Path, resource_dir: &Path) -> Option<PathBuf> {
+    const NAMES: &[&str] = &[
+        "omegazip.exe",
+        "omegazip-x86_64-pc-windows-msvc.exe",
+        "omegazip-aarch64-pc-windows-msvc.exe",
+        "omegazip-i686-pc-windows-msvc.exe",
+    ];
+    for base in [install_dir, resource_dir] {
+        for n in NAMES {
+            let p = base.join(n);
+            if p.is_file() {
+                return Some(p);
+            }
+        }
+    }
+    None
+}
+
+#[cfg(target_os = "windows")]
+fn windows_shell_integration_marker_path(app: &AppHandle) -> Option<PathBuf> {
+    let mut p = app.path().app_config_dir().ok()?;
+    p.push("windows_shell_integration_applied.txt");
+    Some(p)
+}
+
+#[cfg(target_os = "windows")]
 fn ensure_windows_shell_integration(app: &AppHandle) {
+    const MARKER: &str = env!("CARGO_PKG_VERSION");
+
+    if let Some(marker_path) = windows_shell_integration_marker_path(app) {
+        if let Ok(current) = std::fs::read_to_string(&marker_path) {
+            if current.trim() == MARKER {
+                return;
+            }
+        }
+    }
+
     let exe = match std::env::current_exe() {
         Ok(p) => p,
         Err(_) => return,
     };
-    let resource_dir = match app.path().resource_dir() {
-        Ok(p) => p,
-        Err(_) => return,
+    let install_dir = match exe.parent() {
+        Some(p) => p.to_path_buf(),
+        None => return,
     };
 
-    fn pick_script(base: &Path, name: &str) -> Option<PathBuf> {
-        let in_scripts = base.join("scripts").join(name);
-        if in_scripts.exists() {
-            return Some(in_scripts);
-        }
-        let flat = base.join(name);
-        if flat.exists() {
-            return Some(flat);
-        }
-        None
+    let resource_dir = match windows_resource_dir_for_scripts(app) {
+        Some(p) => p,
+        None => return,
+    };
+
+    let install_context = pick_script_in_resource(&resource_dir, "install-context-menu-windows.ps1");
+    let install_assoc = match pick_script_in_resource(&resource_dir, "install-oz-file-association-windows.ps1") {
+        Some(p) => p,
+        None => return,
+    };
+    let install_assoc_s = install_assoc.to_string_lossy().into_owned();
+    let gui_s = exe.to_string_lossy().into_owned();
+    let cli = find_omegazip_cli_exe(&install_dir, &resource_dir);
+
+    if let (Some(ctx), Some(ref cli_path)) = (install_context, &cli) {
+        let ctx_s = ctx.to_string_lossy().into_owned();
+        let clip_s = cli_path.to_string_lossy().into_owned();
+        let _ = Command::new("powershell.exe")
+            .args([
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                &ctx_s,
+                "-OmegaZipExe",
+                &clip_s,
+            ])
+            .spawn();
     }
 
-    let install_context = match pick_script(&resource_dir, "install-context-menu-windows.ps1") {
-        Some(p) => p,
-        None => return,
-    };
-    let install_assoc = match pick_script(&resource_dir, "install-oz-file-association-windows.ps1") {
-        Some(p) => p,
-        None => return,
-    };
-    let install_context_s = install_context.to_string_lossy().into_owned();
-    let install_assoc_s = install_assoc.to_string_lossy().into_owned();
-    let exe_s = exe.to_string_lossy().into_owned();
-
-    let _ = Command::new("powershell.exe")
-        .args([
-            "-NoProfile",
-            "-ExecutionPolicy",
-            "Bypass",
-            "-File",
-            &install_context_s,
-            "-OmegaZipExe",
-            &exe_s,
-        ])
-        .spawn();
-
+    // Double-click / "Open with" for `.oz` should launch the GUI.
     let _ = Command::new("powershell.exe")
         .args([
             "-NoProfile",
@@ -118,9 +179,16 @@ fn ensure_windows_shell_integration(app: &AppHandle) {
             "-File",
             &install_assoc_s,
             "-OmegaZipApp",
-            &exe_s,
+            &gui_s,
         ])
         .spawn();
+
+    if let Some(marker_path) = windows_shell_integration_marker_path(app) {
+        if let Some(parent) = marker_path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let _ = std::fs::write(&marker_path, MARKER);
+    }
 }
 
 #[tauri::command]
