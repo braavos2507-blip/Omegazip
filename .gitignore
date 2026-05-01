@@ -12,6 +12,10 @@ out/
 
 # OS / IDE
 .DS_Store
+__MACOSX/
+
+# Локальный zip экспорта исходников (scripts/export-source-for-windows.sh)
+OmegaZip-source-for-windows.zip
 *.swp
 .idea/
 .vscode/
