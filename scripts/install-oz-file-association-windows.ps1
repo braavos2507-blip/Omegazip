@@ -35,9 +35,16 @@ if (-not (Test-Path -LiteralPath $exe)) {
 
 New-Item -Path "$classesRoot\.oz" -Force | Out-Null
 Set-ItemProperty -Path "$classesRoot\.oz" -Name "(default)" -Value $progId
+New-Item -Path "$classesRoot\.oz\OpenWithProgids" -Force | Out-Null
+New-ItemProperty -Path "$classesRoot\.oz\OpenWithProgids" -Name $progId -Value "" -PropertyType String -Force | Out-Null
 
 New-Item -Path "$classesRoot\$progId" -Force | Out-Null
 Set-ItemProperty -Path "$classesRoot\$progId" -Name "(default)" -Value "OmegaZip Archive"
+Set-ItemProperty -Path "$classesRoot\$progId" -Name "FriendlyTypeName" -Value "OmegaZip Archive"
+
+$iconKey = Join-Path "$classesRoot\$progId" "DefaultIcon"
+New-Item -Path $iconKey -Force | Out-Null
+Set-ItemProperty -Path $iconKey -Name "(default)" -Value ("`"{0}`",0" -f $exe)
 
 $openCmd = Join-Path "$classesRoot\$progId" "shell\open\command"
 New-Item -Path $openCmd -Force | Out-Null

@@ -154,12 +154,16 @@ fn ensure_windows_shell_integration(app: &AppHandle) {
     let gui_s = exe.to_string_lossy().into_owned();
     let cli = find_omegazip_cli_exe(&install_dir, &resource_dir);
 
+    let mut context_ok = install_context.is_none() || cli.is_none();
     if let (Some(ctx), Some(ref cli_path)) = (install_context, &cli) {
         let ctx_s = ctx.to_string_lossy().into_owned();
         let clip_s = cli_path.to_string_lossy().into_owned();
-        let _ = Command::new("powershell.exe")
+        context_ok = Command::new("powershell.exe")
             .args([
                 "-NoProfile",
+                "-NonInteractive",
+                "-WindowStyle",
+                "Hidden",
                 "-ExecutionPolicy",
                 "Bypass",
                 "-File",
@@ -167,13 +171,18 @@ fn ensure_windows_shell_integration(app: &AppHandle) {
                 "-OmegaZipExe",
                 &clip_s,
             ])
-            .spawn();
+            .status()
+            .map(|s| s.success())
+            .unwrap_or(false);
     }
 
     // Double-click / "Open with" for `.oz` should launch the GUI.
-    let _ = Command::new("powershell.exe")
+    let assoc_ok = Command::new("powershell.exe")
         .args([
             "-NoProfile",
+            "-NonInteractive",
+            "-WindowStyle",
+            "Hidden",
             "-ExecutionPolicy",
             "Bypass",
             "-File",
@@ -181,13 +190,21 @@ fn ensure_windows_shell_integration(app: &AppHandle) {
             "-OmegaZipApp",
             &gui_s,
         ])
-        .spawn();
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false);
 
-    if let Some(marker_path) = windows_shell_integration_marker_path(app) {
-        if let Some(parent) = marker_path.parent() {
-            let _ = std::fs::create_dir_all(parent);
+    // Mark as applied only when integration actually succeeded.
+    if assoc_ok && context_ok {
+        if let Some(marker_path) = windows_shell_integration_marker_path(app) {
+            if let Some(parent) = marker_path.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
+            let _ = std::fs::write(&marker_path, MARKER);
         }
-        let _ = std::fs::write(&marker_path, MARKER);
+    } else if let Some(marker_path) = windows_shell_integration_marker_path(app) {
+        // If previous run was marked but current run failed after update, clear marker to retry next launch.
+        let _ = std::fs::remove_file(marker_path);
     }
 }
 
