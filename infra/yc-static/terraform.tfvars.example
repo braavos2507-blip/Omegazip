@@ -1,0 +1,15 @@
+cloud_id  = "..."
+folder_id = "..."
+
+# Auth: pick ONE:
+# yc_token = "y0_A..."
+service_account_key_file = "/absolute/path/to/sa-key.json"
+
+domain           = "omegazip.ru"
+site_bucket_name = "omegazip-ru-site-CHANGE-ME"
+
+enable_downloads_bucket  = true
+downloads_bucket_name    = "omegazip-ru-downloads-CHANGE-ME"
+
+manage_dns_in_yc = true
+

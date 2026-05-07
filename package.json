@@ -22,7 +22,7 @@
     "test:archive-hardening": "cargo test -p omegazip --test archive_hardening",
     "tauri": "tauri",
     "tauri:prepare-sidecar": "node scripts/prepare-omegazip-sidecar.cjs",
-    "build": "npm run tauri:prepare-sidecar && tauri build",
+    "build": "npm run tauri:prepare-sidecar && npx tauri build",
     "build:macos": "npm run tauri:prepare-sidecar && env -u CI npx tauri build",
     "build:macos:with-nsservices": "npm run tauri:prepare-sidecar && env -u CI npx tauri build && bash scripts/inject-macos-services.sh",
     "dev": "tauri dev",

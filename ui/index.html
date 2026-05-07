@@ -253,6 +253,37 @@
     .deps-more a {
       color: hsl(var(--primary));
     }
+    .donate-banner {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid hsl(36 80% 78%);
+      border-radius: var(--radius);
+      background: hsl(42 100% 97%);
+      color: hsl(var(--foreground));
+    }
+    .donate-banner.visible { display: block; }
+    .donate-banner-title {
+      margin: 0;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .donate-banner-text {
+      margin: 0.35rem 0 0;
+      font-size: 0.78rem;
+      color: hsl(var(--muted-foreground));
+      line-height: 1.45;
+    }
+    .donate-banner .btn-row {
+      margin-top: 0.55rem;
+      gap: 0.4rem;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: hsl(var(--muted-foreground));
+      border: 1px solid hsl(var(--border));
+    }
+    .btn-ghost:hover:not(:disabled) { background: hsl(var(--muted)); }
   </style>
 </head>
 <body>
@@ -260,6 +291,15 @@
     <h1 class="app-title">OmegaZip</h1>
     <p class="app-subtitle">Формат .oz + широкая совместимость: ZIP, tar, zstd, CAB; с 7-Zip — 7z, RAR, ISO, WIM, MSI и др.</p>
     <div id="sevenzip-banner" class="deps-banner deps-banner-pending" role="status">Проверка 7-Zip…</div>
+    <div id="donate-banner" class="donate-banner" role="note" aria-live="polite">
+      <p class="donate-banner-title">Если OmegaZip помогает в работе, можно поддержать проект донатом.</p>
+      <p class="donate-banner-text">Без подписок и блокировок: приложение остаётся бесплатным. Плашка показывается редко и её можно отложить.</p>
+      <div class="btn-row">
+        <a id="donate-link" class="btn-primary" href="https://omegazip.ru/donate" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;text-decoration:none;padding:0 1rem;">Поддержать</a>
+        <button class="btn-secondary" id="donate-already">Я уже поддержал</button>
+        <button class="btn-ghost" id="donate-later">Напомнить позже</button>
+      </div>
+    </div>
   </header>
 
   <div class="card">
@@ -386,6 +426,69 @@
       const invoke = window.__TAURI__.core.invoke;
       // Tauri 2 global bundle: listen lives on __TAURI__.event, not __TAURI__.core.event
       const listen = window.__TAURI__.event.listen;
+      const DONATE_STATE_KEY = 'omegazip_donate_prompt_state_v1';
+      const DONATE_REMIND_MS = 7 * 24 * 60 * 60 * 1000;
+      const DONATE_PAUSE_AFTER_SUPPORT_MS = 60 * 24 * 60 * 60 * 1000;
+
+      function readDonateState() {
+        try {
+          const raw = localStorage.getItem(DONATE_STATE_KEY);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return null;
+          return {
+            nextPromptAt: Number(parsed.nextPromptAt) || 0,
+            donatedUntil: Number(parsed.donatedUntil) || 0,
+          };
+        } catch (_) {
+          return null;
+        }
+      }
+      function writeDonateState(state) {
+        try {
+          localStorage.setItem(DONATE_STATE_KEY, JSON.stringify(state));
+        } catch (_) {}
+      }
+      function setupDonateBanner() {
+        const banner = document.getElementById('donate-banner');
+        const laterBtn = document.getElementById('donate-later');
+        const supportedBtn = document.getElementById('donate-already');
+        const donateLink = document.getElementById('donate-link');
+        if (!banner || !laterBtn || !supportedBtn || !donateLink) return;
+
+        const now = Date.now();
+        let state = readDonateState();
+        if (!state) {
+          // Первый запуск: не показываем сразу, начинаем с мягкого таймера.
+          state = { nextPromptAt: now + DONATE_REMIND_MS, donatedUntil: 0 };
+          writeDonateState(state);
+          return;
+        }
+
+        const mutedByDonation = state.donatedUntil > now;
+        const timeToPrompt = state.nextPromptAt <= now;
+        if (!(timeToPrompt && !mutedByDonation)) return;
+
+        banner.classList.add('visible');
+        const hideAndSchedule = function (nextPromptAt, donatedUntil) {
+          writeDonateState({ nextPromptAt: nextPromptAt, donatedUntil: donatedUntil });
+          banner.classList.remove('visible');
+        };
+
+        laterBtn.addEventListener('click', function () {
+          hideAndSchedule(Date.now() + DONATE_REMIND_MS, state.donatedUntil);
+        });
+
+        supportedBtn.addEventListener('click', function () {
+          const until = Date.now() + DONATE_PAUSE_AFTER_SUPPORT_MS;
+          hideAndSchedule(until, until);
+        });
+
+        donateLink.addEventListener('click', function () {
+          const until = Date.now() + DONATE_PAUSE_AFTER_SUPPORT_MS;
+          hideAndSchedule(until, until);
+        });
+      }
 
       function escapeHtml(s) {
         return String(s)
@@ -429,6 +532,7 @@
           }
         }
       })();
+      setupDonateBanner();
 
       // WebKit (macOS): без preventDefault на dragover страница не принимает сброс файлов.
       document.addEventListener(
