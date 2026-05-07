@@ -80,4 +80,4 @@ Set-OmegaZipMenu -Name "OmegaZipExtractHere" -Label "Распаковать (Ome
 Write-Host "Готово: HKCU\Software\Classes\*\shell\OmegaZip*"
 Write-Host "  — Сжать OmegaZip (авто .oz/.zip) — как Services на macOS (pick_ext_auto + пресеты)."
 $self = Join-Path $PSScriptRoot "install-context-menu-windows.ps1"
-Write-Host "Удаление: powershell -ExecutionPolicy Bypass -File `"$self`" -Uninstall"
+Write-Host ('Удаление: powershell -ExecutionPolicy Bypass -File "{0}" -Uninstall' -f $self)

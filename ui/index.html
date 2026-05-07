@@ -304,28 +304,18 @@
 
   <div class="card">
     <h2 class="card-title">Создать архив (.oz или .zip)</h2>
-    <p class="card-desc">Файл или папка → <strong>.oz</strong>, <strong>.zip</strong>, <strong>.tar.gz</strong> или <strong>.7z</strong> (7-Zip в PATH). Профиль сжатия ниже задаёт только <strong>.oz</strong>; для ZIP/tar выберите расширение при сохранении. Пароль и тонкая настройка — под «Дополнительно». <strong>Видео</strong> в .oz почти не сжимается.</p>
+    <p class="card-desc">Файл или папка → <strong>.oz</strong>, <strong>.zip</strong>, <strong>.tar.gz</strong> или <strong>.7z</strong> (7-Zip в PATH). Профиль ниже задаёт только <strong>.oz</strong>; для ZIP/tar выберите расширение при сохранении. <strong>Видео</strong> в .oz почти не сжимается.</p>
     <div class="drop-zone" id="drop-compress" data-mode="compress">Перетащите файл или папку в окно приложения<br><span class="drop-hint">подсветка зоны при перетаскивании (macOS / Tauri)</span></div>
     <div class="opts-row">
       <label>Профиль для <strong>.oz</strong>: <select id="compress-preset" aria-describedby="compress-preset-hint">
-        <option value="fast">Быстрее, без чанков</option>
-        <option value="balanced" selected>Сбалансировано (рекомендуется)</option>
-        <option value="auto">Авто (как Finder Services: тип + context_preset)</option>
-        <option value="max">Сильнее сжатие (solid)</option>
-        <option value="ultra">Максимум (solid + восстановление)</option>
-        <option value="custom">Вручную: чанки, solid, recovery</option>
+        <option value="balanced" selected>Обычный (рекомендуется)</option>
+        <option value="ultra">Сильное сжатие (дольше)</option>
       </select></label>
     </div>
-    <p class="compress-hint" id="compress-preset-hint">Профиль применяется к архивам <strong>.oz</strong>. Для <strong>.zip</strong> и <strong>.tar.gz</strong> тип сжатия задаётся форматом — укажите нужное расширение в диалоге «Куда сохранить».</p>
-    <details class="opts-advanced" id="compress-advanced-details">
-      <summary>Дополнительно — пароль и ручные опции</summary>
-      <div class="opts-inner">
-        <label id="compress-label-chunked"><input type="checkbox" id="compress-chunked"> Чанки (дедупликация)</label>
-        <label id="compress-label-solid"><input type="checkbox" id="compress-solid"> Один поток (solid)</label>
-        <label id="compress-label-recovery"><input type="checkbox" id="compress-recovery"> Блоки восстановления</label>
-        <label>Пароль: <input type="password" id="compress-password" placeholder="если нужен — для .oz или .7z" autocomplete="off"></label>
-      </div>
-    </details>
+    <p class="compress-hint" id="compress-preset-hint">Оставили два рабочих профиля: обычный и сильный. Для <strong>.zip</strong> и <strong>.tar.gz</strong> тип сжатия задаётся форматом — укажите нужное расширение в диалоге «Куда сохранить».</p>
+    <div class="opts-row">
+      <label>Пароль: <input type="password" id="compress-password" placeholder="если нужен — для .oz или .7z" autocomplete="off"></label>
+    </div>
     <div class="btn-row">
       <button class="btn-secondary" id="btn-compress-src">Файл или папка</button>
       <button class="btn-secondary" id="btn-compress-dest">Куда сохранить</button>
@@ -686,25 +676,6 @@
         if (/^[a-zA-Z]:$/.test(out)) out += '\\';
         return out;
       }
-      async function refreshCompressAutoHint() {
-        const hint = document.getElementById('compress-preset-hint');
-        const presetEl = document.getElementById('compress-preset');
-        if (!hint || !presetEl || presetEl.value !== 'auto') return;
-        if (!compressSrc) {
-          hint.textContent =
-            'Выберите источник — подставим рекомендуемый профиль для .oz по расширениям.';
-          return;
-        }
-        try {
-          const h = await invoke('effective_compress_preset_hint', { path: ipcPath(compressSrc) });
-          const name = h.preset != null ? String(h.preset) : '';
-          const reason = h.reason != null ? String(h.reason) : '';
-          hint.innerHTML =
-            escapeHtml(reason) + ' <strong>→</strong> <code>' + escapeHtml(name) + '</code>';
-        } catch (e) {
-          hint.textContent = 'Не удалось получить подсказку: ' + String(e);
-        }
-      }
       function applyPaths(paths) {
         if (!paths || paths.length === 0) return;
         const path = (typeof paths[0] === 'string') ? paths[0] : String(paths[0] || '');
@@ -729,7 +700,6 @@
             compressDest = parent + sep + suggestedCompressSaveFileName(normalized);
             compressDestPath.textContent = compressDest;
           }
-          void refreshCompressAutoHint();
         }
       }
       listen('open-files', function (ev) {
@@ -912,7 +882,6 @@
             compressSrc = normPath(path);
             compressSrcPath.textContent = compressSrc;
             setStatus(compressStatus, '', true);
-            void refreshCompressAutoHint();
           }
         } catch (e) {
           setStatus(compressStatus, 'Ошибка: ' + String(e), false);
@@ -935,56 +904,15 @@
         }
       };
 
-      function openCompressAdvancedIfNeeded() {
-        const details = document.getElementById('compress-advanced-details');
-        const pwdEl = document.getElementById('compress-password');
-        const presetEl = document.getElementById('compress-preset');
-        if (!details) return;
-        const hasPwd = pwdEl && pwdEl.value.trim().length > 0;
-        const custom = presetEl && presetEl.value === 'custom';
-        if (hasPwd || custom) details.open = true;
-      }
-
-      function syncCompressPresetUi() {
-        const presetEl = document.getElementById('compress-preset');
-        const custom = presetEl && presetEl.value === 'custom';
-        const hint = document.getElementById('compress-preset-hint');
-        ['compress-label-chunked', 'compress-label-solid', 'compress-label-recovery'].forEach(function (id) {
-          const lab = document.getElementById(id);
-          if (lab) lab.classList.toggle('is-disabled', !custom);
-        });
-        ['compress-chunked', 'compress-solid', 'compress-recovery'].forEach(function (id) {
-          const el = document.getElementById(id);
-          if (el) {
-            el.disabled = !custom;
-            if (!custom) el.checked = false;
-          }
-        });
-        if (hint) {
-          if (custom) {
-            hint.textContent =
-              'Включите нужные опции ниже — профили «быстро / сбалансировано / …» в этом режиме не подмешиваются.';
-          } else if (presetEl && presetEl.value === 'auto') {
-            hint.textContent = 'Подбор профиля для .oz: те же правила, что у контекстного меню macOS…';
-            void refreshCompressAutoHint();
-          } else {
-            hint.textContent =
-              'Профиль применяется к архивам .oz. Для .zip и .tar.gz тип сжатия задаётся форматом — укажите расширение в диалоге сохранения.';
-          }
-        }
-        openCompressAdvancedIfNeeded();
-      }
       const compressPresetEl = document.getElementById('compress-preset');
       if (compressPresetEl) {
-        compressPresetEl.addEventListener('change', syncCompressPresetUi);
-        syncCompressPresetUi();
-      }
-      const compressPwdEl = document.getElementById('compress-password');
-      const compressDetailsEl = document.getElementById('compress-advanced-details');
-      if (compressPwdEl && compressDetailsEl) {
-        compressPwdEl.addEventListener('input', openCompressAdvancedIfNeeded);
-        compressPwdEl.addEventListener('focus', function () {
-          compressDetailsEl.open = true;
+        compressPresetEl.addEventListener('change', function () {
+          const hint = document.getElementById('compress-preset-hint');
+          if (!hint) return;
+          hint.textContent =
+            compressPresetEl.value === 'ultra'
+              ? 'Сильное сжатие обычно лучше по размеру, но заметно дольше по времени.'
+              : 'Обычный режим: оптимальный баланс скорости и размера для большинства файлов.';
         });
       }
 
@@ -997,33 +925,18 @@
         compressStatus.textContent = 'Сжатие…';
         compressStatus.className = 'status';
         const presetEl = document.getElementById('compress-preset');
-        const presetVal = presetEl ? presetEl.value : 'balanced';
-        const custom = presetVal === 'custom';
-        let preset = null;
-        if (!custom) {
-          if (presetVal === 'auto') {
-            preset = await invoke('effective_compress_preset', { path: ipcPath(compressSrc) });
-          } else {
-            preset = presetVal;
-          }
-        }
+        const preset = presetEl ? presetEl.value : 'balanced';
         const pwd = document.getElementById('compress-password').value.trim() || null;
-        const chunked = custom && document.getElementById('compress-chunked').checked;
-        const solid = custom && document.getElementById('compress-solid').checked;
-        const recovery = custom && document.getElementById('compress-recovery').checked;
-        const useAdvanced = custom ? !!(chunked || solid || recovery || pwd) : true;
         try {
-          const n = useAdvanced
-            ? await invoke('compress_advanced', {
-                source: ipcPath(compressSrc),
-                ...ipcArchivePath(compressDest),
-                password: pwd ? pwd : null,
-                chunked,
-                solid,
-                recovery,
-                preset,
-              })
-            : await invoke('compress', { source: ipcPath(compressSrc), ...ipcArchivePath(compressDest) });
+          const n = await invoke('compress_advanced', {
+            source: ipcPath(compressSrc),
+            ...ipcArchivePath(compressDest),
+            password: pwd ? pwd : null,
+            chunked: false,
+            solid: false,
+            recovery: false,
+            preset,
+          });
           document.getElementById('compress-progress-wrap').classList.remove('visible');
           setStatus(compressStatus, 'Готово: сжато файлов: ' + n, true);
         } catch (e) {

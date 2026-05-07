@@ -45,4 +45,4 @@ $quoted = "`"$exe`" `"%1`""
 Set-ItemProperty -Path $openCmd -Name "(default)" -Value $quoted
 
 Write-Host "Готово: .oz → $exe"
-Write-Host "Удаление: powershell -ExecutionPolicy Bypass -File `"$PSCommandPath`" -Uninstall"
+Write-Host ('Удаление: powershell -ExecutionPolicy Bypass -File "{0}" -Uninstall' -f $PSCommandPath)
