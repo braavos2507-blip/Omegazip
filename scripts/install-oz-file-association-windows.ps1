@@ -15,6 +15,23 @@ param(
 $progId = "OmegaZip.oz"
 $classesRoot = "Registry::HKEY_CURRENT_USER\Software\Classes"
 
+function Resolve-OmegaZipIconPath {
+    param([string]$AppExe)
+    $dir = Split-Path -Parent $AppExe
+    $candidates = @(
+        (Join-Path $dir "icon.ico"),
+        (Join-Path $dir "icons\icon.ico"),
+        (Join-Path $dir "resources\icon.ico"),
+        (Join-Path $dir "resources\icons\icon.ico")
+    )
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate) {
+            return (Resolve-Path -LiteralPath $candidate).Path
+        }
+    }
+    return (Resolve-Path -LiteralPath $AppExe).Path
+}
+
 if ($Uninstall) {
     Remove-Item -Path "$classesRoot\.oz" -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -Path "$classesRoot\$progId" -Recurse -Force -ErrorAction SilentlyContinue
@@ -42,9 +59,16 @@ New-Item -Path "$classesRoot\$progId" -Force | Out-Null
 Set-ItemProperty -Path "$classesRoot\$progId" -Name "(default)" -Value "OmegaZip Archive"
 Set-ItemProperty -Path "$classesRoot\$progId" -Name "FriendlyTypeName" -Value "OmegaZip Archive"
 
+$iconPath = Resolve-OmegaZipIconPath -AppExe $exe
+$iconValue = "`"{0}`",0" -f $iconPath
+
 $iconKey = Join-Path "$classesRoot\$progId" "DefaultIcon"
 New-Item -Path $iconKey -Force | Out-Null
-Set-ItemProperty -Path $iconKey -Name "(default)" -Value ("`"{0}`",0" -f $exe)
+Set-ItemProperty -Path $iconKey -Name "(default)" -Value $iconValue
+
+$extIconKey = Join-Path "$classesRoot\.oz" "DefaultIcon"
+New-Item -Path $extIconKey -Force | Out-Null
+Set-ItemProperty -Path $extIconKey -Name "(default)" -Value $iconValue
 
 $openCmd = Join-Path "$classesRoot\$progId" "shell\open\command"
 New-Item -Path $openCmd -Force | Out-Null

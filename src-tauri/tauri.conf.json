@@ -47,7 +47,8 @@
     "resources": [
       "../scripts/install-context-menu-windows.ps1",
       "../scripts/install-oz-file-association-windows.ps1",
-      "../scripts/omega-context-helper.ps1"
+      "../scripts/omega-context-helper.ps1",
+      "icons/icon.ico"
     ],
     "externalBin": [
       "binaries/omegazip"
