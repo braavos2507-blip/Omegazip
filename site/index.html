@@ -3,42 +3,219 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OmegaZip — быстрый архиватор</title>
-  <meta name="description" content="OmegaZip: бесплатный архиватор для Windows, macOS и Linux. Скачать последнюю версию и поддержать проект донатом.">
-  <style>
-    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }
-    .wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px; }
-    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
-    h1 { margin: 0 0 8px; font-size: 30px; }
-    p { color: #334155; line-height: 1.55; }
-    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
-    .btn { display: inline-block; border-radius: 10px; padding: 10px 14px; text-decoration: none; font-weight: 600; }
-    .btn-primary { background: #0f172a; color: #fff; }
-    .btn-secondary { border: 1px solid #cbd5e1; color: #0f172a; background: #fff; }
-    .note { margin-top: 18px; font-size: 13px; color: #64748b; }
-    ul { color: #334155; }
-  </style>
+  <title>OmegaZip — умный архиватор .oz для Windows, macOS и Linux</title>
+  <meta name="description" content="OmegaZip — бесплатный архиватор с форматом .oz, интеграцией в ОС и поддержкой ZIP/7z через 7-Zip. Скачайте и поддержите проект донатом.">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="wrap">
-    <section class="card">
-      <h1>OmegaZip</h1>
-      <p>Бесплатный архиватор с поддержкой формата <strong>.oz</strong>, а также ZIP/tar/CAB и расширенной совместимостью через 7-Zip.</p>
-      <div class="row">
-        <a class="btn btn-primary" href="https://github.com/REPLACE_ME/OmegaZip/releases/latest">Скачать последнюю версию</a>
-        <a class="btn btn-secondary" href="https://omegazip.ru/donate">Поддержать донатом</a>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">
+        <div class="brand-badge">OZ</div>
+        <span>OmegaZip</span>
       </div>
-      <p class="note">Ссылки будут обновлены после публикации релиза и настройки страницы донатов.</p>
+      <nav class="nav-links">
+        <a href="#features">Преимущества</a>
+        <a href="#tests">Тесты</a>
+        <a href="#download">Скачать</a>
+        <a href="donate.html">Донат</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="pill-row">
+            <span class="pill">Бесплатно</span>
+            <span class="pill">Windows / macOS / Linux</span>
+            <span class="pill">Формат .oz</span>
+          </div>
+          <h1>Архиватор, который сжимает умнее и работает из системы</h1>
+          <p class="lead">
+            OmegaZip — современный архиватор с собственным форматом <strong>.oz</strong>,
+            простым интерфейсом и интеграцией в проводник/Finder: сжатие и распаковка в пару кликов.
+          </p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="#download">Скачать OmegaZip</a>
+            <a class="btn btn-secondary" href="donate.html">Поддержать проект</a>
+          </div>
+        </div>
+        <aside class="hero-card stat">
+          <div class="stat-item">
+            <div class="stat-label">Профиль-смоук (локальный прогон)</div>
+            <div class="stat-value metric-good">−63.1%</div>
+            <div class="stat-note">`.oz` меньше ZIP на том же корпусе (30.7 MB → 53 KB vs 144 KB)</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Реальный корпус (3083 файла)</div>
+            <div class="stat-value metric-good">−9.6%</div>
+            <div class="stat-note">`.oz` компактнее ZIP на versioned-наборе (99 MB вход)</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">KPI gate</div>
+            <div class="stat-value metric-good">PASS</div>
+            <div class="stat-note">Размер, время и D-checklist в целевых порогах</div>
+          </div>
+        </aside>
+      </div>
     </section>
-    <section class="card" style="margin-top:14px">
-      <h2 style="margin-top:0">Что внутри</h2>
-      <ul>
-        <li>Windows / macOS / Linux</li>
-        <li>Простой GUI и CLI</li>
-        <li>Режимы быстрого и глубокого сжатия</li>
-      </ul>
+
+    <section id="features">
+      <div class="wrap">
+        <h2 class="section-title">Почему OmegaZip</h2>
+        <p class="section-sub">Фокус на практике: быстрый старт, понятный GUI и сильное сжатие там, где это реально даёт выигрыш.</p>
+        <div class="grid-3">
+          <article class="card">
+            <h3>Свой формат .oz</h3>
+            <p>Чанковая дедупликация и solid-потоки дают меньший размер на повторяющихся и похожих данных.</p>
+          </article>
+          <article class="card">
+            <h3>Работает из системы</h3>
+            <p>Контекстное меню и ассоциации файлов: сжимайте и открывайте архивы без лишних шагов.</p>
+          </article>
+          <article class="card">
+            <h3>Широкая совместимость</h3>
+            <p>Нативно: ZIP, tar, CAB, .oz. С 7-Zip: 7z, RAR, ISO, MSI и другие форматы экосистемы 7-Zip.</p>
+          </article>
+          <article class="card">
+            <h3>Простой интерфейс</h3>
+            <p>Два рабочих профиля сжатия: обычный и сильный. Без перегруза настройками.</p>
+          </article>
+          <article class="card">
+            <h3>GUI + CLI</h3>
+            <p>Удобно для пользователя и удобно для автоматизации в скриптах и CI.</p>
+          </article>
+          <article class="card">
+            <h3>Бесплатно и без подписок</h3>
+            <p>Проект развивается за счёт добровольной поддержки. Донат — по желанию.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="tests">
+      <div class="wrap">
+        <h2 class="section-title">Результаты тестов</h2>
+        <p class="section-sub">Ниже — зафиксированные прогоны из репозитория (2026-04-15). Цифры зависят от типа данных: на уже сжатых PDF/JPEG выигрыш меньше.</p>
+        <div class="card" style="overflow:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Тест</th>
+                <th>Результат</th>
+                <th>Комментарий</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>KPI: oz_vs_zip_size_pct</td>
+                <td class="metric-good">63.1%</td>
+                <td>Цель: ≥ 10% — PASS</td>
+              </tr>
+              <tr>
+                <td>KPI: time_regression_pct</td>
+                <td class="metric-good">104.3%</td>
+                <td>Цель: ≤ 150% — PASS</td>
+              </tr>
+              <tr>
+                <td>Competitive bench (versioned, 3083 files)</td>
+                <td class="metric-good">.oz −9.6% vs ZIP</td>
+                <td>99.17 MB вход, ZIP 58.31 MB, .oz 52.72 MB</td>
+              </tr>
+              <tr>
+                <td>Competitive bench (mixed, 6756 files)</td>
+                <td class="metric-good">.oz −4.9% vs ZIP</td>
+                <td>40.25 MB вход, ZIP 33.89 MB, .oz 32.22 MB</td>
+              </tr>
+              <tr>
+                <td>Clean-machine smoke</td>
+                <td class="metric-good">PASS</td>
+                <td>Установка и базовый сценарий на чистой машине</td>
+              </tr>
+              <tr>
+                <td>Release readiness</td>
+                <td class="metric-good">GO-WITH-FLAGS</td>
+                <td>Локальный контур QA и gate пройдены</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="color:var(--muted); font-size:13px; margin-top:12px">
+          Источники: <code>tests/manual-files/results-auto/KPI-CHECK-LATEST.md</code>,
+          <code>OZ-ZIP-7Z-LATEST.md</code>, <code>RELEASE-READINESS.md</code>.
+        </p>
+      </div>
+    </section>
+
+    <section id="download">
+      <div class="wrap">
+        <h2 class="section-title">Скачать</h2>
+        <p class="section-sub">Выберите версию для своей ОС. Для расширенных форматов установите 7-Zip/p7zip.</p>
+        <div class="grid-3">
+          <article class="card">
+            <h3>Windows</h3>
+            <p>MSI-установщик x64.</p>
+            <p style="margin-top:12px"><a class="btn btn-primary" id="dl-windows" href="#">Скачать для Windows</a></p>
+          </article>
+          <article class="card">
+            <h3>macOS</h3>
+            <p>Apple Silicon (aarch64), DMG.</p>
+            <p style="margin-top:12px"><a class="btn btn-primary" id="dl-macos" href="#">Скачать для macOS</a></p>
+          </article>
+          <article class="card">
+            <h3>Linux</h3>
+            <p>AppImage / deb (по релизу CI).</p>
+            <p style="margin-top:12px"><a class="btn btn-primary" id="dl-linux" href="#">Скачать для Linux</a></p>
+          </article>
+        </div>
+        <p class="section-sub" style="margin-top:14px">Ссылки на файлы подставим после публикации релиза (GitHub Releases или Object Storage CDN).</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap faq">
+        <h2 class="section-title">FAQ</h2>
+        <details>
+          <summary>Нужен ли 7-Zip?</summary>
+          <p>Для .oz, ZIP и tar — нет. Для .7z, RAR, ISO и ряда других форматов — да, OmegaZip использует установленный 7-Zip.</p>
+        </details>
+        <details>
+          <summary>Чем .oz лучше ZIP?</summary>
+          <p>На данных с повторяемостью и структурой проектов .oz часто заметно компактнее. На одиночных уже сжатых файлах разница может быть небольшой.</p>
+        </details>
+        <details>
+          <summary>Это платно?</summary>
+          <p>Нет. Приложение бесплатное. Можно поддержать разработку донатом.</p>
+        </details>
+      </div>
     </section>
   </main>
+
+  <div class="donate-bar">
+    <div class="wrap donate-inner">
+      <p class="donate-text"><strong>Понравился OmegaZip?</strong> Поддержите развитие проекта — это помогает выпускать стабильные версии.</p>
+      <a class="btn btn-primary" href="donate.html">Задонатить</a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <p>© OmegaZip · <a href="mailto:support@omegazip.ru">support@omegazip.ru</a> · Версия продукта 0.4.0</p>
+    </div>
+  </footer>
+
+  <script>
+    // TODO: заменить на реальные URL релиза
+    const RELEASE = {
+      windows: "#",
+      macos: "#",
+      linux: "#"
+    };
+    document.getElementById("dl-windows").href = RELEASE.windows;
+    document.getElementById("dl-macos").href = RELEASE.macos;
+    document.getElementById("dl-linux").href = RELEASE.linux;
+  </script>
 </body>
 </html>
-

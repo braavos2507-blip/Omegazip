@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Поддержать OmegaZip — донат</title>
+  <meta name="description" content="Поддержите развитие OmegaZip добровольным донатом.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">
+        <div class="brand-badge">OZ</div>
+        <a href="index.html" style="color:inherit;text-decoration:none"><span>OmegaZip</span></a>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html#download">Скачать</a>
+        <a href="index.html#tests">Тесты</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <h1>Поддержать OmegaZip</h1>
+        <p class="lead">Проект бесплатный. Донат помогает тратить время на стабильные релизы, Windows-интеграцию и улучшение сжатия.</p>
+        <div class="card" style="max-width:720px">
+          <h3 style="margin-top:0">Как задонатить</h3>
+          <p style="color:var(--muted)">Подключите ссылку на ваш платёжный сервис (Boosty, ЮMoney, YooKassa, DonationAlerts и т.д.) и замените кнопку ниже.</p>
+          <div class="btn-row" style="margin-top:14px">
+            <a id="donate-pay" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">Перейти к оплате</a>
+            <a class="btn btn-secondary" href="index.html">На главную</a>
+          </div>
+          <p style="color:var(--muted); font-size:13px; margin-top:14px">
+            В приложении показывается мягкая плашка: раз в 7 дней, после доната скрывается на 2 месяца.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="donate-bar">
+    <div class="wrap donate-inner">
+      <p class="donate-text"><strong>Спасибо за поддержку!</strong> Даже небольшой донат сильно помогает проекту.</p>
+      <a class="btn btn-primary" id="donate-pay-bottom" href="#">Задонатить</a>
+    </div>
+  </div>
+
+  <script>
+    const DONATE_URL = "https://omegazip.ru/donate"; // TODO: заменить на реальную ссылку оплаты
+    document.getElementById("donate-pay").href = DONATE_URL;
+    document.getElementById("donate-pay-bottom").href = DONATE_URL;
+  </script>
+</body>
+</html>
