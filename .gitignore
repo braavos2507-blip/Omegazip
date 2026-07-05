@@ -24,11 +24,24 @@ OmegaZip-source-for-windows.zip
 .env
 .env.*
 
+# YC prod secrets / state (local only)
+infra/yc-static/terraform.tfvars
+infra/yc-static/.yc-outputs.env
+infra/yc-static/.terraform/
+**/*sa-key*.json
+.deploy.secrets.env
+.tools/
+
 # Local AI / editor tooling (not part of OmegaZip product)
 .claude/
 
 # Optional local benchmark corpus (CORPUS_EXTRA); do not commit
 Архивы/
+
+# Terraform state (secrets; keep local only)
+infra/yc-static/terraform.tfstate
+infra/yc-static/terraform.tfstate.backup
+infra/yc-static/.yc-outputs.env
 
 # Local artifacts / bulky outputs (not source of truth)
 backups/
