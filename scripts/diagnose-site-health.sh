@@ -12,15 +12,15 @@ dig +short "$DOMAIN" A 2>/dev/null || true
 
 echo ""
 echo "== Origin bucket (должен быть HTTP 200) =="
-curl -sS -o /dev/null -w "http://%s/ -> %{http_code}\n" "$ORIGIN" "$ORIGIN"
+curl -sS -o /dev/null -w "http://${ORIGIN}/ -> %{http_code}\n" "http://${ORIGIN}/"
 
 echo ""
 echo "== CDN www (ожидается 200; сейчас часто 404) =="
-curl -sS -o /dev/null -w "http://%s/ -> %{http_code}\n" "$WWW" "http://$WWW/" || echo "http failed"
-curl -k -sS -o /dev/null -w "https://%s/ -> %{http_code}\n" "$WWW" "https://$WWW/" || echo "https failed"
+curl -sS -o /dev/null -w "http://${WWW}/ -> %{http_code}\n" "http://${WWW}/" || echo "http://${WWW}/ failed"
+curl -k -sS -o /dev/null -w "https://${WWW}/ -> %{http_code}\n" "https://${WWW}/" || echo "https://${WWW}/ failed"
 
 echo ""
-echo "== TLS certificate (должен содержать $WWW или $DOMAIN) =="
+echo "== TLS certificate (должен содержать ${WWW} или ${DOMAIN}) =="
 if command -v openssl >/dev/null 2>&1; then
   openssl s_client -connect "${WWW}:443" -servername "$WWW" </dev/null 2>/dev/null \
     | openssl x509 -noout -subject -ext subjectAltName 2>/dev/null || echo "openssl check failed"
