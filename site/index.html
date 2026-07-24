@@ -3,9 +3,93 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OmegaZip — умный архиватор .oz для Windows, macOS и Linux</title>
-  <meta name="description" content="OmegaZip — бесплатный архиватор с форматом .oz, интеграцией в ОС и поддержкой ZIP/7z через 7-Zip. Скачайте и поддержите проект донатом.">
+  <title>OmegaZip — скачать бесплатный архиватор для Windows и macOS | .oz</title>
+  <meta name="description" content="Скачайте OmegaZip бесплатно — архиватор для Windows, macOS и Linux с форматом .oz, контекстным меню и ZIP/7z. Альтернатива классическим архиваторам для проектов и бэкапов.">
+  <link rel="canonical" href="https://www.omegazip.ru/">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.omegazip.ru/">
+  <meta property="og:title" content="OmegaZip — бесплатный архиватор .oz">
+  <meta property="og:description" content="Скачать архиватор для Windows, macOS и Linux. Формат .oz, интеграция в проводник и Finder.">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="OmegaZip">
+  <meta property="og:image" content="https://www.omegazip.ru/og-image.png">
+  <meta property="og:image:width" content="310">
+  <meta property="og:image:height" content="310">
+  <meta property="og:image:alt" content="OmegaZip — бесплатный архиватор с форматом .oz">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OmegaZip — бесплатный архиватор .oz">
+  <meta name="twitter:description" content="Скачать архиватор для Windows, macOS и Linux бесплатно.">
+  <meta name="twitter:image" content="https://www.omegazip.ru/og-image.png">
   <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://www.omegazip.ru/#website",
+        "url": "https://www.omegazip.ru/",
+        "name": "OmegaZip",
+        "description": "Бесплатный архиватор с форматом .oz для Windows, macOS и Linux",
+        "inLanguage": "ru-RU",
+        "publisher": { "@id": "https://www.omegazip.ru/#organization" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://www.omegazip.ru/#organization",
+        "name": "OmegaZip",
+        "url": "https://www.omegazip.ru/",
+        "email": "Local-scan@yandex.ru",
+        "logo": "https://www.omegazip.ru/og-image.png"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://www.omegazip.ru/#software",
+        "name": "OmegaZip",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": ["Windows", "macOS", "Linux"],
+        "softwareVersion": "0.4.0",
+        "url": "https://www.omegazip.ru/",
+        "downloadUrl": [
+          "https://storage.yandexcloud.net/omegazip-ru-downloads-d65a6bc8/OmegaZip_0.4.0_x64-setup.exe",
+          "https://storage.yandexcloud.net/omegazip-ru-downloads-d65a6bc8/OmegaZip_0.4.0_aarch64.dmg",
+          "https://storage.yandexcloud.net/omegazip-ru-downloads-d65a6bc8/OmegaZip_0.4.0_amd64.deb"
+        ],
+        "fileSize": ["3.2 MB", "4.5 MB", "5.8 MB"],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "RUB",
+          "availability": "https://schema.org/InStock"
+        },
+        "description": "Бесплатный архиватор с форматом .oz, интеграцией в ОС и поддержкой ZIP через 7-Zip.",
+        "publisher": { "@id": "https://www.omegazip.ru/#organization" }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Нужен ли 7-Zip?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Для .oz, ZIP и tar — нет. Для .7z, RAR, ISO, MSI и других форматов — да, OmegaZip использует установленный 7-Zip (Windows) или p7zip (Linux)." }
+          },
+          {
+            "@type": "Question",
+            "name": "Чем .oz лучше ZIP?",
+            "acceptedAnswer": { "@type": "Answer", "text": "На данных с повторяемостью и структурой проектов .oz часто заметно компактнее. На одиночных уже сжатых файлах разница может быть небольшой." }
+          },
+          {
+            "@type": "Question",
+            "name": "Это платно?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Нет. Приложение бесплатное. Можно поддержать разработку добровольным донатом." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <header class="nav">
@@ -16,8 +100,10 @@
       </div>
       <nav class="nav-links">
         <a href="#features">Преимущества</a>
-        <a href="#tests">Тесты</a>
+        <a href="oz.html">.oz</a>
         <a href="#download">Скачать</a>
+        <a href="changelog.html">Что нового</a>
+        <a href="faq.html">FAQ</a>
         <a href="donate.html">Донат</a>
       </nav>
     </div>
@@ -38,25 +124,26 @@
             простым интерфейсом и интеграцией в проводник/Finder: сжатие и распаковка в пару кликов.
           </p>
           <div class="btn-row">
-            <a class="btn btn-primary" href="#download">Скачать OmegaZip</a>
+            <a class="btn btn-primary" id="dl-hero" href="#download">Скачать OmegaZip</a>
             <a class="btn btn-secondary" href="donate.html">Поддержать проект</a>
           </div>
+          <p class="dl-hero-hint" id="dl-hero-hint"></p>
         </div>
         <aside class="hero-card stat">
           <div class="stat-item">
-            <div class="stat-label">Профиль-смоук (локальный прогон)</div>
-            <div class="stat-value metric-good">−63.1%</div>
-            <div class="stat-note">`.oz` меньше ZIP на том же корпусе (30.7 MB → 53 KB vs 144 KB)</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label">Реальный корпус (3083 файла)</div>
+            <div class="stat-label">Меньше ZIP на проектах</div>
             <div class="stat-value metric-good">−9.6%</div>
-            <div class="stat-note">`.oz` компактнее ZIP на versioned-наборе (99 MB вход)</div>
+            <div class="stat-note">На versioned-наборе (3083 файла, 99 MB вход) — см. таблицу тестов ниже</div>
           </div>
           <div class="stat-item">
-            <div class="stat-label">KPI gate</div>
-            <div class="stat-value metric-good">PASS</div>
-            <div class="stat-note">Размер, время и D-checklist в целевых порогах</div>
+            <div class="stat-label">Из системы</div>
+            <div class="stat-value" style="font-size:22px">ПКМ → .oz</div>
+            <div class="stat-note">Контекстное меню Windows и сервисы Finder на macOS</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Бесплатно</div>
+            <div class="stat-value metric-good">0 ₽</div>
+            <div class="stat-note">Без подписок · версия <span data-product-version>0.4.0</span></div>
           </div>
         </aside>
       </div>
@@ -143,34 +230,42 @@
           </table>
         </div>
         <p style="color:var(--muted); font-size:13px; margin-top:12px">
-          Источники: <code>tests/manual-files/results-auto/KPI-CHECK-LATEST.md</code>,
-          <code>OZ-ZIP-7Z-LATEST.md</code>, <code>RELEASE-READINESS.md</code>.
+          Методика и воспроизведение тестов — в репозитории проекта OmegaZip (раздел tests/manual-files).
         </p>
       </div>
     </section>
 
     <section id="download">
       <div class="wrap">
-        <h2 class="section-title">Скачать</h2>
-        <p class="section-sub">Выберите версию для своей ОС. Для расширенных форматов установите 7-Zip/p7zip.</p>
+        <h2 class="section-title">Скачать архиватор OmegaZip</h2>
+        <p class="section-sub">Выберите версию для своей ОС. Карточка вашей системы подсвечивается автоматически. Для .7z/RAR нужен 7-Zip или p7zip.</p>
         <div class="grid-3">
-          <article class="card">
+          <article class="card" data-dl-os="windows" id="dl-card-windows">
+            <span class="dl-badge" data-dl-badge="windows" hidden>Для вашей ОС</span>
             <h3>Windows</h3>
-            <p>MSI-установщик x64.</p>
+            <p>Установщик x64 (setup.exe), ~3.2 MB.</p>
             <p style="margin-top:12px"><a class="btn btn-primary" id="dl-windows" href="#">Скачать для Windows</a></p>
+            <p class="checksum" data-checksum-for="windows" hidden></p>
           </article>
-          <article class="card">
+          <article class="card" data-dl-os="macos" id="dl-card-macos">
+            <span class="dl-badge" data-dl-badge="macos" hidden>Для вашей ОС</span>
             <h3>macOS</h3>
-            <p>Apple Silicon (aarch64), DMG.</p>
+            <p>DMG для Apple Silicon (M1/M2/M3). Intel Mac — в планах.</p>
             <p style="margin-top:12px"><a class="btn btn-primary" id="dl-macos" href="#">Скачать для macOS</a></p>
+            <p class="checksum" data-checksum-for="macos" hidden></p>
           </article>
-          <article class="card">
+          <article class="card" data-dl-os="linux" id="dl-card-linux">
+            <span class="dl-badge" data-dl-badge="linux" hidden>Для вашей ОС</span>
             <h3>Linux</h3>
-            <p>AppImage / deb (по релизу CI).</p>
+            <p>deb amd64 для Ubuntu/Debian (~5.8 MB). Установка: <code>sudo dpkg -i …deb</code></p>
             <p style="margin-top:12px"><a class="btn btn-primary" id="dl-linux" href="#">Скачать для Linux</a></p>
+            <p class="checksum" data-checksum-for="linux" hidden></p>
           </article>
         </div>
-        <p class="section-sub" style="margin-top:14px">Ссылки на файлы подставим после публикации релиза (GitHub Releases или Object Storage CDN).</p>
+        <p style="color:var(--muted); font-size:13px; margin-top:14px">
+          <a href="changelog.html">Что нового в 0.4.0</a> ·
+          <a href="faq.html#install">Установка и SmartScreen</a>
+        </p>
       </div>
     </section>
 
@@ -189,6 +284,25 @@
           <summary>Это платно?</summary>
           <p>Нет. Приложение бесплатное. Можно поддержать разработку донатом.</p>
         </details>
+        <p style="margin-top:16px"><a href="faq.html">Все вопросы и ответы →</a></p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2 class="section-title">Полезные материалы</h2>
+        <p class="section-sub">Подробные гайды по форматам, операционным системам и сценариям использования OmegaZip.</p>
+        <div class="grid-3">
+          <article class="card"><h3><a href="open-7z.html">Открыть 7z / RAR / ISO</a></h3><p>Бесплатно на Windows, macOS и Linux.</p></article>
+          <article class="card"><h3><a href="oz-vs-zip.html">.oz против ZIP и 7z</a></h3><p>Честное сравнение сжатия на реальных корпусах.</p></article>
+          <article class="card"><h3><a href="best-free-archiver.html">Лучший бесплатный архиватор</a></h3><p>Сравнение с 7-Zip, WinRAR и PeaZip.</p></article>
+          <article class="card"><h3><a href="windows-context-menu.html">Меню Windows</a></h3><p>Сжатие в .oz из проводника без окон.</p></article>
+          <article class="card"><h3><a href="macos-archiver.html">Для macOS</a></h3><p>Архиватор для Apple Silicon (M1/M2/M3).</p></article>
+          <article class="card"><h3><a href="linux-deb-archiver.html">Для Linux</a></h3><p>Пакет .deb amd64, GUI и CLI.</p></article>
+          <article class="card"><h3><a href="backup-folder.html">Бэкап папки</a></h3><p>Репозиторий с дедупом и облаком через rclone.</p></article>
+          <article class="card"><h3><a href="zip-to-oz.html">ZIP ⇄ .oz</a></h3><p>Конвертация в обе стороны.</p></article>
+          <article class="card"><h3><a href="encrypt-archive.html">Шифрование</a></h3><p>Пароль, Argon2 и ChaCha20-Poly1305.</p></article>
+        </div>
       </div>
     </section>
   </main>
@@ -196,26 +310,16 @@
   <div class="donate-bar">
     <div class="wrap donate-inner">
       <p class="donate-text"><strong>Понравился OmegaZip?</strong> Поддержите развитие проекта — это помогает выпускать стабильные версии.</p>
-      <a class="btn btn-primary" href="donate.html">Задонатить</a>
+      <a class="btn btn-primary" href="https://pay.cloudtips.ru/p/3f3cfedb" data-donate-payment target="_blank" rel="noopener noreferrer">Задонатить</a>
     </div>
   </div>
 
   <footer>
     <div class="wrap">
-      <p>© OmegaZip · <a href="mailto:support@omegazip.ru">support@omegazip.ru</a> · Версия продукта 0.4.0</p>
+      <p>© OmegaZip · <a href="about.html">О проекте</a> · <a href="changelog.html">Что нового</a> · <a href="open-7z.html">Открыть 7z/RAR/ISO</a> · <a href="oz-vs-zip.html">.oz против ZIP</a> · <a href="faq.html">FAQ</a> · <a href="privacy.html">Конфиденциальность</a> · <a href="mailto:Local-scan@yandex.ru" data-contact-email>Local-scan@yandex.ru</a> · v<span data-product-version>0.4.0</span></p>
     </div>
   </footer>
 
-  <script>
-    // TODO: заменить на реальные URL релиза
-    const RELEASE = {
-      windows: "#",
-      macos: "#",
-      linux: "#"
-    };
-    document.getElementById("dl-windows").href = RELEASE.windows;
-    document.getElementById("dl-macos").href = RELEASE.macos;
-    document.getElementById("dl-linux").href = RELEASE.linux;
-  </script>
+  <script src="site-config.js"></script>
 </body>
 </html>

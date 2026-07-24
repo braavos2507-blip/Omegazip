@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Бэкап папки с дедупом и восстановлением — OmegaZip</title>
+  <meta name="description" content="Делайте бэкапы папки как Borg: репозиторий OmegaZip с дедупликацией между снимками, восстановлением и синхронизацией в облако через rclone.">
+  <link rel="canonical" href="https://www.omegazip.ru/backup-folder.html">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.omegazip.ru/backup-folder.html">
+  <meta property="og:title" content="Бэкап папки — OmegaZip">
+  <meta property="og:description" content="Репозиторий бэкапов с дедупом, снимками и облаком через rclone.">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="OmegaZip">
+  <meta property="og:image" content="https://www.omegazip.ru/og-image.png">
+  <meta property="og:image:width" content="310">
+  <meta property="og:image:height" content="310">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Бэкап папки — OmegaZip">
+  <meta name="twitter:description" content="Репозиторий бэкапов с дедупом и облаком.">
+  <meta name="twitter:image" content="https://www.omegazip.ru/og-image.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Главная", "item": "https://www.omegazip.ru/" },
+          { "@type": "ListItem", "position": 2, "name": "Бэкап папки", "item": "https://www.omegazip.ru/backup-folder.html" }
+        ]
+      },
+      {
+        "@type": "Article",
+        "headline": "Бэкап папки с дедупом и восстановлением",
+        "description": "Репозиторий OmegaZip: дедупликация между снимками, восстановление и синхронизация в облако через rclone.",
+        "inLanguage": "ru-RU",
+        "publisher": { "@id": "https://www.omegazip.ru/#organization" },
+        "mainEntityOfPage": "https://www.omegazip.ru/backup-folder.html"
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">
+        <div class="brand-badge">OZ</div>
+        <a href="index.html" style="color:inherit;text-decoration:none"><span>OmegaZip</span></a>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html#features">Преимущества</a>
+        <a href="index.html#download">Скачать</a>
+        <a href="faq.html">FAQ</a>
+        <a href="donate.html">Донат</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label="Навигация">
+          <a href="index.html">Главная</a> → Бэкап папки
+        </nav>
+        <h1>Бэкап папки как Borg</h1>
+        <p class="lead">OmegaZip умеет не просто упаковывать, а вести <strong>репозиторий бэкапов</strong>: снимки, дедупликация между ними и восстановление любой версии. Бесплатно.</p>
+
+        <div class="card" style="margin-bottom:18px">
+          <h3>Как это работает</h3>
+          <ul class="list-muted">
+            <li><strong>Дедуп</strong> — одинаковые блоки между снимками хранятся один раз, поэтому ежедневный бэкап почти не занимает места.</li>
+            <li><strong>Снимки</strong> — каждый backup фиксирует состояние папки; restore возвращает нужную версию.</li>
+            <li><strong>Recovery</strong> — в формате .oz есть блоки восстановления (Reed–Solomon) на случай частичной порчи.</li>
+          </ul>
+        </div>
+
+        <h2 class="section-title">Команды</h2>
+        <div class="card" style="overflow:auto">
+          <table>
+            <thead><tr><th>Задача</th><th>Команда</th></tr></thead>
+            <tbody>
+              <tr><td>Создать репозиторий</td><td><code>omegazip repo init ./myrepo</code></td></tr>
+              <tr><td>Снять снимок</td><td><code>omegazip repo backup ./myrepo ./data</code></td></tr>
+              <tr><td>Список снимков</td><td><code>omegazip repo list ./myrepo</code></td></tr>
+              <tr><td>Восстановить</td><td><code>omegazip repo restore ./myrepo 1 ./restored</code></td></tr>
+              <tr><td>Копия репо локально</td><td><code>omegazip repo push ./myrepo /mirror</code></td></tr>
+              <tr><td>В облако (S3/SFTP)</td><td><code>omegazip repo rclone-sync ./myrepo remote:bucket</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="color:var(--muted); font-size:13px; margin-top:12px">Облако подключается через <a href="https://rclone.org/" target="_blank" rel="noopener noreferrer">rclone</a> (S3, SFTP, …) — нативного SDK в .oz нет, синхронизируется папка репо.</p>
+
+        <p style="margin-top:24px"><a class="btn btn-primary" href="index.html#download">Скачать OmegaZip</a> <a class="btn btn-secondary" href="encrypt-archive.html">Шифрование бэкапов</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>© OmegaZip · <a href="open-7z.html">Открыть 7z/RAR/ISO</a> · <a href="oz-vs-zip.html">.oz против ZIP</a> · <a href="macos-archiver.html">Для macOS</a> · <a href="windows-context-menu.html">Меню Windows</a> · <a href="backup-folder.html">Бэкап папки</a> · <a href="best-free-archiver.html">Лучший архиватор</a> · <a href="zip-to-oz.html">ZIP → .oz</a> · <a href="encrypt-archive.html">Шифрование</a> · <a href="linux-deb-archiver.html">Для Linux</a> · <a href="faq.html">FAQ</a> · <a href="privacy.html">Конфиденциальность</a> · <a href="mailto:Local-scan@yandex.ru" data-contact-email>Local-scan@yandex.ru</a></p>
+    </div>
+  </footer>
+  <script src="site-config.js"></script>
+</body>
+</html>

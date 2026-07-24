@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Контекстное меню Windows: сжать в .oz без окон — OmegaZip</title>
+  <meta name="description" content="Как сжать папку в .oz или ZIP прямо из проводника одним кликом и распаковать без главного окна. Установка OmegaZip на Windows, что делать со SmartScreen.">
+  <link rel="canonical" href="https://www.omegazip.ru/windows-context-menu.html">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.omegazip.ru/windows-context-menu.html">
+  <meta property="og:title" content="Меню проводника Windows — OmegaZip">
+  <meta property="og:description" content="Сжатие в .oz из контекстного меню Windows без открытия окна.">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="OmegaZip">
+  <meta property="og:image" content="https://www.omegazip.ru/og-image.png">
+  <meta property="og:image:width" content="310">
+  <meta property="og:image:height" content="310">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Меню проводника Windows — OmegaZip">
+  <meta name="twitter:description" content="Сжатие в .oz из контекстного меню Windows.">
+  <meta name="twitter:image" content="https://www.omegazip.ru/og-image.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Главная", "item": "https://www.omegazip.ru/" },
+          { "@type": "ListItem", "position": 2, "name": "Меню Windows", "item": "https://www.omegazip.ru/windows-context-menu.html" }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Как добавить пункт «Сжать в .oz» в проводник?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Установите OmegaZip через setup.exe — ассоциации файлов и пункты контекстного меню «Сжать в .oz / .zip» добавляются автоматически." }
+          },
+          {
+            "@type": "Question",
+            "name": "Нужно ли открывать окно архиватора?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Нет. Базовое сжатие и тихая распаковка работают из проводника без запуска главного окна Tauri." }
+          },
+          {
+            "@type": "Question",
+            "name": "Что делать, если Windows показывает SmartScreen?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Установщик пока без EV-подписи. При предупреждении «неизвестный издатель» нажмите «Подробнее» → «Выполнить в любом случае». Скачивайте только с omegazip.ru." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">
+        <div class="brand-badge">OZ</div>
+        <a href="index.html" style="color:inherit;text-decoration:none"><span>OmegaZip</span></a>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html#features">Преимущества</a>
+        <a href="index.html#download">Скачать</a>
+        <a href="faq.html">FAQ</a>
+        <a href="donate.html">Донат</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label="Навигация">
+          <a href="index.html">Главная</a> → Меню Windows
+        </nav>
+        <h1>Сжатие из контекстного меню Windows</h1>
+        <p class="lead">OmegaZip добавляет в проводник пункты «Сжать в .oz» и «Сжать в .zip». Папка упаковывается рядом — без запуска окна архиватора.</p>
+
+        <div class="card" style="margin-bottom:18px">
+          <h3>Как работает</h3>
+          <ul class="list-muted">
+            <li>Правый клик по папке/файлу → «Сжать в .oz» — архив появляется рядом.</li>
+            <li>Двойной клик по .oz открывает его и распаковывает рядом (тихо, без окна).</li>
+            <li>Ассоциация .oz с OmegaZip настраивается при установке.</li>
+          </ul>
+        </div>
+
+        <h2 class="section-title">Установка на Windows</h2>
+        <ul class="list-muted">
+          <li>Скачайте <strong>setup.exe</strong> на <a href="index.html#download">странице загрузки</a> (~3.2 МБ).</li>
+          <li>Запустите установщик — меню и ассоциации добавляются автоматически.</li>
+          <li>При SmartScreen: «Подробнее» → «Выполнить в любом случае» (подпись EV пока не куплена).</li>
+        </ul>
+
+        <div class="card" style="margin-top:18px">
+          <h3>Почему это удобно</h3>
+          <p>Не нужно открывать программу, чтобы запаковать папку в отправленное письмо или бэкап. .oz при этом часто компактнее ZIP на похожих данных — см. <a href="oz-vs-zip.html">сравнение</a>.</p>
+        </div>
+
+        <p style="margin-top:24px"><a class="btn btn-primary" href="index.html#download">Скачать для Windows</a> <a class="btn btn-secondary" href="faq.html">FAQ</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>© OmegaZip · <a href="open-7z.html">Открыть 7z/RAR/ISO</a> · <a href="oz-vs-zip.html">.oz против ZIP</a> · <a href="macos-archiver.html">Для macOS</a> · <a href="windows-context-menu.html">Меню Windows</a> · <a href="backup-folder.html">Бэкап папки</a> · <a href="best-free-archiver.html">Лучший архиватор</a> · <a href="zip-to-oz.html">ZIP → .oz</a> · <a href="encrypt-archive.html">Шифрование</a> · <a href="linux-deb-archiver.html">Для Linux</a> · <a href="faq.html">FAQ</a> · <a href="privacy.html">Конфиденциальность</a> · <a href="mailto:Local-scan@yandex.ru" data-contact-email>Local-scan@yandex.ru</a></p>
+    </div>
+  </footer>
+  <script src="site-config.js"></script>
+</body>
+</html>

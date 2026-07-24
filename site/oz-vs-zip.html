@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Чем .oz отличается от ZIP и 7z: сравнение сжатия — OmegaZip</title>
+  <meta name="description" content="Формат .oz от OmegaZip: чанковая дедупликация и solid-потоки дают меньший размер на похожих данных. Честное сравнение с ZIP и 7z на реальных корпусах.">
+  <link rel="canonical" href="https://www.omegazip.ru/oz-vs-zip.html">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.omegazip.ru/oz-vs-zip.html">
+  <meta property="og:title" content=".oz против ZIP и 7z — OmegaZip">
+  <meta property="og:description" content="Честное сравнение сжатия: где .oz выигрывает у ZIP и когда разница минимальна.">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="OmegaZip">
+  <meta property="og:image" content="https://www.omegazip.ru/og-image.png">
+  <meta property="og:image:width" content="310">
+  <meta property="og:image:height" content="310">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content=".oz против ZIP и 7z — OmegaZip">
+  <meta name="twitter:description" content="Честное сравнение сжатия форматов.">
+  <meta name="twitter:image" content="https://www.omegazip.ru/og-image.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Главная", "item": "https://www.omegazip.ru/" },
+          { "@type": "ListItem", "position": 2, "name": ".oz против ZIP", "item": "https://www.omegazip.ru/oz-vs-zip.html" }
+        ]
+      },
+      {
+        "@type": "Article",
+        "headline": "Чем .oz отличается от ZIP и 7z",
+        "description": "Формат .oz от OmegaZip: чанковая дедупликация и solid-потоки. Честное сравнение сжатия с ZIP и 7z.",
+        "inLanguage": "ru-RU",
+        "publisher": { "@id": "https://www.omegazip.ru/#organization" },
+        "mainEntityOfPage": "https://www.omegazip.ru/oz-vs-zip.html"
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">
+        <div class="brand-badge">OZ</div>
+        <a href="index.html" style="color:inherit;text-decoration:none"><span>OmegaZip</span></a>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html#features">Преимущества</a>
+        <a href="index.html#download">Скачать</a>
+        <a href="oz.html">Формат .oz</a>
+        <a href="faq.html">FAQ</a>
+        <a href="donate.html">Донат</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label="Навигация">
+          <a href="index.html">Главная</a> → .oz против ZIP
+        </nav>
+        <h1>Чем .oz отличается от ZIP и 7z</h1>
+        <p class="lead">.oz — собственный формат OmegaZip. Главное преимущество — не новый алгоритм, а то, <strong>как</strong> данные упаковываются: чанковая дедупликация и solid-потоки. На похожих и повторяющихся данных это даёт меньший размер, чем обычный ZIP.</p>
+
+        <div class="card" style="margin-bottom:18px">
+          <h3>За счёт чего .oz компактнее</h3>
+          <ul class="list-muted">
+            <li><strong>Chunked dedup</strong> — файлы режутся на чанки 64 КиБ, одинаковые блоки хранятся один раз (как в Borg/restic). Выигрыш на VM-образах, бэкапах версий, видео с повторами.</li>
+            <li><strong>Solid</strong> — все файлы в один сжатый поток (как в 7-Zip), что лучше сжимает похожие файлы рядом.</li>
+            <li><strong>Пресеты</strong> — fast / balanced / max / ultra (XZ-9 + recovery). Ultra даёт максимальный размер ценой времени.</li>
+          </ul>
+        </div>
+
+        <h2 class="section-title">Честное сравнение с ZIP</h2>
+        <p class="section-sub">Цифры — из зафиксированных прогонов в репозитории (см. главную). Результат сильно зависит от типа данных.</p>
+        <div class="card" style="overflow:auto">
+          <table>
+            <thead>
+              <tr><th>Корпус</th><th>Вход</th><th>ZIP</th><th>.oz</th><th>Разница</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Versioned (3083 файла)</td><td>99.17 МБ</td><td>58.31 МБ</td><td>52.72 МБ</td><td class="metric-good">−9.6%</td></tr>
+              <tr><td>Смешанный (6756 файлов)</td><td>40.25 МБ</td><td>33.89 МБ</td><td>32.22 МБ</td><td class="metric-good">−4.9%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="color:var(--muted); font-size:13px; margin-top:12px">KPI <code>oz_vs_zip_size_pct</code> в отдельном прогоне: 63.1% (цель ≥ 10%) — PASS. На уже сжатых PDF/JPEG выигрыш меньше.</p>
+
+        <div class="card" style="margin-top:18px">
+          <h3>.oz против 7z</h3>
+          <p>Это <strong>не тот же алгоритм</strong>, что LZMA2 в 7-Zip. .oz — свой контейнер с дедупом и solid. Для максимального сжатия одиночного файла 7-Zip с LZMA2 может быть конкурентом; .oz выигрывает там, где много похожих/повторяющихся данных и где важны дедуп и бэкапы.</p>
+        </div>
+
+        <h2 class="section-title" style="margin-top:22px">Когда .oz не даёт выигрыша</h2>
+        <ul class="list-muted">
+          <li>Одиночные уже сжатые файлы (JPEG, MP4, PNG) — они почти не сжимаются ничем.</li>
+          <li>Один большой бинарный файл без повторов — дедуп не срабатывает.</li>
+        </ul>
+
+        <p style="margin-top:24px"><a class="btn btn-primary" href="index.html#download">Скачать OmegaZip</a> <a class="btn btn-secondary" href="oz.html">Подробнее о формате .oz</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>© OmegaZip · <a href="open-7z.html">Открыть 7z/RAR/ISO</a> · <a href="oz-vs-zip.html">.oz против ZIP</a> · <a href="macos-archiver.html">Для macOS</a> · <a href="windows-context-menu.html">Меню Windows</a> · <a href="backup-folder.html">Бэкап папки</a> · <a href="best-free-archiver.html">Лучший архиватор</a> · <a href="zip-to-oz.html">ZIP → .oz</a> · <a href="encrypt-archive.html">Шифрование</a> · <a href="linux-deb-archiver.html">Для Linux</a> · <a href="faq.html">FAQ</a> · <a href="privacy.html">Конфиденциальность</a> · <a href="mailto:Local-scan@yandex.ru" data-contact-email>Local-scan@yandex.ru</a></p>
+    </div>
+  </footer>
+  <script src="site-config.js"></script>
+</body>
+</html>

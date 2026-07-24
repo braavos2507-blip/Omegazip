@@ -1,0 +1,14 @@
+{
+  "siteBaseUrl": "https://www.omegazip.ru",
+  "productVersion": "0.4.0",
+  "donatePageUrl": "/donate.html",
+  "donatePaymentUrl": "https://pay.cloudtips.ru/p/3f3cfedb",
+  "contactEmail": "Local-scan@yandex.ru",
+  "downloadsBaseUrl": "https://storage.yandexcloud.net/omegazip-ru-downloads-d65a6bc8",
+  "analyticsMetrikaId": "REPLACE_ME_METRIKA_ID",
+  "downloads": {
+    "windows": "OmegaZip_0.4.0_x64-setup.exe",
+    "macos": "OmegaZip_0.4.0_aarch64.dmg",
+    "linux": "OmegaZip_0.4.0_amd64.deb"
+  }
+}

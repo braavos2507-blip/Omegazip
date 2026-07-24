@@ -3,8 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Поддержать OmegaZip — донат</title>
-  <meta name="description" content="Поддержите развитие OmegaZip добровольным донатом.">
+  <title>Поддержать OmegaZip — донат на развитие архиватора</title>
+  <meta name="description" content="Добровольный донат OmegaZip через CloudTips. Проект бесплатный — поддержка помогает выпускать стабильные версии для Windows и macOS.">
+  <link rel="canonical" href="https://www.omegazip.ru/donate.html">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="OmegaZip">
+  <meta property="og:url" content="https://www.omegazip.ru/donate.html">
+  <meta property="og:title" content="Поддержать OmegaZip">
+  <meta property="og:description" content="Добровольный донат на развитие бесплатного архиватора OmegaZip.">
+  <meta property="og:image" content="https://www.omegazip.ru/og-image.png">
+  <meta property="og:image:width" content="310">
+  <meta property="og:image:height" content="310">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Поддержать OmegaZip">
+  <meta name="twitter:image" content="https://www.omegazip.ru/og-image.png">
+  <meta name="robots" content="index, follow">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -28,9 +44,9 @@
         <p class="lead">Проект бесплатный. Донат помогает тратить время на стабильные релизы, Windows-интеграцию и улучшение сжатия.</p>
         <div class="card" style="max-width:720px">
           <h3 style="margin-top:0">Как задонатить</h3>
-          <p style="color:var(--muted)">Подключите ссылку на ваш платёжный сервис (Boosty, ЮMoney, YooKassa, DonationAlerts и т.д.) и замените кнопку ниже.</p>
+          <p style="color:var(--muted)">Донат через <a href="https://pay.cloudtips.ru/p/3f3cfedb" target="_blank" rel="noopener noreferrer">CloudTips</a> — карта, СБП и другие способы оплаты.</p>
           <div class="btn-row" style="margin-top:14px">
-            <a id="donate-pay" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">Перейти к оплате</a>
+            <a id="donate-pay" class="btn btn-primary" href="https://pay.cloudtips.ru/p/3f3cfedb" data-donate-payment target="_blank" rel="noopener noreferrer">Перейти к оплате</a>
             <a class="btn btn-secondary" href="index.html">На главную</a>
           </div>
           <p style="color:var(--muted); font-size:13px; margin-top:14px">
@@ -44,14 +60,10 @@
   <div class="donate-bar">
     <div class="wrap donate-inner">
       <p class="donate-text"><strong>Спасибо за поддержку!</strong> Даже небольшой донат сильно помогает проекту.</p>
-      <a class="btn btn-primary" id="donate-pay-bottom" href="#">Задонатить</a>
+      <a class="btn btn-primary" id="donate-pay-bottom" href="https://pay.cloudtips.ru/p/3f3cfedb" data-donate-payment target="_blank" rel="noopener noreferrer">Задонатить</a>
     </div>
   </div>
 
-  <script>
-    const DONATE_URL = "https://omegazip.ru/donate"; // TODO: заменить на реальную ссылку оплаты
-    document.getElementById("donate-pay").href = DONATE_URL;
-    document.getElementById("donate-pay-bottom").href = DONATE_URL;
-  </script>
+  <script src="site-config.js"></script>
 </body>
 </html>

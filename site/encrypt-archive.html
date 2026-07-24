@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Как зашифровать архив паролем (ChaCha20-Poly1305) — OmegaZip</title>
+  <meta name="description" content="Шифруйте архив .oz паролем: ключ выводится через Argon2, каждый блок — ChaCha20-Poly1305. Как задать пароль в CLI и GUI, переменная OMEGAZIP_PASSWORD, восстановление при порче.">
+  <link rel="canonical" href="https://www.omegazip.ru/encrypt-archive.html">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.omegazip.ru/encrypt-archive.html">
+  <meta property="og:title" content="Шифрование архива — OmegaZip">
+  <meta property="og:description" content="Парольное шифрование .oz: Argon2 + ChaCha20-Poly1305.">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="OmegaZip">
+  <meta property="og:image" content="https://www.omegazip.ru/og-image.png">
+  <meta property="og:image:width" content="310">
+  <meta property="og:image:height" content="310">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Шифрование архива — OmegaZip">
+  <meta name="twitter:description" content="Парольное шифрование .oz.">
+  <meta name="twitter:image" content="https://www.omegazip.ru/og-image.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Главная", "item": "https://www.omegazip.ru/" },
+          { "@type": "ListItem", "position": 2, "name": "Шифрование архива", "item": "https://www.omegazip.ru/encrypt-archive.html" }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Как зашифровать архив паролем?",
+            "acceptedAnswer": { "@type": "Answer", "text": "В CLI: omegazip compress --password \"секрет\" ./data archive.oz. В GUI пароль задаётся в настройках сжатия." }
+          },
+          {
+            "@type": "Question",
+            "name": "Какой алгоритм шифрования?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Ключ выводится из пароля через Argon2; каждый блок шифруется ChaCha20-Poly1305 (соль 16 байт, nonce 12 байт)." }
+          },
+          {
+            "@type": "Question",
+            "name": "Что делать, если забыл пароль?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Без пароля данные не восстановить — это свойство надёжного шифрования. Храните пароль отдельно." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">
+        <div class="brand-badge">OZ</div>
+        <a href="index.html" style="color:inherit;text-decoration:none"><span>OmegaZip</span></a>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html#features">Преимущества</a>
+        <a href="index.html#download">Скачать</a>
+        <a href="faq.html">FAQ</a>
+        <a href="donate.html">Донат</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label="Навигация">
+          <a href="index.html">Главная</a> → Шифрование архива
+        </nav>
+        <h1>Шифрование архива паролем</h1>
+        <p class="lead">В .oz каждый блок шифруется независимо: ключ выводится из пароля через <strong>Argon2</strong>, блоки закрываются <strong>ChaCha20-Poly1305</strong>. Без пароля данные недоступны.</p>
+
+        <div class="card" style="margin-bottom:18px">
+          <h3>В командной строке</h3>
+          <p><code>omegazip compress --password "секрет" ./data archive.oz</code></p>
+          <p>Можно комбинировать с дедупом и восстановлением:</p>
+          <p><code>omegazip compress --chunked --solid --recovery --password "секрет" ./data archive.oz</code></p>
+        </div>
+
+        <div class="card" style="margin-bottom:18px">
+          <h3>Без ввода пароля в команду</h3>
+          <ul class="list-muted">
+            <li>Переменная окружения: <code>OMEGAZIP_PASSWORD=секрет omegazip compress ./data archive.oz</code></li>
+            <li>Или <code>--password-file путь</code> — пароль в файле (не светится в истории shell).</li>
+            <li>Распаковка: <code>omegazip decompress --password "секрет" archive.oz ./out</code></li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:18px">
+          <h3>Надёжность</h3>
+          <p>В формате .oz v2 есть блоки восстановления (Reed–Solomon) на случай частичной порчи носителя. Пароль при этом не хранится в архиве — восстановить забытый пароль нельзя.</p>
+        </div>
+
+        <p style="margin-top:24px"><a class="btn btn-primary" href="index.html#download">Скачать OmegaZip</a> <a class="btn btn-secondary" href="backup-folder.html">Бэкап папки</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>© OmegaZip · <a href="open-7z.html">Открыть 7z/RAR/ISO</a> · <a href="oz-vs-zip.html">.oz против ZIP</a> · <a href="macos-archiver.html">Для macOS</a> · <a href="windows-context-menu.html">Меню Windows</a> · <a href="backup-folder.html">Бэкап папки</a> · <a href="best-free-archiver.html">Лучший архиватор</a> · <a href="zip-to-oz.html">ZIP → .oz</a> · <a href="encrypt-archive.html">Шифрование</a> · <a href="linux-deb-archiver.html">Для Linux</a> · <a href="faq.html">FAQ</a> · <a href="privacy.html">Конфиденциальность</a> · <a href="mailto:Local-scan@yandex.ru" data-contact-email>Local-scan@yandex.ru</a></p>
+    </div>
+  </footer>
+  <script src="site-config.js"></script>
+</body>
+</html>

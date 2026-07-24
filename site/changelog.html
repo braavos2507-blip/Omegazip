@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Что нового — OmegaZip 0.4.0</title>
+  <meta name="description" content="Список изменений OmegaZip 0.4.0: формат .oz, репозитории бэкапов, GUI, контекстное меню Windows и macOS.">
+  <link rel="canonical" href="https://www.omegazip.ru/changelog.html">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.omegazip.ru/changelog.html">
+  <meta property="og:title" content="Что нового в OmegaZip 0.4.0">
+  <meta property="og:description" content="Список изменений OmegaZip 0.4.0 — .oz, бэкапы, GUI, Windows и macOS.">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="OmegaZip">
+  <meta property="og:image" content="https://www.omegazip.ru/og-image.png">
+  <meta property="og:image:width" content="310">
+  <meta property="og:image:height" content="310">
+  <meta property="og:image:alt" content="OmegaZip 0.4.0">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Что нового в OmegaZip 0.4.0">
+  <meta name="twitter:description" content="Релиз 0.4.0 — формат .oz, GUI, контекстное меню.">
+  <meta name="twitter:image" content="https://www.omegazip.ru/og-image.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Главная", "item": "https://www.omegazip.ru/" },
+          { "@type": "ListItem", "position": 2, "name": "Что нового", "item": "https://www.omegazip.ru/changelog.html" }
+        ]
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "OmegaZip",
+        "softwareVersion": "0.4.0",
+        "releaseNotes": "https://www.omegazip.ru/changelog.html",
+        "url": "https://www.omegazip.ru/"
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">
+        <div class="brand-badge">OZ</div>
+        <a href="index.html" style="color:inherit;text-decoration:none"><span>OmegaZip</span></a>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html#download">Скачать</a>
+        <a href="changelog.html">Что нового</a>
+        <a href="faq.html">FAQ</a>
+        <a href="donate.html">Донат</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <h1>Что нового в 0.4.0</h1>
+        <p class="lead">Релиз от 15 апреля 2026. Скачать: <a href="index.html#download">страница загрузки</a>.</p>
+        <div class="card">
+          <h3 style="margin-top:0">Основное</h3>
+          <ul class="list-muted">
+            <li>Формат <strong>.oz</strong> v2: дедупликация, solid-потоки, шифрование, recovery</li>
+            <li>Пресеты сжатия: fast, balanced, max, ultra</li>
+            <li>Репозиторий бэкапов: init, backup, restore, prune, rclone-sync</li>
+            <li>Экспорт .oz → .zip, просмотр info/list, прогресс в GUI</li>
+            <li>Контекстное меню Windows и сервисы macOS</li>
+            <li>GUI + CLI для автоматизации</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h3 style="margin-top:0">Платформы</h3>
+          <ul class="list-muted">
+            <li><strong>Windows</strong> — setup.exe x64</li>
+            <li><strong>macOS</strong> — DMG для Apple Silicon (aarch64)</li>
+            <li><strong>Linux</strong> — deb amd64 (Ubuntu/Debian)</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h3 style="margin-top:0">Известные ограничения</h3>
+          <ul class="list-muted">
+            <li>Расширенные форматы (.7z, RAR, ISO…) — нужен установленный 7-Zip / p7zip</li>
+            <li>macOS: публичный релиз без Apple notarization может показывать предупреждение Gatekeeper</li>
+            <li>Windows: установщик без EV-подписи — возможно предупреждение SmartScreen</li>
+            <li>Intel Mac пока не в релизе</li>
+          </ul>
+        </div>
+        <p style="margin-top:20px"><a class="btn btn-primary" href="index.html#download">Скачать OmegaZip 0.4.0</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>© OmegaZip · <a href="about.html">О проекте</a> · <a href="privacy.html">Конфиденциальность</a> · <a href="mailto:Local-scan@yandex.ru" data-contact-email>Local-scan@yandex.ru</a></p>
+    </div>
+  </footer>
+  <script src="site-config.js"></script>
+</body>
+</html>

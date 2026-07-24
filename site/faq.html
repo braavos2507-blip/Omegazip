@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FAQ OmegaZip — установка, 7-Zip, .oz, Windows SmartScreen</title>
+  <meta name="description" content="Ответы про OmegaZip: нужен ли 7-Zip, чем .oz лучше ZIP, установка setup.exe и deb, SmartScreen, macOS Apple Silicon, безопасность скачивания.">
+  <link rel="canonical" href="https://www.omegazip.ru/faq.html">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.omegazip.ru/faq.html">
+  <meta property="og:title" content="FAQ OmegaZip — архиватор .oz">
+  <meta property="og:description" content="Частые вопросы: установка, 7-Zip, .oz, SmartScreen, Linux deb.">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="OmegaZip">
+  <meta property="og:image" content="https://www.omegazip.ru/og-image.png">
+  <meta property="og:image:width" content="310">
+  <meta property="og:image:height" content="310">
+  <meta property="og:image:alt" content="OmegaZip — бесплатный архиватор с форматом .oz">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FAQ OmegaZip">
+  <meta name="twitter:description" content="Установка, 7-Zip, .oz и безопасность скачивания.">
+  <meta name="twitter:image" content="https://www.omegazip.ru/og-image.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Главная", "item": "https://www.omegazip.ru/" },
+          { "@type": "ListItem", "position": 2, "name": "FAQ", "item": "https://www.omegazip.ru/faq.html" }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Нужен ли 7-Zip?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Для .oz, ZIP и tar — нет. Для .7z, RAR, ISO и других форматов экосистемы 7-Zip нужен установленный 7-Zip (Windows) или p7zip (Linux)." }
+          },
+          {
+            "@type": "Question",
+            "name": "Чем .oz лучше ZIP?",
+            "acceptedAnswer": { "@type": "Answer", "text": "На корпусах с повторяемостью .oz часто даёт меньший размер. На одиночных PDF/JPEG разница может быть минимальной." }
+          },
+          {
+            "@type": "Question",
+            "name": "Как установить на Windows?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Скачайте setup.exe с www.omegazip.ru, запустите установщик. При SmartScreen: Подробнее → Выполнить в любом случае." }
+          },
+          {
+            "@type": "Question",
+            "name": "Как установить на Linux?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Скачайте .deb amd64 и выполните: sudo dpkg -i OmegaZip_0.4.0_amd64.deb" }
+          },
+          {
+            "@type": "Question",
+            "name": "Есть ли версия для macOS?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Да, DMG для Apple Silicon (M1/M2/M3). Intel Mac пока не поддерживается." }
+          },
+          {
+            "@type": "Question",
+            "name": "Это платно?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Нет. Можно поддержать проект добровольным донатом." }
+          },
+          {
+            "@type": "Question",
+            "name": "Безопасно ли скачивать с сайта?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Устанавливайте только с официального домена www.omegazip.ru и проверяйте SHA-256 на странице загрузки." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand">
+        <div class="brand-badge">OZ</div>
+        <a href="index.html" style="color:inherit;text-decoration:none"><span>OmegaZip</span></a>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html#features">Преимущества</a>
+        <a href="index.html#download">Скачать</a>
+        <a href="changelog.html">Что нового</a>
+        <a href="oz.html">Формат .oz</a>
+        <a href="donate.html">Донат</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <nav class="breadcrumbs" aria-label="Навигация">
+          <a href="index.html">Главная</a> → FAQ
+        </nav>
+        <h1>Частые вопросы</h1>
+        <p class="lead">OmegaZip — бесплатный архиватор с форматом .oz, GUI и интеграцией в Windows/macOS.</p>
+        <div class="faq">
+          <details open>
+            <summary>Нужен ли 7-Zip?</summary>
+            <p>Для .oz, ZIP и tar — нет. Для .7z, RAR, ISO, MSI и других форматов экосистемы 7-Zip — да, нужен установленный <a href="open-7z.html">7-Zip (Windows) или p7zip (Linux)</a>.</p>
+          </details>
+          <details>
+            <summary>Чем .oz лучше ZIP?</summary>
+            <p>На корпусах с повторяемостью (версии проектов, похожие файлы) .oz часто даёт меньший размер. На одиночных PDF/JPEG разница может быть минимальной. Подробнее — на странице <a href="oz.html">формат .oz</a>.</p>
+          </details>
+          <details id="install" open>
+            <summary>Как установить на Windows?</summary>
+            <p>Скачайте <strong>setup.exe</strong> с <a href="index.html#download">страницы загрузки</a>, запустите установщик. После установки — контекстное меню проводника и ассоциация .oz.</p>
+            <p>Если Windows показывает <strong>SmartScreen</strong> («неизвестный издатель»): нажмите «Подробнее» → «Выполнить в любом случае». Установщик пока без EV-подписи; скачивайте только с omegazip.ru.</p>
+          </details>
+          <details>
+            <summary>Как установить на Linux?</summary>
+            <p>Скачайте <strong>.deb</strong> (amd64), затем в терминале: <code>sudo dpkg -i OmegaZip_0.4.0_amd64.deb</code>. При ошибках зависимостей: <code>sudo apt -f install</code>.</p>
+          </details>
+          <details>
+            <summary>Есть ли версия для macOS?</summary>
+            <p>Да, DMG для <strong>Apple Silicon</strong> (M1/M2/M3). Откройте DMG и перетащите OmegaZip в «Программы». Intel Mac пока не поддерживается.</p>
+            <p>Если macOS блокирует запуск: Системные настройки → Конфиденциальность → «Всё равно открыть».</p>
+          </details>
+          <details>
+            <summary>Это платно?</summary>
+            <p>Нет. Можно поддержать разработку <a href="donate.html">донатом</a> — по желанию.</p>
+          </details>
+          <details>
+            <summary>Безопасно ли скачивать с сайта?</summary>
+            <p>Устанавливайте только с официального домена <strong>omegazip.ru</strong> или проверенных релизов проекта. Проверяйте подпись установщика, когда она доступна в релизе.</p>
+          </details>
+        </div>
+        <p style="margin-top:24px"><a class="btn btn-primary" href="index.html#download">Скачать OmegaZip</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>© OmegaZip · <a href="open-7z.html">Открыть 7z/RAR/ISO</a> · <a href="oz-vs-zip.html">.oz против ZIP</a> · <a href="changelog.html">Что нового</a> · <a href="privacy.html">Конфиденциальность</a> · <a href="mailto:Local-scan@yandex.ru" data-contact-email>Local-scan@yandex.ru</a></p>
+    </div>
+  </footer>
+  <script src="site-config.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /googleb003475243772388.html
+Disallow: /yandex_bfd21c8103be0d77.html
+
+Sitemap: https://www.omegazip.ru/sitemap.xml
+Host: https://www.omegazip.ru
