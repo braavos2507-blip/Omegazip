@@ -30,6 +30,8 @@ infra/yc-static/.yc-outputs.env
 infra/yc-static/.terraform/
 **/*sa-key*.json
 .deploy.secrets.env
+key_copy
+key_copy.*
 .tools/
 
 # Local AI / editor tooling (not part of OmegaZip product)
